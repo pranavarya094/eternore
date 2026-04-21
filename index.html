@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eternore — With Love For Aurora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Dancing+Script:wght@400;600&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{background:#1a120e;overflow-x:hidden}
+
+/* ── Lock Screen ── */
+#lock-screen{
+  position:fixed;inset:0;
+  background:#0d0810;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  z-index:9999;
+  transition:opacity .8s ease;
+}
+#lock-screen.fade-out{opacity:0;pointer-events:none}
+
+.lock-rose{
+  font-size:52px;margin-bottom:2rem;
+  animation:pulse 3s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.08);opacity:1}}
+
+.lock-title{
+  font-family:'Dancing Script',cursive;
+  font-size:30px;color:#c9a0a0;
+  margin-bottom:.5rem;letter-spacing:.05em;
+}
+.lock-subtitle{
+  font-family:'Cormorant Garamond',serif;
+  font-size:13px;color:#7a6060;
+  margin-bottom:2.5rem;letter-spacing:.2em;text-transform:uppercase;
+}
+#password-input{
+  background:transparent;border:none;
+  border-bottom:1px solid #4a3040;
+  color:#f0ddd0;
+  font-family:'Cormorant Garamond',serif;
+  font-size:18px;padding:8px 16px;
+  text-align:center;width:240px;
+  letter-spacing:.3em;outline:none;
+  transition:border-color .3s;display:block;
+}
+#password-input::placeholder{color:#4a3040;letter-spacing:.15em;font-size:14px}
+#password-input:focus{border-color:#c9a0a0}
+#unlock-btn{
+  display:block;margin:1.75rem auto 0;
+  background:transparent;border:1px solid #c9a0a0;
+  color:#c9a0a0;
+  font-family:'Cormorant Garamond',serif;
+  font-size:14px;letter-spacing:.25em;text-transform:uppercase;
+  padding:11px 36px;cursor:pointer;transition:all .3s;
+}
+#unlock-btn:hover{background:#c9a0a0;color:#0d0810}
+#error-msg{
+  color:#a05060;font-size:13px;margin-top:1.25rem;
+  letter-spacing:.1em;opacity:0;transition:opacity .3s;text-align:center;
+  font-family:'Cormorant Garamond',serif;
+}
+#error-msg.show{opacity:1}
+
+/* ── Stars (lock screen bg) ── */
+#stars-canvas{position:fixed;inset:0;pointer-events:none;z-index:0}
+
+/* ── Main App ── */
+#app{
+  display:none;opacity:0;transition:opacity 1.2s ease;
+}
+#app.visible{display:block}
+#app.fade-in{opacity:1}
+
+.scene{
+  background:#1a120e;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;
+  padding:40px 16px 60px;
+  position:relative;overflow:hidden;
+}
+.desk-bg{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 80%,#2a1a0e 0%,#0e0a06 100%);
+}
+.candle-glow{
+  position:absolute;
+  width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(200,140,60,.07) 0%,transparent 70%);
+  top:-100px;left:50%;transform:translateX(-50%);
+  pointer-events:none;
+}
+
+.book-container{position:relative;z-index:2;width:100%;max-width:600px}
+
+.search-row{display:flex;gap:8px;justify-content:center;margin-bottom:20px}
+.search-row input{
+  background:rgba(180,130,70,.1);border:1px solid rgba(180,130,70,.3);
+  color:#e8d5b0;font-family:'Cormorant Garamond',serif;
+  font-size:14px;padding:7px 14px;border-radius:1px;
+  width:210px;outline:none;letter-spacing:.05em;
+}
+.search-row input::placeholder{color:#7a6040;font-size:13px}
+.search-row input:focus{border-color:rgba(200,160,80,.5)}
+.search-row button{
+  background:rgba(180,130,70,.15);border:1px solid rgba(180,130,70,.35);
+  color:#c8a050;font-family:'Cormorant Garamond',serif;
+  font-size:13px;letter-spacing:.12em;
+  padding:7px 16px;border-radius:1px;cursor:pointer;transition:all .25s;
+}
+.search-row button:hover{background:rgba(180,130,70,.3)}
+.search-hint{
+  text-align:center;font-family:'Cormorant Garamond',serif;
+  font-size:12px;color:#7a6040;letter-spacing:.1em;
+  margin-bottom:20px;min-height:18px;transition:color .3s;
+}
+
+/* ── Book Cover ── */
+.book{width:100%;position:relative;perspective:1600px}
+
+.book-cover{
+  width:100%;min-height:540px;position:relative;
+  border-radius:4px 10px 10px 4px;cursor:pointer;
+  transform-style:preserve-3d;transform-origin:left center;
+  transition:transform .9s cubic-bezier(.4,0,.15,1),box-shadow .5s;
+  box-shadow:6px 6px 0 #1a0e06,8px 8px 0 #140c04,12px 12px 20px rgba(0,0,0,.7),-2px 0 8px rgba(0,0,0,.5);
+}
+.book-cover.open{
+  transform:rotateY(-155deg);
+  box-shadow:2px 4px 16px rgba(0,0,0,.4);
+}
+
+.cover-front{
+  position:absolute;inset:0;
+  background:
+    repeating-linear-gradient(92deg,rgba(0,0,0,.04) 0px,rgba(0,0,0,0) 2px,rgba(255,255,255,.02) 4px,rgba(0,0,0,0) 6px),
+    repeating-linear-gradient(180deg,rgba(0,0,0,.03) 0px,rgba(0,0,0,0) 3px,rgba(255,255,255,.015) 6px,rgba(0,0,0,0) 9px),
+    linear-gradient(160deg,#6b3a1f 0%,#4a2410 30%,#3d1e0c 55%,#5c3018 80%,#4a2810 100%);
+  border-radius:4px 10px 10px 4px;
+  border-left:12px solid #2a1206;
+  backface-visibility:hidden;overflow:hidden;
+}
+.cover-spine-shadow{
+  position:absolute;left:0;top:0;bottom:0;width:18px;
+  background:linear-gradient(to right,rgba(0,0,0,.5),transparent);
+  pointer-events:none;
+}
+.cover-border-outer{position:absolute;inset:12px;border:1px solid rgba(200,160,80,.35);border-radius:3px;pointer-events:none}
+.cover-border-inner{position:absolute;inset:18px;border:1px solid rgba(200,160,80,.2);border-radius:2px;pointer-events:none}
+
+.cover-corner{position:absolute;width:28px;height:28px;border-color:rgba(200,160,80,.5);border-style:solid}
+.cover-corner.tl{top:10px;left:22px;border-width:2px 0 0 2px;border-radius:2px 0 0 0}
+.cover-corner.tr{top:10px;right:10px;border-width:2px 2px 0 0;border-radius:0 2px 0 0}
+.cover-corner.bl{bottom:10px;left:22px;border-width:0 0 2px 2px;border-radius:0 0 0 2px}
+.cover-corner.br{bottom:10px;right:10px;border-width:0 2px 2px 0;border-radius:0 0 2px 0}
+
+.cover-center{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:40px 28px;
+}
+.cover-ornament-top{font-size:13px;letter-spacing:.6em;color:rgba(200,160,80,.6);margin-bottom:20px}
+.cover-title{
+  font-family:'UnifrakturMaguntia',serif;
+  font-size:58px;color:#c8a050;line-height:1.1;
+  margin-bottom:10px;text-shadow:0 2px 8px rgba(0,0,0,.4);letter-spacing:.04em;
+}
+.cover-rule{
+  width:100px;height:1px;
+  background:linear-gradient(to right,transparent,rgba(200,160,80,.5),transparent);
+  margin:0 auto 14px;
+}
+.cover-subtitle{
+  font-family:'Dancing Script',cursive;
+  font-size:20px;color:rgba(220,185,120,.7);letter-spacing:.06em;margin-bottom:32px;
+}
+.cover-open-hint{
+  font-family:'Cormorant Garamond',serif;
+  font-size:11px;letter-spacing:.35em;text-transform:uppercase;
+  color:rgba(200,160,80,.4);
+  animation:breathe 2.8s ease-in-out infinite;
+}
+@keyframes breathe{0%,100%{opacity:.35}50%{opacity:.8}}
+
+.cover-clasp{
+  position:absolute;right:-8px;top:50%;transform:translateY(-50%);
+  width:20px;height:44px;
+  background:linear-gradient(to bottom,#c8a050,#8b6820,#c8a050);
+  border-radius:2px;box-shadow:1px 1px 4px rgba(0,0,0,.5);
+  display:flex;align-items:center;justify-content:center;
+}
+.cover-clasp::after{
+  content:'';width:8px;height:8px;
+  background:#2a1206;border-radius:50%;
+  box-shadow:0 0 0 2px rgba(200,160,80,.6);
+}
+.cover-back{
+  position:absolute;inset:0;
+  background:linear-gradient(160deg,#4a2410 0%,#3a1c0a 50%,#4a2410 100%);
+  border-radius:4px 10px 10px 4px;
+  border-left:12px solid #2a1206;
+  backface-visibility:hidden;
+  transform:rotateY(180deg);
+}
+
+/* ── Pages ── */
+.page-block{display:none;width:100%}
+.page-block.visible{display:block}
+
+.page{
+  width:100%;
+  background:
+    repeating-linear-gradient(0deg,rgba(139,100,60,.06) 0px,rgba(139,100,60,0) 1px,rgba(255,255,255,.04) 28px,rgba(0,0,0,0) 29px),
+    linear-gradient(170deg,#f2e4c8 0%,#ecdbb0 30%,#e8d4a8 60%,#f0e0be 100%);
+  border-radius:2px 8px 8px 2px;
+  border-left:6px solid #6b3a1f;
+  padding:48px 52px 68px;
+  min-height:540px;position:relative;
+  box-shadow:4px 0 14px rgba(0,0,0,.3),inset 0 0 60px rgba(139,90,40,.08);
+}
+.page-aged-edge{position:absolute;right:0;top:0;bottom:0;width:20px;background:linear-gradient(to left,rgba(139,90,40,.15),transparent);pointer-events:none;border-radius:0 8px 8px 0}
+.page-aged-top{position:absolute;left:0;right:0;top:0;height:16px;background:linear-gradient(to bottom,rgba(139,90,40,.12),transparent);pointer-events:none}
+.page-aged-bottom{position:absolute;left:0;right:0;bottom:0;height:20px;background:linear-gradient(to top,rgba(139,90,40,.15),transparent);pointer-events:none;border-radius:0 0 8px 0}
+
+.pg-num-left{position:absolute;bottom:24px;left:52px;font-family:'Cormorant Garamond',serif;font-size:12px;color:#8b6b40;letter-spacing:.2em}
+.pg-num-right{position:absolute;bottom:24px;right:52px;font-family:'Cormorant Garamond',serif;font-size:12px;color:#8b6b40;letter-spacing:.2em}
+
+.pg-cover-inner{text-align:center;padding-top:60px}
+.pg-title-fraktur{font-family:'UnifrakturMaguntia',serif;font-size:46px;color:#3a1e08;margin-bottom:8px;letter-spacing:.03em}
+.pg-cover-sub{font-family:'Dancing Script',cursive;font-size:20px;color:#6b3a1f;margin-bottom:36px}
+.pg-cover-rule{width:80px;height:1px;background:linear-gradient(to right,transparent,#a07040,transparent);margin:0 auto 30px}
+.pg-open-book-btn{
+  background:transparent;border:1px solid #8b5e30;
+  color:#5a3010;font-family:'Cormorant Garamond',serif;
+  font-size:13px;letter-spacing:.2em;text-transform:uppercase;
+  padding:10px 28px;cursor:pointer;transition:all .3s;border-radius:1px;
+}
+.pg-open-book-btn:hover{background:#8b5e30;color:#f2e4c8}
+
+.pg-section-head{font-family:'UnifrakturMaguntia',serif;font-size:30px;color:#3a1e08;text-align:center;margin-bottom:6px}
+.pg-section-rule{width:60px;height:1px;background:linear-gradient(to right,transparent,#a07040,transparent);margin:0 auto 24px}
+
+.idx-list{list-style:none}
+.idx-list li{display:flex;align-items:baseline;padding:9px 0;border-bottom:1px solid rgba(139,90,40,.18);cursor:pointer;transition:color .2s}
+.idx-list li:hover .idx-t{color:#6b3a1f}
+.idx-n{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;color:#a07850;min-width:28px}
+.idx-t{font-family:'Cormorant Garamond',serif;font-size:15px;color:#2c1408;flex:1;transition:color .2s}
+.idx-dots{flex:1;border-bottom:1px dotted rgba(139,90,40,.4);margin:0 10px;position:relative;top:-3px}
+.idx-p{font-family:'Cormorant Garamond',serif;font-size:12px;color:#8b6b40;min-width:20px;text-align:right}
+
+.poem-roman{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:11px;letter-spacing:.5em;text-transform:uppercase;color:#a07850;margin-bottom:16px}
+.poem-title-pg{font-family:'Dancing Script',cursive;font-size:26px;color:#3a1e08;margin-bottom:18px;font-weight:400}
+.poem-body-pg{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;line-height:2.1;color:#2c1408;white-space:pre-line}
+.poem-orn{margin-top:18px;text-align:center;color:#a07850;font-size:15px;letter-spacing:.6em}
+
+.epilogue-body{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;line-height:2.1;color:#2c1408;text-align:center;margin-top:12px}
+
+/* ── Nav ── */
+.nav-bar{display:flex;align-items:center;justify-content:space-between;margin-top:18px;gap:8px;flex-wrap:wrap}
+.nav-btn{
+  background:rgba(200,160,80,.08);border:1px solid rgba(200,160,80,.25);
+  color:#c8a050;font-family:'Cormorant Garamond',serif;
+  font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+  padding:7px 14px;border-radius:1px;cursor:pointer;transition:all .25s;white-space:nowrap;
+}
+.nav-btn:hover{background:rgba(200,160,80,.2);color:#e8d080}
+.nav-btn:disabled{opacity:.25;cursor:default}
+.nav-btn.primary{background:rgba(107,58,31,.3);border-color:rgba(139,90,40,.5);color:#e8c880}
+.nav-btn.primary:hover{background:rgba(107,58,31,.5)}
+.jump-wrap{display:flex;align-items:center;gap:6px}
+.jump-wrap input{
+  width:50px;background:rgba(200,160,80,.08);border:1px solid rgba(200,160,80,.22);
+  color:#e8d080;font-family:'Cormorant Garamond',serif;
+  font-size:13px;padding:6px 8px;border-radius:1px;text-align:center;outline:none;
+}
+.jump-wrap input:focus{border-color:rgba(200,160,80,.5)}
+
+@media(max-width:520px){
+  .page{padding:36px 28px 60px}
+  .cover-title{font-size:44px}
+  .pg-title-fraktur{font-size:36px}
+  .nav-bar{justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<!-- Lock Screen -->
+<div id="lock-screen">
+  <div class="lock-rose">🌹</div>
+  <div class="lock-title">For Aurora, with love</div>
+  <div class="lock-subtitle">A secret garden awaits</div>
+  <input type="password" id="password-input" placeholder="whisper the password..." autocomplete="off" />
+  <button id="unlock-btn" onclick="tryUnlock()">Enter ✦</button>
+  <div id="error-msg">That's not quite right, my love…</div>
+</div>
+
+<!-- Main App -->
+<div id="app">
+<div class="scene">
+  <div class="desk-bg"></div>
+  <div class="candle-glow"></div>
+
+  <div class="book-container">
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder="Search poems or keywords..." />
+      <button onclick="doSearch()">Search</button>
+    </div>
+    <div class="search-hint" id="searchHint">Type a poem title or keyword to jump to a page</div>
+
+    <div class="book">
+      <div class="book-cover" id="bookCover" onclick="openBook()">
+        <div class="cover-front">
+          <div class="cover-spine-shadow"></div>
+          <div class="cover-border-outer"></div>
+          <div class="cover-border-inner"></div>
+          <div class="cover-corner tl"></div>
+          <div class="cover-corner tr"></div>
+          <div class="cover-corner bl"></div>
+          <div class="cover-corner br"></div>
+          <div class="cover-center">
+            <div class="cover-ornament-top">— ✦ —</div>
+            <div class="cover-title">Eternore</div>
+            <div class="cover-rule"></div>
+            <div class="cover-subtitle">With Love For Aurora</div>
+            <div class="cover-open-hint">open to read</div>
+          </div>
+          <div class="cover-clasp"></div>
+        </div>
+        <div class="cover-back"></div>
+      </div>
+
+      <div class="page-block" id="pageBlock">
+        <div class="page" id="currentPage"></div>
+      </div>
+    </div>
+
+    <div class="nav-bar" id="navBar"></div>
+  </div>
+</div>
+</div>
+
+<script>
+const PAGES=[
+  {type:'title'},
+  {type:'index'},
+  {type:'poem',title:'The Way You Look at Me',body:`There's a moment just before you smile,
+when your eyes soften at the corners —
+a tiny universe deciding
+whether to let me in.
+
+It always does.
+
+And I fall, quietly,
+the way a leaf falls in October —
+not rushing, not afraid,
+just turning gold
+in the light of you.`},
+  {type:'poem',title:'Morning',body:`I have a theory
+that mornings were invented
+just so I could watch you
+reach for your coffee,
+
+still half-dreaming,
+your hair forgetting what shape it is —
+the most honest version of you,
+and the one I love the most.`},
+  {type:'poem',title:'Distance',body:`The miles between us
+are just numbers.
+What matters is this:
+
+that somewhere across the sky
+you are laughing at something,
+living in your wonderful way,
+
+and when I think of you
+every corner of me
+becomes a little warmer.`},
+  {type:'poem',title:'Small Things',body:`I love you in the small things:
+the way you remember details,
+the sound of you humming without knowing it,
+how you hold a thought
+before you say it —
+careful, like it matters.
+
+It does.
+You do.
+
+More than all the grand gestures
+I never quite know how to make.`},
+  {type:'epilogue',title:'Epilogue',body:`This book has no last page,
+only the next chapter
+we haven't written yet.
+
+Every day with you
+is a sentence worth keeping.
+
+Sempre, Aurora.`}
+];
+
+let cur=0,animating=false,bookOpen=false;
+
+// ── Stars ──
+const canvas=document.getElementById('stars-canvas');
+const ctx=canvas.getContext('2d');
+let stars=[];
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+function createStars(){
+  stars=[];
+  for(let i=0;i<140;i++){
+    stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.3+0.2,alpha:Math.random()*.5+.1,speed:Math.random()*.003+.001,phase:Math.random()*Math.PI*2});
+  }
+}
+function drawStars(t){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  stars.forEach(s=>{
+    const a=s.alpha*(.6+.4*Math.sin(t*s.speed*1000+s.phase));
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(240,221,208,${a})`;ctx.fill();
+  });
+  requestAnimationFrame(t=>drawStars(t/1000));
+}
+resizeCanvas();createStars();
+requestAnimationFrame(t=>drawStars(t/1000));
+window.addEventListener('resize',()=>{resizeCanvas();createStars();});
+
+// ── Lock ──
+function tryUnlock(){
+  const val=document.getElementById('password-input').value.trim().toLowerCase().replace(/\s/g,'');
+  if(val==='kittycat'){
+    const ls=document.getElementById('lock-screen');
+    ls.classList.add('fade-out');
+    setTimeout(()=>{
+      ls.style.display='none';
+      const app=document.getElementById('app');
+      app.style.display='block';
+      requestAnimationFrame(()=>requestAnimationFrame(()=>app.classList.add('visible','fade-in')));
+    },800);
+  } else {
+    const err=document.getElementById('error-msg');
+    err.classList.add('show');
+    setTimeout(()=>err.classList.remove('show'),2500);
+    document.getElementById('password-input').value='';
+  }
+}
+document.getElementById('password-input').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock();});
+
+// ── Helpers ──
+function toRoman(n){
+  const v=[1000,900,500,400,100,90,50,40,10,9,5,4,1];
+  const s=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+  let r='';for(let i=0;i<v.length;i++){while(n>=v[i]){r+=s[i];n-=v[i];}}return r;
+}
+
+// ── Open Book ──
+function openBook(){
+  if(bookOpen)return;bookOpen=true;
+  document.getElementById('bookCover').classList.add('open');
+  setTimeout(()=>{
+    document.getElementById('bookCover').style.display='none';
+    const pb=document.getElementById('pageBlock');
+    pb.classList.add('visible');
+    renderPage(0,document.getElementById('currentPage'));
+    renderNav();
+  },850);
+}
+
+// ── Render Page ──
+function renderPage(idx,el){
+  const p=PAGES[idx];
+  el.innerHTML='<div class="page-aged-edge"></div><div class="page-aged-top"></div><div class="page-aged-bottom"></div>';
+
+  if(p.type==='title'){
+    el.innerHTML+=`<div class="pg-cover-inner">
+      <div class="pg-title-fraktur">Eternore</div>
+      <div class="pg-cover-sub">With Love For Aurora</div>
+      <div class="pg-cover-rule"></div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:#8b6b40;letter-spacing:.1em;margin-bottom:28px">A Book of Poems</div>
+      <button class="pg-open-book-btn" onclick="goTo(1)">Read the Index ›</button>
+    </div>`;
+    const pnl=document.createElement('div');pnl.className='pg-num-left';pnl.textContent='Eternore';
+    el.appendChild(pnl);return;
+  }
+
+  if(p.type==='index'){
+    let rows='';
+    PAGES.forEach((pg,i)=>{
+      if(i<2)return;
+      const label=pg.type==='epilogue'?'Epilogue':pg.title;
+      rows+=`<li onclick="goTo(${i})">
+        <span class="idx-n">${i===PAGES.length-1?'—':toRoman(i-1)}</span>
+        <span class="idx-t">${label}</span>
+        <span class="idx-dots"></span>
+        <span class="idx-p">${i-1}</span>
+      </li>`;
+    });
+    el.innerHTML+=`<div class="pg-section-head">Index</div>
+      <div class="pg-section-rule"></div>
+      <ul class="idx-list">${rows}</ul>`;
+    const pnl=document.createElement('div');pnl.className='pg-num-left';pnl.textContent='Eternore';
+    el.appendChild(pnl);return;
+  }
+
+  if(p.type==='poem'){
+    const num=idx-1;
+    el.innerHTML+=`<div class="poem-roman">${toRoman(num)}</div>
+      <div class="poem-title-pg">${p.title}</div>
+      <div class="poem-body-pg">${p.body}</div>
+      <div class="poem-orn">· · ·</div>`;
+    const pnl=document.createElement('div');pnl.className='pg-num-left';pnl.textContent='Eternore';
+    const pnr=document.createElement('div');pnr.className='pg-num-right';pnr.textContent=`— ${num} —`;
+    el.appendChild(pnl);el.appendChild(pnr);return;
+  }
+
+  if(p.type==='epilogue'){
+    el.innerHTML+=`<div style="padding-top:48px">
+      <div class="pg-section-head">Epilogue</div>
+      <div class="pg-section-rule"></div>
+      <div class="epilogue-body">${p.body.replace(/\n/g,'<br>')}</div>
+      <div class="poem-orn" style="margin-top:28px">✦</div>
+    </div>`;
+    const pnl=document.createElement('div');pnl.className='pg-num-left';pnl.textContent='Eternore';
+    const pnr=document.createElement('div');pnr.className='pg-num-right';pnr.textContent='— fin —';
+    el.appendChild(pnl);el.appendChild(pnr);return;
+  }
+}
+
+// ── Nav ──
+function renderNav(){
+  const nb=document.getElementById('navBar');nb.innerHTML='';
+  if(!bookOpen)return;
+
+  const back=document.createElement('button');
+  back.className='nav-btn';back.textContent='‹ Back';
+  back.disabled=cur<=0;back.onclick=()=>goTo(cur-1);
+  nb.appendChild(back);
+
+  const idx=document.createElement('button');
+  idx.className='nav-btn';idx.textContent='Index';
+  idx.disabled=cur===1;idx.onclick=()=>goTo(1);
+  nb.appendChild(idx);
+
+  const jw=document.createElement('div');jw.className='jump-wrap';
+  const ji=document.createElement('input');
+  ji.type='number';ji.min='1';ji.max=PAGES.length-2;
+  ji.placeholder='pg';ji.id='jumpInput';
+  const jb=document.createElement('button');
+  jb.className='nav-btn';jb.textContent='Go';
+  jb.onclick=()=>{const v=parseInt(document.getElementById('jumpInput').value);if(v>=1&&v<=PAGES.length-2)goTo(v+1);};
+  ji.addEventListener('keydown',e=>{if(e.key==='Enter')jb.click();});
+  jw.appendChild(ji);jw.appendChild(jb);nb.appendChild(jw);
+
+  const next=document.createElement('button');
+  next.className='nav-btn primary';next.textContent='Next ›';
+  next.disabled=cur>=PAGES.length-1;next.onclick=()=>goTo(cur+1);
+  nb.appendChild(next);
+}
+
+// ── Go To Page ──
+function goTo(idx){
+  if(animating||idx===cur||idx<0||idx>=PAGES.length)return;
+  animating=true;
+  const el=document.getElementById('currentPage');
+  const dir=idx>cur?1:-1;
+  el.style.transition='opacity .25s, transform .3s';
+  el.style.opacity='0';
+  el.style.transform=dir>0?'rotateY(-15deg) translateX(-12px)':'rotateY(15deg) translateX(12px)';
+  setTimeout(()=>{
+    cur=idx;renderPage(cur,el);renderNav();
+    el.style.transition='none';el.style.opacity='0';
+    el.style.transform=dir>0?'rotateY(12deg) translateX(12px)':'rotateY(-12deg) translateX(-12px)';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      el.style.transition='opacity .35s, transform .45s cubic-bezier(.2,0,.3,1)';
+      el.style.opacity='1';el.style.transform='rotateY(0deg) translateX(0)';
+      setTimeout(()=>{el.style.transition='';animating=false;},460);
+    }));
+  },300);
+}
+
+// ── Search ──
+function doSearch(){
+  const q=document.getElementById('searchInput').value.trim().toLowerCase();
+  const hint=document.getElementById('searchHint');
+  if(!q){hint.textContent='Type a poem title or keyword to jump to a page';hint.style.color='#7a6040';return;}
+  let best=-1;
+  for(let i=2;i<PAGES.length;i++){
+    const pg=PAGES[i];
+    const hay=((pg.title||'')+' '+(pg.body||'')).toLowerCase();
+    if(hay.includes(q)){best=i;break;}
+  }
+  if(best>-1){
+    hint.style.color='#c8a050';
+    hint.textContent=`Found in "${PAGES[best].title||'Epilogue'}" — turning pages...`;
+    if(!bookOpen){openBook();setTimeout(()=>goTo(best),1000);}
+    else setTimeout(()=>goTo(best),300);
+  } else {
+    hint.style.color='#a05030';
+    hint.textContent='No match found — try another word';
+  }
+}
+document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+</script>
+</body>
+</html>
