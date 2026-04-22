@@ -158,9 +158,10 @@ html,body{min-height:100%;background:#0d0810}
     repeating-linear-gradient(0deg,rgba(139,100,60,.06) 0px,rgba(139,100,60,0) 1px,rgba(255,255,255,.04) 28px,rgba(0,0,0,0) 29px),
     linear-gradient(170deg,#f2e4c8 0%,#ecdbb0 30%,#e8d4a8 60%,#f0e0be 100%);
   border-radius:2px 8px 8px 2px;border-left:6px solid #6b3a1f;
-  padding:48px 52px 68px;min-height:560px;position:relative;
+  padding:48px 52px 80px;min-height:560px;position:relative;
   box-shadow:4px 0 14px rgba(0,0,0,.3),inset 0 0 60px rgba(139,90,40,.08);
   animation:candlePageFlicker 6s ease-in-out infinite;
+  overflow:visible;
 }
 @keyframes candlePageFlicker{
   0%,100%{box-shadow:4px 0 14px rgba(0,0,0,.3),inset 0 0 60px rgba(139,90,40,.08)}
@@ -298,35 +299,38 @@ html,body{min-height:100%;background:#0d0810}
 /* ── Cat ── */
 #kitty{
   position:absolute;
-  bottom:36px;
+  bottom:40px;
   left:60px;
   pointer-events:auto;
   z-index:20;
   cursor:pointer;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
 }
-#kitty svg{display:block}
+#kitty svg{display:block;pointer-events:none}
 .kitty-bubble{
   position:absolute;
-  bottom:58px;
+  bottom:56px;
   left:50%;
   transform:translateX(-50%);
-  background:#f5efe6;
-  border:1px solid rgba(139,90,40,.35);
-  border-radius:8px;
-  padding:5px 12px;
+  background:#fdf6ec;
+  border:1px solid rgba(139,90,40,.4);
+  border-radius:10px;
+  padding:5px 14px;
   font-family:'Dancing Script',cursive;
-  font-size:14px;
+  font-size:15px;
   color:#5a3010;
   white-space:nowrap;
   opacity:0;
-  transition:opacity .4s;
+  transition:opacity .35s;
   pointer-events:none;
-  box-shadow:0 2px 6px rgba(0,0,0,.12);
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+  z-index:30;
 }
 .kitty-bubble::after{
-  content:'';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);
-  border-left:6px solid transparent;border-right:6px solid transparent;
-  border-top:7px solid #f5efe6;
+  content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);
+  border-left:7px solid transparent;border-right:7px solid transparent;
+  border-top:8px solid #fdf6ec;
 }
 .kitty-bubble.show{opacity:1}
 </style>
@@ -557,100 +561,128 @@ resizeCanvas(); createStars();
 requestAnimationFrame(t => drawStars(t / 1000));
 window.addEventListener('resize', () => { resizeCanvas(); createStars(); });
 
-// ── Cat "I love you Auri" sound ──
+// ── Cat meow sound ──
 function playMeowSound() {
   try {
     const ac = new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === 'suspended') ac.resume();
     const t = ac.currentTime;
-    // sweet ascending chirp
-    [[520,0],[620,0.12],[580,0.22],[680,0.34],[640,0.44]].forEach(([freq, when]) => {
+    [[480,0],[600,0.1],[560,0.2],[680,0.32],[620,0.42]].forEach(([freq, when]) => {
       const o = ac.createOscillator();
       const g = ac.createGain();
-      o.type = 'sine'; o.frequency.setValueAtTime(freq, t + when);
-      o.frequency.exponentialRampToValueAtTime(freq * 1.3, t + when + 0.1);
-      g.gain.setValueAtTime(0, t + when);
-      g.gain.linearRampToValueAtTime(0.18, t + when + 0.03);
+      o.type = 'sine';
+      o.frequency.setValueAtTime(freq, t + when);
+      o.frequency.exponentialRampToValueAtTime(freq * 1.35, t + when + 0.09);
+      g.gain.setValueAtTime(0.001, t + when);
+      g.gain.linearRampToValueAtTime(0.22, t + when + 0.03);
       g.gain.exponentialRampToValueAtTime(0.001, t + when + 0.18);
       o.connect(g); g.connect(ac.destination);
-      o.start(t + when); o.stop(t + when + 0.2);
+      o.start(t + when); o.stop(t + when + 0.22);
     });
-  } catch(e) {}
+  } catch(e) { console.log('sound err', e); }
 }
 
-// ── Cat Animation (lives inside the page) ──
+// ── Cat Animation ──
 (function initCat() {
-  const kitty = document.getElementById('kitty');
-  if (!kitty) { setTimeout(initCat, 300); return; }
-  const bubble = document.getElementById('kittyBubble');
-  const tail   = document.getElementById('catTail');
-  const leg1   = document.getElementById('leg1');
-  const leg2   = document.getElementById('leg2');
-  const leg3   = document.getElementById('leg3');
-  const legsWalk = document.getElementById('legsWalk');
-  const legsSit  = document.getElementById('legsSit');
+  // Use event delegation on document so click always fires even after kitty is re-parented
+  document.addEventListener('click', function(e) {
+    const kitty = document.getElementById('kitty');
+    if (kitty && (e.target === kitty || kitty.contains(e.target))) {
+      e.stopPropagation();
+      playMeowSound();
+      const bubble = document.getElementById('kittyBubble');
+      if (bubble) {
+        bubble.textContent = 'I love you Auri ♥';
+        bubble.classList.add('show');
+        clearTimeout(kitty._bt);
+        kitty._bt = setTimeout(() => bubble.classList.remove('show'), 3200);
+      }
+      kitty._state = 'sit';
+      kitty._stateTimer = 3500;
+    }
+  }, true); // capture phase so it fires before anything else
 
-  let catX = 60, catDir = 1, catState = 'walk';
+  let catX = 60, catDir = 1;
   let stateTimer = 2000, bubbleTimer = 0, flipped = false;
-  const idleSayings = ['purrrr ♥','mrow~','*yawns*','zzz...','*blinks*','meow!'];
+  const idleSayings = ['purrrr ♥', 'mrow~', '*yawns*', 'zzz...', '*blinks*', 'meow!'];
 
   function getMaxX() {
     const page = document.getElementById('currentPage');
-    return page ? Math.max(page.offsetWidth - 80, 160) : 460;
+    return page ? Math.max(page.offsetWidth - 90, 140) : 420;
   }
 
-  function showBubble(text, dur) {
-    bubble.textContent = text;
+  function showIdleBubble() {
+    const bubble = document.getElementById('kittyBubble');
+    const kitty = document.getElementById('kitty');
+    if (!bubble || !kitty) return;
+    bubble.textContent = idleSayings[Math.floor(Math.random() * idleSayings.length)];
     bubble.classList.add('show');
-    clearTimeout(bubbleTimer);
-    bubbleTimer = setTimeout(() => bubble.classList.remove('show'), dur || 2200);
-  }
-
-  function animateTail(t) {
-    const sw = Math.sin(t * 0.003) * 10;
-    tail.setAttribute('d', `M42,40 Q${50+sw},${36+sw*0.4} 50,26`);
-  }
-
-  function animateLegs(t) {
-    if (catState !== 'walk') {
-      legsWalk.style.display = 'none'; legsSit.style.display = 'block'; return;
-    }
-    legsWalk.style.display = 'block'; legsSit.style.display = 'none';
-    const s = Math.sin(t * 0.012);
-    leg1.setAttribute('y', 44 + (s > 0 ? -3 : 0));
-    leg2.setAttribute('y', 44 + (s < 0 ? -3 : 0));
-    leg3.setAttribute('y', 44 + (s > 0 ? -3 : 0));
+    clearTimeout(kitty._bt);
+    kitty._bt = setTimeout(() => bubble.classList.remove('show'), 2200);
   }
 
   let lastT = 0;
   function loop(t) {
     const dt = Math.min(t - lastT, 50); lastT = t;
-    stateTimer -= dt;
-    animateTail(t); animateLegs(t);
+
+    const kitty = document.getElementById('kitty');
+    const tail  = document.getElementById('catTail');
+    const leg1  = document.getElementById('leg1');
+    const leg2  = document.getElementById('leg2');
+    const leg3  = document.getElementById('leg3');
+    const legsWalk = document.getElementById('legsWalk');
+    const legsSit  = document.getElementById('legsSit');
+
+    if (!kitty || !tail) { requestAnimationFrame(loop); return; }
+
+    // state stored on element so it survives re-parents
+    if (!kitty._state) { kitty._state = 'walk'; kitty._stateTimer = 2000; }
+    kitty._stateTimer -= dt;
+
+    // tail sway
+    const sw = Math.sin(t * 0.003) * 10;
+    tail.setAttribute('d', `M42,40 Q${50+sw},${36+sw*0.4} 50,26`);
+
+    // legs
+    if (kitty._state !== 'walk') {
+      if (legsWalk) legsWalk.style.display = 'none';
+      if (legsSit)  legsSit.style.display  = 'block';
+    } else {
+      if (legsWalk) legsWalk.style.display = 'block';
+      if (legsSit)  legsSit.style.display  = 'none';
+      const s = Math.sin(t * 0.012);
+      if (leg1) leg1.setAttribute('y', 44 + (s > 0 ? -3 : 0));
+      if (leg2) leg2.setAttribute('y', 44 + (s < 0 ? -3 : 0));
+      if (leg3) leg3.setAttribute('y', 44 + (s > 0 ? -3 : 0));
+    }
+
+    // movement
     const maxX = getMaxX();
-    if (catState === 'walk') {
+    if (kitty._state === 'walk') {
       catX += catDir * 0.65;
-      if (catX >= maxX) { catDir = -1; flipped = true; catX = maxX; }
+      if (catX >= maxX) { catDir = -1; flipped = true;  catX = maxX; }
       if (catX <= 16)   { catDir =  1; flipped = false; catX = 16; }
-      if (stateTimer <= 0) {
+      if (kitty._stateTimer <= 0) {
         if (Math.random() < 0.35) {
-          catState = 'sit'; stateTimer = 2500 + Math.random() * 3000;
-          showBubble(idleSayings[Math.floor(Math.random() * idleSayings.length)]);
-        } else { stateTimer = 1800 + Math.random() * 2000; }
+          kitty._state = 'sit';
+          kitty._stateTimer = 2500 + Math.random() * 3000;
+          showIdleBubble();
+        } else {
+          kitty._stateTimer = 1800 + Math.random() * 2000;
+        }
       }
     } else {
-      if (stateTimer <= 0) { catState = 'walk'; stateTimer = 2000 + Math.random() * 2000; }
+      if (kitty._stateTimer <= 0) {
+        kitty._state = 'walk';
+        kitty._stateTimer = 2000 + Math.random() * 2000;
+      }
     }
-    kitty.style.left = catX + 'px';
+
+    kitty.style.left      = catX + 'px';
     kitty.style.transform = flipped ? 'scaleX(-1)' : 'scaleX(1)';
+
     requestAnimationFrame(loop);
   }
-
-  kitty.addEventListener('click', e => {
-    e.stopPropagation();
-    playMeowSound();
-    showBubble('I love you Auri ♥', 3200);
-    catState = 'sit'; stateTimer = 3500;
-  });
 
   requestAnimationFrame(loop);
 })();
@@ -698,9 +730,13 @@ function openBook() {
 // ── Render Pages ──
 function renderPage(idx, el) {
   const p = PAGES[idx];
-  // preserve the kitty div before wiping innerHTML
+  // detach kitty before wiping, re-attach after
   const kittyEl = document.getElementById('kitty');
+  if (kittyEl && kittyEl.parentNode) kittyEl.parentNode.removeChild(kittyEl);
+
   el.innerHTML = '<div class="page-aged-edge"></div><div class="page-aged-top"></div><div class="page-aged-bottom"></div><div class="ribbon-marker"></div>';
+
+  // re-attach kitty so it stays inside the page
   if (kittyEl) el.appendChild(kittyEl);
 
   if (p.type === 'title') {
