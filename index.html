@@ -85,16 +85,6 @@ html,body{min-height:100%;background:#0d0810}
 .search-row button:hover{background:rgba(180,130,70,.3)}
 .search-hint{text-align:center;font-family:'Cormorant Garamond',serif;font-size:12px;color:#7a6040;letter-spacing:.1em;margin-bottom:20px;min-height:18px;transition:color .3s}
 
-/* ── Audio ── */
-.audio-btn{
-  position:absolute;top:16px;right:16px;z-index:10;
-  background:rgba(200,160,80,.1);border:1px solid rgba(200,160,80,.25);
-  color:#c8a050;font-family:'Cormorant Garamond',serif;
-  font-size:11px;letter-spacing:.15em;text-transform:uppercase;
-  padding:6px 12px;border-radius:1px;cursor:pointer;transition:all .25s;
-}
-.audio-btn:hover{background:rgba(200,160,80,.2)}
-
 /* ── Book Cover ── */
 .book{width:100%;position:relative;perspective:1600px}
 .book-cover{
@@ -308,28 +298,30 @@ html,body{min-height:100%;background:#0d0810}
 /* ── Cat ── */
 #kitty{
   position:absolute;
-  bottom:0;
-  pointer-events:none;
-  z-index:10;
-  transition:transform .1s linear;
+  bottom:36px;
+  left:60px;
+  pointer-events:auto;
+  z-index:20;
+  cursor:pointer;
 }
 #kitty svg{display:block}
 .kitty-bubble{
   position:absolute;
-  bottom:62px;
+  bottom:58px;
   left:50%;
   transform:translateX(-50%);
   background:#f5efe6;
-  border:1px solid rgba(139,90,40,.3);
+  border:1px solid rgba(139,90,40,.35);
   border-radius:8px;
-  padding:4px 10px;
+  padding:5px 12px;
   font-family:'Dancing Script',cursive;
-  font-size:13px;
+  font-size:14px;
   color:#5a3010;
   white-space:nowrap;
   opacity:0;
   transition:opacity .4s;
   pointer-events:none;
+  box-shadow:0 2px 6px rgba(0,0,0,.12);
 }
 .kitty-bubble::after{
   content:'';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);
@@ -360,8 +352,6 @@ html,body{min-height:100%;background:#0d0810}
 <div class="scene">
   <div class="desk-bg"></div>
   <div class="candle-glow"></div>
-
-  <button class="audio-btn" id="audioBtn" onclick="toggleAudio()">♪ Music</button>
 
   <div class="book-container">
     <div class="search-row">
@@ -395,56 +385,45 @@ html,body{min-height:100%;background:#0d0810}
       </div>
 
       <div class="page-block" id="pageBlock">
-        <div class="page" id="currentPage"></div>
+        <div class="page" id="currentPage" style="position:relative">
+          <div id="kitty">
+            <div class="kitty-bubble" id="kittyBubble">I love you Auri ♥</div>
+            <svg id="kittySvg" width="52" height="52" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="28" cy="36" rx="14" ry="11" fill="#d4a96a"/>
+              <circle cx="28" cy="20" r="11" fill="#d4a96a"/>
+              <polygon points="18,12 14,4 22,10" fill="#d4a96a"/>
+              <polygon points="38,12 42,4 34,10" fill="#d4a96a"/>
+              <polygon points="18,12 15,6 21,10" fill="#e8c0a0"/>
+              <polygon points="38,12 41,6 35,10" fill="#e8c0a0"/>
+              <ellipse cx="23" cy="20" rx="3" ry="3.5" fill="#2c1408"/>
+              <ellipse cx="33" cy="20" rx="3" ry="3.5" fill="#2c1408"/>
+              <ellipse cx="23" cy="20" rx="1.2" ry="1.8" fill="#7fd4e8"/>
+              <ellipse cx="33" cy="20" rx="1.2" ry="1.8" fill="#7fd4e8"/>
+              <circle cx="23.5" cy="19.5" r=".6" fill="white"/>
+              <circle cx="33.5" cy="19.5" r=".6" fill="white"/>
+              <polygon points="28,24 26.5,26 29.5,26" fill="#c07080"/>
+              <path d="M26.5,26 Q28,28 29.5,26" fill="none" stroke="#8b5060" stroke-width=".8"/>
+              <line x1="17" y1="24" x2="25" y2="25" stroke="#8b6b40" stroke-width=".7" opacity=".7"/>
+              <line x1="17" y1="26" x2="25" y2="26" stroke="#8b6b40" stroke-width=".7" opacity=".7"/>
+              <line x1="31" y1="25" x2="39" y2="24" stroke="#8b6b40" stroke-width=".7" opacity=".7"/>
+              <line x1="31" y1="26" x2="39" y2="26" stroke="#8b6b40" stroke-width=".7" opacity=".7"/>
+              <path id="catTail" d="M42,40 Q52,34 50,26" fill="none" stroke="#d4a96a" stroke-width="4" stroke-linecap="round"/>
+              <g id="legsWalk">
+                <rect id="leg1" x="18" y="44" width="5" height="10" rx="2" fill="#c89850"/>
+                <rect id="leg2" x="25" y="44" width="5" height="10" rx="2" fill="#c89850"/>
+                <rect id="leg3" x="32" y="44" width="5" height="10" rx="2" fill="#c89850"/>
+              </g>
+              <g id="legsSit" style="display:none">
+                <ellipse cx="22" cy="46" rx="5" ry="4" fill="#c89850"/>
+                <ellipse cx="34" cy="46" rx="5" ry="4" fill="#c89850"/>
+              </g>
+            </svg>
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="nav-bar" id="navBar"></div>
-  </div>
-
-  <!-- Kitty -->
-  <div id="kitty">
-    <div class="kitty-bubble" id="kittyBubble">purrrr ♥</div>
-    <svg id="kittySvg" width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
-      <!-- body -->
-      <ellipse cx="28" cy="36" rx="14" ry="11" fill="#d4a96a"/>
-      <!-- head -->
-      <circle cx="28" cy="20" r="11" fill="#d4a96a"/>
-      <!-- ears -->
-      <polygon points="18,12 14,4 22,10" fill="#d4a96a"/>
-      <polygon points="38,12 42,4 34,10" fill="#d4a96a"/>
-      <polygon points="18,12 15,6 21,10" fill="#e8c0a0"/>
-      <polygon points="38,12 41,6 35,10" fill="#e8c0a0"/>
-      <!-- face -->
-      <ellipse cx="23" cy="20" rx="3" ry="3.5" fill="#2c1408"/>
-      <ellipse cx="33" cy="20" rx="3" ry="3.5" fill="#2c1408"/>
-      <ellipse cx="23" cy="20" rx="1.2" ry="1.8" fill="#7fd4e8"/>
-      <ellipse cx="33" cy="20" rx="1.2" ry="1.8" fill="#7fd4e8"/>
-      <circle cx="23.5" cy="19.5" r=".6" fill="white"/>
-      <circle cx="33.5" cy="19.5" r=".6" fill="white"/>
-      <!-- nose -->
-      <polygon points="28,24 26.5,26 29.5,26" fill="#c07080"/>
-      <!-- mouth -->
-      <path d="M26.5,26 Q28,28 29.5,26" fill="none" stroke="#8b5060" stroke-width=".8"/>
-      <!-- whiskers -->
-      <line x1="17" y1="24" x2="25" y2="25" stroke="#8b6b40" stroke-width=".7" opacity=".7"/>
-      <line x1="17" y1="26" x2="25" y2="26" stroke="#8b6b40" stroke-width=".7" opacity=".7"/>
-      <line x1="31" y1="25" x2="39" y2="24" stroke="#8b6b40" stroke-width=".7" opacity=".7"/>
-      <line x1="31" y1="26" x2="39" y2="26" stroke="#8b6b40" stroke-width=".7" opacity=".7"/>
-      <!-- tail -->
-      <path id="catTail" d="M42,40 Q52,34 50,26" fill="none" stroke="#d4a96a" stroke-width="4" stroke-linecap="round"/>
-      <!-- legs walking -->
-      <g id="legsWalk">
-        <rect id="leg1" x="18" y="44" width="5" height="10" rx="2" fill="#c89850"/>
-        <rect id="leg2" x="25" y="44" width="5" height="10" rx="2" fill="#c89850"/>
-        <rect id="leg3" x="32" y="44" width="5" height="10" rx="2" fill="#c89850"/>
-      </g>
-      <!-- sitting legs (hidden by default) -->
-      <g id="legsSit" style="display:none">
-        <ellipse cx="22" cy="46" rx="5" ry="4" fill="#c89850"/>
-        <ellipse cx="34" cy="46" rx="5" ry="4" fill="#c89850"/>
-      </g>
-    </svg>
   </div>
 
 </div>
@@ -511,25 +490,47 @@ Every room you enter
 rearranges itself around you,
 and I have been the lucky one
 standing closest to the glow.` },
-  { type: 'timeline' },
-  { type: 'letter' },
   { type: 'epilogue' },
   { type: 'secret' }
 ];
 
 let cur = 0, animating = false, bookOpen = false;
-let audioPlaying = false;
 let secretUnlocked = false;
+let countdownTickInterval = null;
 
-// ── Countdown ──
+function startCountdownTick() {
+  clearInterval(countdownTickInterval);
+  countdownTickInterval = setInterval(() => {
+    const cd = getCountdown();
+    const d = document.getElementById('cdDays');
+    const h = document.getElementById('cdHours');
+    const m = document.getElementById('cdMins');
+    const s = document.getElementById('cdSecs');
+    if (!s) { clearInterval(countdownTickInterval); return; }
+    if (cd.passed) {
+      clearInterval(countdownTickInterval);
+      const box = document.getElementById('countdownBox');
+      if (box) box.innerHTML = `<span style="font-family:'Dancing Script',cursive;font-size:20px;color:#5a3010">The wait is over ♥</span><br><span style="font-size:13px;opacity:.8">24th April 2026 — finally together</span>`;
+      return;
+    }
+    if (d) d.textContent = cd.days;
+    if (h) h.textContent = cd.hours;
+    if (m) m.textContent = cd.minutes;
+    if (s) s.textContent = cd.seconds;
+  }, 1000);
+}
+
+// ── Countdown to April 24 2026 10PM Berlin ──
 function getCountdown() {
-  const start = new Date('2023-01-01'); // Change this to your actual anniversary date
+  const target = new Date('2026-04-24T22:00:00+02:00');
   const now = new Date();
-  const diff = now - start;
+  const diff = target - now;
+  if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0, passed: true };
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  return { days, hours, minutes };
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  return { days, hours, minutes, seconds, passed: false };
 }
 
 // ── Stars ──
@@ -556,117 +557,64 @@ resizeCanvas(); createStars();
 requestAnimationFrame(t => drawStars(t / 1000));
 window.addEventListener('resize', () => { resizeCanvas(); createStars(); });
 
-// ── Web Audio Piano ──
-let audioCtx = null;
-let musicInterval = null;
-const MELODY = [
-  [261.63,0.6],[293.66,0.4],[329.63,0.5],[392.00,0.8],
-  [349.23,0.5],[329.63,0.4],[293.66,0.6],[261.63,0.9],
-  [220.00,0.5],[246.94,0.4],[261.63,0.6],[293.66,0.8],
-  [329.63,0.5],[293.66,0.4],[261.63,0.5],[246.94,1.0]
-];
-let melodyIdx = 0;
-
-function playPianoNote(freq, dur) {
-  if (!audioCtx) return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  const filter = audioCtx.createBiquadFilter();
-  filter.type = 'lowpass'; filter.frequency.value = 1800;
-  osc.type = 'triangle';
-  osc.frequency.value = freq;
-  osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
-  const t = audioCtx.currentTime;
-  gain.gain.setValueAtTime(0, t);
-  gain.gain.linearRampToValueAtTime(0.12, t + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
-  osc.start(t); osc.stop(t + dur + 0.05);
-  // soft harmony note one octave below
-  const osc2 = audioCtx.createOscillator();
-  const gain2 = audioCtx.createGain();
-  osc2.type = 'sine'; osc2.frequency.value = freq / 2;
-  osc2.connect(gain2); gain2.connect(audioCtx.destination);
-  gain2.gain.setValueAtTime(0, t);
-  gain2.gain.linearRampToValueAtTime(0.05, t + 0.02);
-  gain2.gain.exponentialRampToValueAtTime(0.001, t + dur);
-  osc2.start(t); osc2.stop(t + dur + 0.05);
+// ── Cat "I love you Auri" sound ──
+function playMeowSound() {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const t = ac.currentTime;
+    // sweet ascending chirp
+    [[520,0],[620,0.12],[580,0.22],[680,0.34],[640,0.44]].forEach(([freq, when]) => {
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(freq, t + when);
+      o.frequency.exponentialRampToValueAtTime(freq * 1.3, t + when + 0.1);
+      g.gain.setValueAtTime(0, t + when);
+      g.gain.linearRampToValueAtTime(0.18, t + when + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.001, t + when + 0.18);
+      o.connect(g); g.connect(ac.destination);
+      o.start(t + when); o.stop(t + when + 0.2);
+    });
+  } catch(e) {}
 }
 
-function startMelody() {
-  if (musicInterval) return;
-  musicInterval = setInterval(() => {
-    const [freq, durMult] = MELODY[melodyIdx % MELODY.length];
-    playPianoNote(freq, 0.7 * durMult + 0.2);
-    melodyIdx++;
-  }, 520);
-}
-
-function stopMelody() {
-  clearInterval(musicInterval);
-  musicInterval = null;
-}
-
-function toggleAudio() {
-  const btn = document.getElementById('audioBtn');
-  if (audioPlaying) {
-    stopMelody();
-    btn.textContent = '♪ Music';
-    audioPlaying = false;
-  } else {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    startMelody();
-    btn.textContent = '♪ Mute';
-    audioPlaying = true;
-  }
-}
-
-// ── Cat Animation ──
+// ── Cat Animation (lives inside the page) ──
 (function initCat() {
-  const pageBlock = document.getElementById('pageBlock');
-  if (!pageBlock) { setTimeout(initCat, 500); return; }
-
   const kitty = document.getElementById('kitty');
+  if (!kitty) { setTimeout(initCat, 300); return; }
   const bubble = document.getElementById('kittyBubble');
-  const tail = document.getElementById('catTail');
-  const leg1 = document.getElementById('leg1');
-  const leg2 = document.getElementById('leg2');
-  const leg3 = document.getElementById('leg3');
+  const tail   = document.getElementById('catTail');
+  const leg1   = document.getElementById('leg1');
+  const leg2   = document.getElementById('leg2');
+  const leg3   = document.getElementById('leg3');
   const legsWalk = document.getElementById('legsWalk');
-  const legsSit = document.getElementById('legsSit');
+  const legsSit  = document.getElementById('legsSit');
 
   let catX = 60, catDir = 1, catState = 'walk';
-  let stateTimer = 0, bubbleTimer = 0;
-  let flipped = false;
-  let legPhase = 0;
+  let stateTimer = 2000, bubbleTimer = 0, flipped = false;
+  const idleSayings = ['purrrr ♥','mrow~','*yawns*','zzz...','*blinks*','meow!'];
 
-  const sayings = ['purrrr ♥','mrow~','✦','meow!','*sits*','zzz...','♥','*blinks*'];
-
-  function getPageWidth() {
-    const pb = document.getElementById('pageBlock');
-    return pb && pb.offsetWidth > 0 ? pb.offsetWidth - 60 : 560;
+  function getMaxX() {
+    const page = document.getElementById('currentPage');
+    return page ? Math.max(page.offsetWidth - 80, 160) : 460;
   }
 
-  function showBubble(text) {
+  function showBubble(text, dur) {
     bubble.textContent = text;
     bubble.classList.add('show');
     clearTimeout(bubbleTimer);
-    bubbleTimer = setTimeout(() => bubble.classList.remove('show'), 2200);
+    bubbleTimer = setTimeout(() => bubble.classList.remove('show'), dur || 2200);
   }
 
   function animateTail(t) {
-    const swing = Math.sin(t * 0.003) * 12;
-    tail.setAttribute('d', `M42,40 Q${52 + swing},${34 + swing * 0.5} 50,26`);
+    const sw = Math.sin(t * 0.003) * 10;
+    tail.setAttribute('d', `M42,40 Q${50+sw},${36+sw*0.4} 50,26`);
   }
 
   function animateLegs(t) {
     if (catState !== 'walk') {
-      legsWalk.style.display = 'none';
-      legsSit.style.display = 'block';
-      return;
+      legsWalk.style.display = 'none'; legsSit.style.display = 'block'; return;
     }
-    legsWalk.style.display = 'block';
-    legsSit.style.display = 'none';
+    legsWalk.style.display = 'block'; legsSit.style.display = 'none';
     const s = Math.sin(t * 0.012);
     leg1.setAttribute('y', 44 + (s > 0 ? -3 : 0));
     leg2.setAttribute('y', 44 + (s < 0 ? -3 : 0));
@@ -675,39 +623,34 @@ function toggleAudio() {
 
   let lastT = 0;
   function loop(t) {
-    const dt = t - lastT; lastT = t;
+    const dt = Math.min(t - lastT, 50); lastT = t;
     stateTimer -= dt;
-
-    animateTail(t);
-    animateLegs(t);
-
-    const maxX = getPageWidth();
-
+    animateTail(t); animateLegs(t);
+    const maxX = getMaxX();
     if (catState === 'walk') {
-      catX += catDir * 0.7;
-      if (catX >= maxX) { catDir = -1; flipped = true; }
-      if (catX <= 20) { catDir = 1; flipped = false; }
+      catX += catDir * 0.65;
+      if (catX >= maxX) { catDir = -1; flipped = true; catX = maxX; }
+      if (catX <= 16)   { catDir =  1; flipped = false; catX = 16; }
       if (stateTimer <= 0) {
-        const r = Math.random();
-        if (r < 0.3) { catState = 'sit'; stateTimer = 2000 + Math.random() * 3000; showBubble(sayings[Math.floor(Math.random() * sayings.length)]); }
-        else stateTimer = 1500 + Math.random() * 2000;
+        if (Math.random() < 0.35) {
+          catState = 'sit'; stateTimer = 2500 + Math.random() * 3000;
+          showBubble(idleSayings[Math.floor(Math.random() * idleSayings.length)]);
+        } else { stateTimer = 1800 + Math.random() * 2000; }
       }
-    } else if (catState === 'sit') {
-      if (stateTimer <= 0) { catState = 'walk'; stateTimer = 2000 + Math.random() * 3000; }
+    } else {
+      if (stateTimer <= 0) { catState = 'walk'; stateTimer = 2000 + Math.random() * 2000; }
     }
-
     kitty.style.left = catX + 'px';
     kitty.style.transform = flipped ? 'scaleX(-1)' : 'scaleX(1)';
     requestAnimationFrame(loop);
   }
 
-  // Only show cat when page is open
-  const observer = new MutationObserver(() => {
-    kitty.style.display = pageBlock.classList.contains('visible') ? 'block' : 'none';
+  kitty.addEventListener('click', e => {
+    e.stopPropagation();
+    playMeowSound();
+    showBubble('I love you Auri ♥', 3200);
+    catState = 'sit'; stateTimer = 3500;
   });
-  observer.observe(pageBlock, { attributes: true, attributeFilter: ['class'] });
-  kitty.style.display = 'none';
-  kitty.addEventListener('click', () => showBubble(sayings[Math.floor(Math.random() * sayings.length)]));
 
   requestAnimationFrame(loop);
 })();
@@ -740,27 +683,6 @@ function toRoman(n) {
   let r = ''; for (let i = 0; i < v.length; i++) { while (n >= v[i]) { r += s[i]; n -= v[i]; } } return r;
 }
 
-// ── Page turn sound ──
-function playPageSound() {
-  try {
-    const ac = new (window.AudioContext || window.webkitAudioContext)();
-    const buf = ac.createBuffer(1, ac.sampleRate * 0.15, ac.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < data.length; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ac.sampleRate * 0.05));
-    }
-    const src = ac.createBufferSource();
-    const gain = ac.createGain();
-    const filter = ac.createBiquadFilter();
-    filter.type = 'bandpass'; filter.frequency.value = 2000; filter.Q.value = 0.5;
-    src.buffer = buf;
-    src.connect(filter); filter.connect(gain); gain.connect(ac.destination);
-    gain.gain.setValueAtTime(0.18, ac.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.15);
-    src.start(); src.stop(ac.currentTime + 0.15);
-  } catch(e) {}
-}
-
 // ── Open Book ──
 function openBook() {
   if (bookOpen) return; bookOpen = true;
@@ -776,23 +698,40 @@ function openBook() {
 // ── Render Pages ──
 function renderPage(idx, el) {
   const p = PAGES[idx];
+  // preserve the kitty div before wiping innerHTML
+  const kittyEl = document.getElementById('kitty');
   el.innerHTML = '<div class="page-aged-edge"></div><div class="page-aged-top"></div><div class="page-aged-bottom"></div><div class="ribbon-marker"></div>';
+  if (kittyEl) el.appendChild(kittyEl);
 
   if (p.type === 'title') {
     const cd = getCountdown();
+    const countdownHTML = cd.passed
+      ? `<div class="countdown-box">
+           <span style="font-family:'Dancing Script',cursive;font-size:20px;color:#5a3010">The wait is over ♥</span><br>
+           <span style="font-size:13px;opacity:.8">24th April 2026 — finally together</span>
+         </div>`
+      : `<div class="countdown-box" id="countdownBox">
+           See you in<br>
+           <span class="countdown-num" id="cdDays">${cd.days}</span> <span style="font-size:13px">days</span>
+           &nbsp;·&nbsp;
+           <span class="countdown-num" id="cdHours">${cd.hours}</span> <span style="font-size:13px">hrs</span>
+           &nbsp;·&nbsp;
+           <span class="countdown-num" id="cdMins">${cd.minutes}</span> <span style="font-size:13px">min</span>
+           &nbsp;·&nbsp;
+           <span class="countdown-num" id="cdSecs">${cd.seconds}</span> <span style="font-size:13px">sec</span><br>
+           <span style="font-size:12px;opacity:.7">24th April 2026 · 10 PM · Berlin</span>
+         </div>`;
     el.innerHTML += `<div class="pg-cover-inner">
       <div class="pg-title-fraktur">Eternore</div>
       <div class="pg-cover-sub">With Love For Aurora</div>
       <div class="pg-cover-rule"></div>
       <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:#8b6b40;letter-spacing:.08em;margin-bottom:20px">A Book of Poems</div>
-      <div class="countdown-box">
-        We have been together for<br>
-        <span class="countdown-num">${cd.days}</span> days &nbsp;·&nbsp; <span class="countdown-num">${cd.hours}</span> hours &nbsp;·&nbsp; <span class="countdown-num">${cd.minutes}</span> minutes<br>
-        <span style="font-size:12px;opacity:.7">and every moment has been a gift</span>
-      </div>
+      ${countdownHTML}
       <button class="pg-open-book-btn" onclick="goTo(1)">Begin reading ›</button>
     </div>`;
-    const pnl = document.createElement('div'); pnl.className = 'pg-num-left'; pnl.textContent = 'Eternore'; el.appendChild(pnl); return;
+    const pnl = document.createElement('div'); pnl.className = 'pg-num-left'; pnl.textContent = 'Eternore'; el.appendChild(pnl);
+    if (!cd.passed) startCountdownTick();
+    return;
   }
 
   if (p.type === 'dedication') {
@@ -842,53 +781,10 @@ This book belongs to you. You always did.</div>
     el.innerHTML += `<div class="poem-roman">${toRoman(num)}</div>
       <div class="poem-title-pg">${p.title}</div>
       <div class="poem-body-pg">${linesHTML}</div>
-      <div class="poem-orn">· · ·</div>`;
+      <div class="poem-orn">· · ·</div>
+      <div style="font-family:'Dancing Script',cursive;font-size:19px;color:#8b5e30;text-align:right;margin-top:16px;padding-right:8px">— Pranav Arya</div>`;
     const pnl = document.createElement('div'); pnl.className = 'pg-num-left'; pnl.textContent = 'Eternore';
     const pnr = document.createElement('div'); pnr.className = 'pg-num-right'; pnr.textContent = `— ${num} —`;
-    el.appendChild(pnl); el.appendChild(pnr); return;
-  }
-
-  if (p.type === 'timeline') {
-    const events = [
-      { date: 'The beginning', title: 'The First Hello', body: 'The moment everything changed, though neither of us knew it yet.' },
-      { date: 'Early days', title: 'When I Knew', body: 'There was a moment — ordinary, unremarkable to anyone else — when I looked at you and knew.' },
-      { date: 'Together', title: 'Us, Finally', body: 'The day we stopped pretending the world existed when we were apart.' },
-      { date: 'A hard day', title: 'Distance', body: 'Miles between us, but you felt closer than anyone has ever been.' },
-      { date: 'Now', title: 'Still Here', body: 'Still choosing you. Still grateful. Still falling, a little, every single day.' }
-    ];
-    let items = '';
-    events.forEach(e => {
-      items += `<div class="timeline-item"><div class="timeline-dot"></div><div style="flex:1"><div style="display:flex;align-items:baseline;gap:12px;margin-bottom:4px"><div class="timeline-date">${e.date}</div><div class="timeline-title">${e.title}</div></div><div class="timeline-body">${e.body}</div></div></div>`;
-    });
-    el.innerHTML += `<div class="pg-section-head" style="font-size:26px">Our Story</div><div class="pg-section-rule"></div><div class="timeline-wrap">${items}</div>`;
-    const pnl = document.createElement('div'); pnl.className = 'pg-num-left'; pnl.textContent = 'Eternore';
-    const pnr = document.createElement('div'); pnr.className = 'pg-num-right'; pnr.textContent = '— our story —';
-    el.appendChild(pnl); el.appendChild(pnr); return;
-  }
-
-  if (p.type === 'letter') {
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-    el.innerHTML += `<div class="letter-wrap">
-      <div class="letter-date">${dateStr}</div>
-      <div class="letter-salutation">My dearest Aurora,</div>
-      <div class="letter-body">I have been trying to write this letter for longer than I would like to admit.
-
-Every time I begin, the words feel too small for what I mean. So let me simply say it plainly, the way I would if we were sitting across from each other right now:
-
-You are the most remarkable person I have ever known. Not for any grand reason, but for the quiet ones — the way you listen, the way you laugh, the way you hold the world gently even when it is not gentle with you.
-
-I am a better person for loving you. I think I always will be.
-
-This book is just one small proof of that — of how much I think about you, how often I reach for words that could come close to what I feel.
-
-They never quite do. But I keep trying.</div>
-      <div class="letter-close">With all of my love,</div>
-      <div class="letter-sig">Yours</div>
-      <div class="wax-seal">❧</div>
-    </div>`;
-    const pnl = document.createElement('div'); pnl.className = 'pg-num-left'; pnl.textContent = 'Eternore';
-    const pnr = document.createElement('div'); pnr.className = 'pg-num-right'; pnr.textContent = '— a letter —';
     el.appendChild(pnl); el.appendChild(pnr); return;
   }
 
@@ -959,22 +855,57 @@ function trySecretUnlock() {
 function renderNav() {
   const nb = document.getElementById('navBar'); nb.innerHTML = '';
   if (!bookOpen) return;
-  const back = document.createElement('button'); back.className = 'nav-btn'; back.textContent = '‹ Back'; back.disabled = cur <= 0; back.onclick = () => goTo(cur - 1); nb.appendChild(back);
-  const idx = document.createElement('button'); idx.className = 'nav-btn'; idx.textContent = 'Index'; idx.disabled = cur === 2; idx.onclick = () => goTo(2); nb.appendChild(idx);
+
+  // Close book button — always shown
+  const close = document.createElement('button');
+  close.className = 'nav-btn';
+  close.textContent = '✕ Close';
+  close.onclick = () => closeBook();
+  nb.appendChild(close);
+
+  const back = document.createElement('button');
+  back.className = 'nav-btn'; back.textContent = '‹ Back';
+  back.disabled = cur <= 0;
+  back.onclick = () => { if (cur > 0) goTo(cur - 1); else closeBook(); };
+  nb.appendChild(back);
+
+  const idx = document.createElement('button');
+  idx.className = 'nav-btn'; idx.textContent = 'Index';
+  idx.disabled = cur === 2; idx.onclick = () => goTo(2);
+  nb.appendChild(idx);
+
   const jw = document.createElement('div'); jw.className = 'jump-wrap';
-  const ji = document.createElement('input'); ji.type = 'number'; ji.min = '1'; ji.max = PAGES.length - 3; ji.placeholder = 'pg'; ji.id = 'jumpInput';
+  const ji = document.createElement('input');
+  ji.type = 'number'; ji.min = '1'; ji.max = PAGES.length - 3;
+  ji.placeholder = 'pg'; ji.id = 'jumpInput';
   const jb = document.createElement('button'); jb.className = 'nav-btn'; jb.textContent = 'Go';
   jb.onclick = () => { const v = parseInt(document.getElementById('jumpInput').value); if (v >= 1 && v <= PAGES.length - 3) goTo(v + 2); };
   ji.addEventListener('keydown', e => { if (e.key === 'Enter') jb.click(); });
   jw.appendChild(ji); jw.appendChild(jb); nb.appendChild(jw);
-  const next = document.createElement('button'); next.className = 'nav-btn primary'; next.textContent = 'Next ›'; next.disabled = cur >= PAGES.length - 1; next.onclick = () => goTo(cur + 1); nb.appendChild(next);
+
+  const next = document.createElement('button');
+  next.className = 'nav-btn primary'; next.textContent = 'Next ›';
+  next.disabled = cur >= PAGES.length - 1; next.onclick = () => goTo(cur + 1);
+  nb.appendChild(next);
+}
+
+// ── Close Book ──
+function closeBook() {
+  if (animating) return;
+  bookOpen = false;
+  const pb = document.getElementById('pageBlock');
+  pb.classList.remove('visible');
+  const cover = document.getElementById('bookCover');
+  cover.style.display = '';
+  cover.classList.remove('open');
+  cur = 0;
+  document.getElementById('navBar').innerHTML = '';
 }
 
 // ── Go To ──
 function goTo(idx) {
   if (animating || idx === cur || idx < 0 || idx >= PAGES.length) return;
   animating = true;
-  playPageSound();
   const el = document.getElementById('currentPage');
   const dir = idx > cur ? 1 : -1;
   el.style.transition = 'opacity .25s, transform .3s';
