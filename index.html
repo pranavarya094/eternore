@@ -333,6 +333,96 @@ html,body{min-height:100%;background:#0d0810}
   border-top:8px solid #fdf6ec;
 }
 .kitty-bubble.show{opacity:1}
+/* ── Story page ── */
+.story-wrap{padding:8px 0 0}
+.story-dropcap{
+  float:left;font-family:'UnifrakturMaguntia',serif;
+  font-size:72px;line-height:.8;margin:4px 10px 0 0;
+  color:#6b3a1f;
+}
+.story-body{
+  font-family:'Cormorant Garamond',serif;
+  font-size:16px;line-height:2.1;color:#2c1408;
+  text-align:justify;
+}
+.story-body p{margin-bottom:14px}
+.story-sig{
+  font-family:'Dancing Script',cursive;
+  font-size:20px;color:#6b3a1f;
+  text-align:right;margin-top:18px;
+}
+
+/* ── Photo page ── */
+.photo-page-wrap{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  min-height:420px;padding:16px 0;
+}
+.photo-frame{
+  position:relative;
+  background:#fff;
+  padding:12px 12px 40px;
+  box-shadow:2px 3px 14px rgba(0,0,0,.18), 0 1px 3px rgba(0,0,0,.1);
+  max-width:340px;width:100%;
+  transform:rotate(-1deg);
+  transition:transform .3s;
+}
+.photo-frame:hover{transform:rotate(0deg) scale(1.02)}
+.photo-frame.slot2{transform:rotate(1.2deg)}
+.photo-frame.slot3{transform:rotate(-.8deg)}
+.photo-frame.slot4{transform:rotate(1.5deg)}
+.photo-frame.slot5{transform:rotate(-.5deg)}
+.photo-frame.slot6{transform:rotate(.9deg)}
+.photo-inner{
+  width:100%;aspect-ratio:4/3;
+  background:linear-gradient(135deg,#e8d5b8 0%,#d4bfa0 50%,#c8ad8c 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;cursor:pointer;
+}
+.photo-inner img{
+  width:100%;height:100%;object-fit:cover;display:block;
+}
+.photo-upload-hint{
+  font-family:'Cormorant Garamond',serif;
+  font-size:13px;font-style:italic;color:#8b6b40;
+  text-align:center;padding:12px;
+  pointer-events:none;
+}
+.photo-upload-hint span{display:block;font-size:20px;margin-bottom:8px;opacity:.5}
+.photo-upload-input{
+  position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
+}
+.photo-caption{
+  font-family:'Dancing Script',cursive;
+  font-size:17px;color:#5a3010;
+  text-align:center;margin-top:10px;
+  letter-spacing:.04em;
+}
+.photo-tape{
+  position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+  width:50px;height:20px;
+  background:rgba(255,230,150,.55);
+  border:1px solid rgba(200,170,80,.3);
+  border-radius:2px;
+}
+
+/* ── Cover photo ── */
+.cover-photo-wrap{
+  position:relative;width:90px;height:90px;
+  margin:0 auto 20px;
+}
+.cover-photo-frame{
+  width:90px;height:90px;
+  background:linear-gradient(135deg,#e8d5b8,#c8ad8c);
+  border:3px solid rgba(200,160,80,.4);
+  border-radius:2px;
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;
+}
+.cover-photo-frame img{width:100%;height:100%;object-fit:cover}
+.cover-photo-hint{font-size:10px;font-style:italic;color:#8b6b40;text-align:center;padding:6px;pointer-events:none}
+.cover-photo-input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 </style>
 </head>
 <body>
@@ -439,6 +529,9 @@ const PAGES = [
   { type: 'title' },
   { type: 'dedication' },
   { type: 'index' },
+  { type: 'photo', slot: 1, src: 'photo3.jpg', caption: 'Us ♥' },
+  { type: 'story' },
+  { type: 'photo', slot: 2, src: 'photo5.jpg', caption: 'Every moment with you ♥' },
   { type: 'poem', title: 'The Way You Look at Me', body: `There's a moment just before you smile,
 when your eyes soften at the corners —
 a tiny universe deciding
@@ -451,6 +544,7 @@ the way a leaf falls in October —
 not rushing, not afraid,
 just turning gold
 in the light of you.` },
+  { type: 'photo', slot: 3, src: 'photo4.jpg', caption: 'My favourite person ♥' },
   { type: 'poem', title: 'Morning', body: `I have a theory
 that mornings were invented
 just so I could watch you
@@ -460,6 +554,7 @@ still half-dreaming,
 your hair forgetting what shape it is —
 the most honest version of you,
 and the one I love the most.` },
+  { type: 'photo', slot: 4, src: 'photo6.jpg', caption: 'Always finding my way back to you ♥' },
   { type: 'poem', title: 'Distance', body: `The miles between us
 are just numbers.
 What matters is this:
@@ -471,6 +566,7 @@ living in your wonderful way,
 and when I think of you
 every corner of me
 becomes a little warmer.` },
+  { type: 'photo', slot: 5, src: 'photo2.jpg', caption: 'The small moments are the best ones ♥' },
   { type: 'poem', title: 'Small Things', body: `I love you in the small things:
 the way you remember details,
 the sound of you humming without knowing it,
@@ -483,6 +579,7 @@ You do.
 
 More than all the grand gestures
 I never quite know how to make.` },
+  { type: 'photo', slot: 6, src: 'photo1.jpg', caption: 'My Aurora ♥' },
   { type: 'poem', title: 'Aurora', body: `You were named for the light
 that breaks at the edge of night —
 the sky's way of saying:
@@ -501,6 +598,38 @@ standing closest to the glow.` },
 let cur = 0, animating = false, bookOpen = false;
 let secretUnlocked = false;
 let countdownTickInterval = null;
+
+// ── Photo store (persists during session) ──
+const photoStore = {};
+
+function handlePhotoUpload(event, slot) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    photoStore['photo_slot_' + slot] = e.target.result;
+    const inner = document.getElementById('photoInner' + slot);
+    if (inner) {
+      inner.innerHTML = `<img src="${e.target.result}" alt="our photo">
+        <input type="file" accept="image/*" class="photo-upload-input" onchange="handlePhotoUpload(event,${slot})">`;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleCoverPhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    photoStore['cover'] = e.target.result;
+    const img = document.getElementById('coverPhotoImg');
+    const hint = document.getElementById('coverPhotoHint');
+    if (img) { img.src = e.target.result; img.style.display = 'block'; }
+    if (hint) hint.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
 
 function startCountdownTick() {
   clearInterval(countdownTickInterval);
@@ -761,6 +890,12 @@ function renderPage(idx, el) {
       <div class="pg-title-fraktur">Eternore</div>
       <div class="pg-cover-sub">With Love For Aurora</div>
       <div class="pg-cover-rule"></div>
+      <div class="cover-photo-wrap">
+        <div class="cover-photo-frame">
+          <img src="photo3.jpg" alt="us" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+          <div class="cover-photo-hint" style="display:none">📷</div>
+        </div>
+      </div>
       <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:#8b6b40;letter-spacing:.08em;margin-bottom:20px">A Book of Poems</div>
       ${countdownHTML}
       <button class="pg-open-book-btn" onclick="goTo(1)">Begin reading ›</button>
@@ -790,9 +925,10 @@ This book belongs to you. You always did.</div>
 
   if (p.type === 'index') {
     let rows = '';
-    const labels = {title:'Title Page', dedication:'Dedication', index:'Index', poem:'', timeline:'Our Story', letter:'A Letter', epilogue:'Epilogue', secret:'Hidden Page'};
+    const labels = {title:'Title Page', dedication:'Dedication', index:'Index', story:'How It Began', poem:'', photo:'', epilogue:'Epilogue', secret:'Hidden Page'};
     PAGES.forEach((pg, i) => {
       if (i < 3) return;
+      if (pg.type === 'photo') return; // skip photo pages from index
       const label = pg.type === 'poem' ? pg.title : (labels[pg.type] || pg.type);
       const pgNum = i - 2;
       const isSecret = pg.type === 'secret';
@@ -822,6 +958,40 @@ This book belongs to you. You always did.</div>
     const pnl = document.createElement('div'); pnl.className = 'pg-num-left'; pnl.textContent = 'Eternore';
     const pnr = document.createElement('div'); pnr.className = 'pg-num-right'; pnr.textContent = `— ${num} —`;
     el.appendChild(pnl); el.appendChild(pnr); return;
+  }
+
+  if (p.type === 'story') {
+    el.innerHTML += `<div class="story-wrap">
+      <div class="pg-section-head" style="font-size:22px;margin-bottom:4px">How It Began</div>
+      <div class="pg-section-rule"></div>
+      <div class="story-body">
+        <p><span class="story-dropcap">I</span>t was an ordinary street on an ordinary day — or so I thought. Then you walked into it, and the ordinary world quietly ceased to exist.</p>
+        <p>I don't think either of us knew, in that first moment, what had just happened. But something had. A door had opened. And I have never once wished it closed.</p>
+        <p>You are my Catwoman — clever, fearless, a little unpredictable, and entirely impossible to forget. I am your Batman — stubborn, devoted, always finding my way back to you no matter how dark the night gets. We are a strange and perfect pair.</p>
+        <p>Life will bring us its highs and its lows. There will be days that shimmer, and days that are harder to carry. But through all of it, I want you to know this: I will always reach for your hand. I will always look you in the eyes and remind you how extraordinary you are. We will face whatever comes — together, without question.</p>
+        <p>And whenever you miss me, or feel angry, or happy, or sad, or excited, or simply need somewhere to go — come back to this book. There will always be something new waiting for you here. A poem, a story, a surprise. Because you deserve to be celebrated, not just on special days, but on all the ordinary ones too.</p>
+        <p style="text-align:center;margin-top:4px">Happy Valentine's Day, Aurora.</p>
+      </div>
+      <div class="story-sig">— Pranav Arya</div>
+    </div>`;
+    const pnl = document.createElement('div'); pnl.className = 'pg-num-left'; pnl.textContent = 'Eternore';
+    const pnr = document.createElement('div'); pnr.className = 'pg-num-right'; pnr.textContent = '— our beginning —';
+    el.appendChild(pnl); el.appendChild(pnr); return;
+  }
+
+  if (p.type === 'photo') {
+    el.innerHTML += `<div class="photo-page-wrap">
+      <div class="photo-frame slot${p.slot}">
+        <div class="photo-tape"></div>
+        <div class="photo-inner">
+          <img src="${p.src}" alt="our photo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="photo-upload-hint" style="display:none"><span>📷</span>${p.src}</div>
+        </div>
+        <div class="photo-caption">${p.caption}</div>
+      </div>
+    </div>`;
+    const pnl = document.createElement('div'); pnl.className = 'pg-num-left'; pnl.textContent = 'Eternore';
+    el.appendChild(pnl); return;
   }
 
   if (p.type === 'epilogue') {
