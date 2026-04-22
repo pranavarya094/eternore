@@ -423,6 +423,52 @@ html,body{min-height:100%;background:#0d0810}
 .cover-photo-frame img{width:100%;height:100%;object-fit:cover}
 .cover-photo-hint{font-size:10px;font-style:italic;color:#8b6b40;text-align:center;padding:6px;pointer-events:none}
 .cover-photo-input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+/* ── Video page ── */
+.video-page-wrap{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:24px 0 16px;
+}
+.video-label{
+  font-family:'Cormorant Garamond',serif;
+  font-size:11px;letter-spacing:.45em;text-transform:uppercase;
+  color:#a07850;text-align:center;margin-bottom:8px;
+}
+.video-title{
+  font-family:'Dancing Script',cursive;
+  font-size:24px;color:#3a1e08;
+  text-align:center;margin-bottom:20px;
+}
+.video-frame-wrap{
+  position:relative;width:100%;max-width:440px;
+  background:#1a0e06;
+  border:3px solid rgba(139,90,40,.35);
+  box-shadow:3px 4px 16px rgba(0,0,0,.25);
+  border-radius:3px;
+  overflow:hidden;
+}
+.video-frame-wrap::before{
+  content:'';display:block;padding-top:56.25%;
+}
+.video-frame-wrap iframe{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  border:none;
+}
+.video-caption{
+  font-family:'Dancing Script',cursive;
+  font-size:17px;color:#5a3010;
+  text-align:center;margin-top:14px;
+  letter-spacing:.04em;
+}
+.video-tape{
+  position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+  width:60px;height:20px;
+  background:rgba(255,230,150,.5);
+  border:1px solid rgba(200,170,80,.3);
+  border-radius:2px;
+  z-index:2;
+}
 </style>
 </head>
 <body>
@@ -592,6 +638,7 @@ rearranges itself around you,
 and I have been the lucky one
 standing closest to the glow.` },
   { type: 'epilogue' },
+  { type: 'video', videoId: '4JNtAtGGNRU', caption: 'A song, just for you ♥' },
   { type: 'secret' }
 ];
 
@@ -925,7 +972,7 @@ This book belongs to you. You always did.</div>
 
   if (p.type === 'index') {
     let rows = '';
-    const labels = {title:'Title Page', dedication:'Dedication', index:'Index', story:'How It Began', poem:'', photo:'', epilogue:'Epilogue', secret:'Hidden Page'};
+    const labels = {title:'Title Page', dedication:'Dedication', index:'Index', story:'How It Began', poem:'', photo:'', video:'A Song For You', epilogue:'Epilogue', secret:'Hidden Page'};
     PAGES.forEach((pg, i) => {
       if (i < 3) return;
       if (pg.type === 'photo') return; // skip photo pages from index
@@ -992,6 +1039,27 @@ This book belongs to you. You always did.</div>
     </div>`;
     const pnl = document.createElement('div'); pnl.className = 'pg-num-left'; pnl.textContent = 'Eternore';
     el.appendChild(pnl); return;
+  }
+
+  if (p.type === 'video') {
+    el.innerHTML += `<div class="video-page-wrap">
+      <div class="video-label">A song for you</div>
+      <div class="video-title">Press play ♥</div>
+      <div style="position:relative;width:100%;max-width:440px">
+        <div class="video-tape"></div>
+        <div class="video-frame-wrap">
+          <iframe
+            src="https://www.youtube.com/embed/${p.videoId}?rel=0&modestbranding=1&color=white"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+          </iframe>
+        </div>
+      </div>
+      <div class="video-caption">${p.caption}</div>
+    </div>`;
+    const pnl = document.createElement('div'); pnl.className = 'pg-num-left'; pnl.textContent = 'Eternore';
+    const pnr = document.createElement('div'); pnr.className = 'pg-num-right'; pnr.textContent = '— for you —';
+    el.appendChild(pnl); el.appendChild(pnr); return;
   }
 
   if (p.type === 'epilogue') {
