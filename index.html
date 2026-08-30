@@ -958,6 +958,19 @@ function renderPage(idx,el){
     el.innerHTML+=`
       <div class="pg-section-head" style="font-size:24px">Eternore</div>
       <div class="pg-section-rule"></div>
+      <div onclick="goTo(1)" style="
+        display:flex;align-items:center;justify-content:space-between;
+        background:rgba(139,90,40,.08);
+        border:1px solid rgba(139,90,40,.25);
+        border-radius:2px;
+        padding:12px 16px;
+        cursor:pointer;
+        margin-bottom:16px;
+        transition:background .2s;
+      " onmouseover="this.style.background='rgba(139,90,40,.15)'" onmouseout="this.style.background='rgba(139,90,40,.08)'">
+        <span style="font-family:'Dancing Script',cursive;font-size:19px;color:#3a1e08">▶ A message for you</span>
+        <span style="font-family:'Cormorant Garamond',serif;font-size:11px;color:#c8a050;letter-spacing:.15em;text-transform:uppercase;border:1px solid rgba(200,160,80,.3);padding:2px 8px;border-radius:1px">video</span>
+      </div>
       <div class="idx-search-wrap">
         <input type="text" id="idxSearch" class="idx-search-input" placeholder="search..." oninput="filterIndex(this.value)">
       </div>
