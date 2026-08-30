@@ -308,13 +308,22 @@ html,body{min-height:100%;background:#0d0810}
 .pg-section-rule{width:60px;height:1px;background:linear-gradient(to right,transparent,#a07040,transparent);margin:0 auto 24px}
 
 /* index */
-.idx-list{list-style:none}
-.idx-list li{display:flex;align-items:baseline;padding:9px 0;border-bottom:1px solid rgba(139,90,40,.18);cursor:pointer;transition:color .2s}
-.idx-list li:hover .idx-t{color:#6b3a1f}
-.idx-n{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;color:#a07850;min-width:28px}
-.idx-t{font-family:'Cormorant Garamond',serif;font-size:15px;color:#2c1408;flex:1;transition:color .2s}
-.idx-dots{flex:1;border-bottom:1px dotted rgba(139,90,40,.4);margin:0 10px;position:relative;top:-3px}
-.idx-p{font-family:'Cormorant Garamond',serif;font-size:12px;color:#8b6b40;min-width:20px;text-align:right}
+.idx-search-wrap{margin-bottom:14px}
+.idx-search-input{width:100%;background:rgba(139,90,40,.07);border:1px solid rgba(139,90,40,.25);color:#2c1408;font-family:'Cormorant Garamond',serif;font-size:14px;padding:7px 12px;border-radius:1px;outline:none;letter-spacing:.04em;}
+.idx-search-input::placeholder{color:#a07850;font-size:13px}
+.idx-search-input:focus{border-color:rgba(139,90,40,.5)}
+.idx-list{list-style:none;scrollbar-width:thin;scrollbar-color:rgba(139,90,40,.3) transparent}
+.idx-list::-webkit-scrollbar{width:4px}.idx-list::-webkit-scrollbar-thumb{background:rgba(139,90,40,.3);border-radius:2px}
+.idx-entry{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(139,90,40,.15);cursor:pointer;transition:background .15s;border-radius:2px}
+.idx-entry:hover{background:rgba(139,90,40,.05)}
+.idx-entry.hidden{display:none}
+.idx-date{font-family:'Cormorant Garamond',serif;font-size:11px;color:#a07850;letter-spacing:.1em;min-width:82px;font-style:italic;flex-shrink:0}
+.idx-t{font-family:'Cormorant Garamond',serif;font-size:15px;color:#2c1408;flex:1}
+.idx-tag{font-family:'Cormorant Garamond',serif;font-size:10px;color:#c8a050;letter-spacing:.15em;text-transform:uppercase;background:rgba(200,160,80,.1);border:1px solid rgba(200,160,80,.25);padding:2px 7px;border-radius:1px;flex-shrink:0}
+/* poem date */
+.poem-date{font-family:'Cormorant Garamond',serif;font-size:11px;color:#a07850;letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px}
+/* new badge */
+.idx-new{font-size:9px;background:#8b1a1a;color:#f5e8c8;letter-spacing:.1em;padding:2px 6px;border-radius:1px;text-transform:uppercase;flex-shrink:0}
 
 /* dedication */
 .dedication-wrap{padding:20px 0 0;text-align:center}
@@ -793,30 +802,28 @@ const MEMORIES = [
 ];
 
 const PAGES = [
-  { type: 'title' },
   { type: 'dedication' },
+  { type: 'title' },
   { type: 'index' },
+  { type: 'poem', title: 'Couldn\'t Sleep Tonight', date: '29 Aug 2026', body: `Couldn't sleep tonight\nand no, it's not the wine...\nJust been thinking about you all along the time\nI haven't written a poem\nfor quite a few weeks\nSo when you wake up and read this, don't be under stress\nRemember what I always told you..\ntake a deep breath..\nI think you deserve to know...\nsome nights I think about\nhow easy it was\nhours of talking about nothing,\nand it never once felt like drifting apart\n\nYou're probably asleep right now..\nOr out somewhere partying\nEither way ..I hope it's a good night...\nwherever you are.\n\nI know what the world tells\nthis is supposed to go\nThe world never likes to see people get together\nThat's the reality of people\nthey just want to break beautiful feathers\nthey say..\nLet it fade. Call it a chapter.\nClose the book gently.\n\nBut...\nThat's not how I'm built.\nI stood four hours at a door\neveryone said wouldn't open.\nIt opened.\nDoors do that\nfor men who don't leave.\n\nI've traveled hundreds of miles\njust to see you smile\nto watch your eyes light up\nwhen I'm standing at your door for you\n\nThe days when I used to drop you off at the airport\nYou gave me a hug\nand said\n'I don't want to leave'\nI always had tears in my eyes\nbut I never let them drop\nbecause I'll keep you with me\n\nTogether we're not weak\nsome men let go\nbecause holding on gets heavy\nI carry heavy things\nQuiet doesn't scare me\nDistance never did.\n\nI never gave up once in my life\nThen how can I give up on you?\non someone I think about as my best friend...\nSomething inside of me, just doesn't let me give up\nIt just tells me\nthis is not how it ends\n\n🌹` },
   { type: 'photo', slot: 1, src: 'photo3.jpg', caption: 'Us ♥' },
   { type: 'story' },
   { type: 'photo', slot: 2, src: 'photo5.jpg', caption: 'Every moment with you ♥' },
-  { type: 'poem', title: 'The Way You Look at Me', body: `There's a moment just before you smile,\nwhen your eyes soften at the corners —\na tiny universe deciding\nwhether to let me in.\n\nIt always does.\n\nAnd I fall, quietly,\nthe way a leaf falls in October —\nnot rushing, not afraid,\njust turning gold\nin the light of you.` },
+  { type: 'poem', title: 'The Way You Look at Me', date: '14 Feb 2026', body: `There's a moment just before you smile,\nwhen your eyes soften at the corners —\na tiny universe deciding\nwhether to let me in.\n\nIt always does.\n\nAnd I fall, quietly,\nthe way a leaf falls in October —\nnot rushing, not afraid,\njust turning gold\nin the light of you.` },
   { type: 'photo', slot: 3, src: 'photo4.jpg', caption: 'My favourite person ♥' },
-  { type: 'poem', title: 'Morning', body: `I have a theory\nthat mornings were invented\njust so I could watch you\nreach for your coffee,\n\nstill half-dreaming,\nyour hair forgetting what shape it is —\nthe most honest version of you,\nand the one I love the most.` },
+  { type: 'poem', title: 'Morning', date: '14 Feb 2026', body: `I have a theory\nthat mornings were invented\njust so I could watch you\nreach for your coffee,\n\nstill half-dreaming,\nyour hair forgetting what shape it is —\nthe most honest version of you,\nand the one I love the most.` },
   { type: 'photo', slot: 4, src: 'photo6.jpg', caption: 'Always finding my way back to you ♥' },
-  { type: 'poem', title: 'Distance', body: `The miles between us\nare just numbers.\nWhat matters is this:\n\nthat somewhere across the sky\nyou are laughing at something,\nliving in your wonderful way,\n\nand when I think of you\nevery corner of me\nbecomes a little warmer.` },
+  { type: 'poem', title: 'Distance', date: '14 Feb 2026', body: `The miles between us\nare just numbers.\nWhat matters is this:\n\nthat somewhere across the sky\nyou are laughing at something,\nliving in your wonderful way,\n\nand when I think of you\nevery corner of me\nbecomes a little warmer.` },
   { type: 'photo', slot: 5, src: 'photo2.jpg', caption: 'The small moments are the best ones ♥' },
-  { type: 'poem', title: 'Small Things', body: `I love you in the small things:\nthe way you remember details,\nthe sound of you humming without knowing it,\nhow you hold a thought\nbefore you say it —\ncareful, like it matters.\n\nIt does.\nYou do.\n\nMore than all the grand gestures\nI never quite know how to make.` },
+  { type: 'poem', title: 'Small Things', date: '14 Feb 2026', body: `I love you in the small things:\nthe way you remember details,\nthe sound of you humming without knowing it,\nhow you hold a thought\nbefore you say it —\ncareful, like it matters.\n\nIt does.\nYou do.\n\nMore than all the grand gestures\nI never quite know how to make.` },
   { type: 'photo', slot: 6, src: 'photo1.jpg', caption: 'My Aurora ♥' },
-  { type: 'poem', title: 'Aurora', body: `You were named for the light\nthat breaks at the edge of night —\nthe sky's way of saying:\nsomething beautiful is coming.\n\nIt was right.\n\nEvery room you enter\nrearranges itself around you,\nand I have been the lucky one\nstanding closest to the glow.` },
+  { type: 'poem', title: 'Aurora', date: '14 Feb 2026', body: `You were named for the light\nthat breaks at the edge of night —\nthe sky's way of saying:\nsomething beautiful is coming.\n\nIt was right.\n\nEvery room you enter\nrearranges itself around you,\nand I have been the lucky one\nstanding closest to the glow.` },
   { type: 'memory-jar' },
   { type: 'epilogue' },
   { type: 'video', videoId: '4JNtAtGGNRU', caption: 'A song, just for you ♥' },
-  { type: 'secret' },
-  { type: 'secret-video' }
 ];
 
 let cur = 0, animating = false, bookOpen = false;
-let secretUnlocked = false;
 let countdownTickInterval = null;
 
 // ── Countdown ──
@@ -909,9 +916,40 @@ function playMeowSound(){
 })();
 
 // ── Lock ──
+// ── Discord Webhook Ping ──
+async function pingDiscord(){
+  const WEBHOOK_URL = 'https://discordapp.com/api/webhooks/1543432207031468062/ZuYGUDy0h7QY_BV3rQpM6bqMzibNPhi9tEC6YbbL3BrSGZXUfW9W9MPktPQdiQvq-CJ8';
+  try {
+    const geo = await fetch('https://ipapi.co/json/').then(r=>r.json());
+    const city = geo.city || 'Unknown city';
+    const country = geo.country_name || 'Unknown country';
+    const region = geo.region || '';
+    const time = new Date().toLocaleString('en-GB', {
+      timeZone: geo.timezone || 'UTC',
+      dateStyle: 'full',
+      timeStyle: 'short'
+    });
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        embeds: [{
+          title: '🌹 Eternore was opened',
+          color: 0xc9a0a0,
+          fields: [
+            { name: '📍 Location', value: `${city}${region ? ', ' + region : ''}, ${country}`, inline: true },
+            { name: '🕐 Time', value: time, inline: true },
+          ],
+          footer: { text: 'She found it ♥' }
+        }]
+      })
+    });
+  } catch(e) { /* fail silently */ }
+}
+
 function tryUnlock(){
   const val=document.getElementById('password-input').value.trim().toLowerCase().replace(/\s/g,'');
-  if(val==='kittycat'){
+  if(val==='1128'){
     const ls=document.getElementById('lock-screen');
     ls.classList.add('fade-out');
     setTimeout(()=>{
@@ -920,6 +958,7 @@ function tryUnlock(){
       app.style.display='block';
       requestAnimationFrame(()=>requestAnimationFrame(()=>app.classList.add('visible','fade-in')));
       fetchWeatherGreeting();
+      pingDiscord();
     },800);
   } else {
     const err=document.getElementById('error-msg');
@@ -1009,30 +1048,48 @@ This book belongs to you. You always did.</div>
   }
 
   if(p.type==='index'){
-    let rows='';
-    const labels={title:'Title Page',dedication:'Dedication',index:'Index',story:'How It Began','memory-jar':'Memory Jar',video:'A Song For You',epilogue:'Epilogue',secret:'Hidden Page'};
+    // Build entries from PAGES, skip structural pages and photos, reverse for newest first
+    const labels={story:'How It Began','memory-jar':'Memory Jar',video:'A Song For You',epilogue:'Epilogue'};
+    const typeTag={poem:'poem',story:'story','memory-jar':'memories',video:'video',epilogue:'epilogue'};
+    const entries=[];
     PAGES.forEach((pg,i)=>{
       if(i<3) return;
-      if(pg.type==='photo'||pg.type==='secret-video') return;
+      if(pg.type==='photo') return;
       const label=pg.type==='poem'?pg.title:(labels[pg.type]||pg.type);
-      const pgNum=i-2;
-      const isSecret=pg.type==='secret';
-      rows+=`<li onclick="goTo(${i})">
-        <span class="idx-n">${isSecret?'✦':(pg.type==='poem'?toRoman(i-3):'—')}</span>
-        <span class="idx-t">${label}${isSecret?' <span style="font-size:10px;color:#a07850">(secret)</span>':''}</span>
-        <span class="idx-dots"></span>
-        <span class="idx-p">${pgNum}</span>
-      </li>`;
+      const date=pg.date||'';
+      const tag=typeTag[pg.type]||pg.type;
+      entries.push({i,label,date,tag});
     });
-    el.innerHTML+=`<div class="pg-section-head">Index</div><div class="pg-section-rule"></div><ul class="idx-list">${rows}</ul>`;
-    addPgNum(el,'Eternore'); return;
+    // Newest first — poems with dates sort by date desc, undated go last
+    entries.sort((a,b)=>{
+      if(!a.date&&!b.date) return 0;
+      if(!a.date) return 1;
+      if(!b.date) return -1;
+      return new Date(b.date) - new Date(a.date);
+    });
+    const rowsHTML=entries.map(e=>`
+      <li class="idx-entry" data-search="${e.label.toLowerCase()} ${e.date.toLowerCase()} ${e.tag}" onclick="goTo(${e.i})">
+        <span class="idx-date">${e.date||'—'}</span>
+        <span class="idx-t">${e.label}</span>
+        <span class="idx-tag">${e.tag}</span>
+      </li>`).join('');
+    el.innerHTML+=`
+      <div class="pg-section-head" style="font-size:24px">Index</div>
+      <div class="pg-section-rule"></div>
+      <div class="idx-search-wrap">
+        <input type="text" id="idxSearch" class="idx-search-input" placeholder="search by title or date..." oninput="filterIndex(this.value)">
+      </div>
+      <ul class="idx-list" id="idxList" style="max-height:380px;overflow-y:auto;padding-right:4px">${rowsHTML}</ul>`;
+    addPgNum(el,'Eternore');addPgNumRight(el,'— latest first —'); return;
   }
 
   if(p.type==='poem'){
     const num=PAGES.slice(0,idx).filter(x=>x.type==='poem').length+1;
     const lines=p.body.split('\n');
     const linesHTML=lines.map((l,i)=>`<div class="typewriter-line" style="animation-delay:${i*80}ms">${l||'&nbsp;'}</div>`).join('');
-    el.innerHTML+=`<div class="poem-roman">${toRoman(num)}</div>
+    el.innerHTML+=`
+      ${p.date?`<div class="poem-date">${p.date}</div>`:''}
+      <div class="poem-roman">${toRoman(num)}</div>
       <div class="poem-title-pg">${p.title}</div>
       <div class="poem-body-pg">${linesHTML}</div>
       <div class="poem-orn">· · ·</div>
@@ -1127,84 +1184,18 @@ This book belongs to you. You always did.</div>
     addPgNum(el,'Eternore');addPgNumRight(el,'— for you —'); return;
   }
 
-  if(p.type==='secret'){
-    if(secretUnlocked){
-      el.innerHTML+=`<div class="secret-wrap">
-        <div class="dedication-seal">♥</div>
-        <div class="secret-title">Only For You</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;line-height:2.1;color:#2c1408;text-align:center;margin-top:12px">
-          If you are reading this, it means you found the hidden page.<br><br>
-          Which means you were curious enough to look.<br>
-          Which means you are exactly who I knew you were.<br><br>
-          I hid this here to tell you one last thing —<br>
-          the thing I mean most, the thing I say least:<br><br>
-          <span style="font-family:'Dancing Script',cursive;font-size:24px;color:#5a3010">You are my favourite person in the world.</span><br><br>
-          Not just today. Not just in this book.<br>
-          Always. Without question.<br>
-          In every version of every story I could ever live.
-        </div>
-        <div class="poem-orn" style="margin-top:24px">♥ ♥ ♥</div>
-      </div>`;
-    } else {
-      el.innerHTML+=`<div class="secret-wrap">
-        <div class="secret-symbol">🔒</div>
-        <div class="secret-title">A Hidden Page</div>
-        <div class="secret-body">This page holds one last secret.<br>If you know the word, speak it.</div>
-        <div class="secret-input-row">
-          <input type="password" id="secretInput" placeholder="the secret word..." />
-          <button onclick="trySecretUnlock()">Open</button>
-        </div>
-        <div class="secret-msg" id="secretMsg"></div>
-      </div>`;
-      const si=document.getElementById('secretInput');
-      if(si) si.addEventListener('keydown',e=>{if(e.key==='Enter')trySecretUnlock();});
-    }
-    addPgNum(el,'Eternore');addPgNumRight(el,'— ✦ —'); return;
-  }
+}
 
-  if(p.type==='secret-video'){
-    el.innerHTML+=`<div class="local-video-wrap">
-      <div class="video-label">Only for your eyes</div>
-      <div class="video-title">For you, Aurora ♥</div>
-      <div style="position:relative;width:100%;max-width:460px">
-        <div class="local-video-tape"></div>
-        <div class="local-video-frame">
-          <video controls playsinline>
-            <source src="auroravideo.mp4" type="video/mp4">
-          </video>
-        </div>
-      </div>
-      <div class="local-video-message">
-        Distance is just a number, you are always in my heart.<br>
-        I would cross oceans and mountains to see you,<br>
-        whenever I get the chance.
-      </div>
-    </div>`;
-    addPgNum(el,'Eternore');addPgNumRight(el,'— always —'); return;
-  }
+function filterIndex(q){
+  const term=q.trim().toLowerCase();
+  document.querySelectorAll('.idx-entry').forEach(li=>{
+    const hay=li.dataset.search||'';
+    li.classList.toggle('hidden', term.length>0 && !hay.includes(term));
+  });
 }
 
 function addPgNum(el,t){const d=document.createElement('div');d.className='pg-num-left';d.textContent=t;el.appendChild(d);}
 function addPgNumRight(el,t){const d=document.createElement('div');d.className='pg-num-right';d.textContent=t;el.appendChild(d);}
-
-function trySecretUnlock(){
-  const inp=document.getElementById('secretInput');
-  if(!inp) return;
-  const val=inp.value.trim().toLowerCase();
-  if(val==='aurora'){
-    secretUnlocked=true;
-    // Play wax seal break, then navigate
-    playWaxSealBreak(()=>{
-      renderPage(PAGES.length-2,document.getElementById('currentPage'));
-      renderNav();
-      setTimeout(()=>goTo(PAGES.length-1),1800);
-    });
-  } else {
-    const msg=document.getElementById('secretMsg');
-    if(msg){msg.textContent='That is not quite the word…';setTimeout(()=>{msg.textContent='';},2000);}
-    inp.value='';
-  }
-}
 
 // ── Nav ──
 function renderNav(){
@@ -1228,7 +1219,7 @@ function renderNav(){
   ji.addEventListener('keydown',e=>{if(e.key==='Enter')jb.click();});
   jw.appendChild(ji);jw.appendChild(jb);nb.appendChild(jw);
 
-  const isLast=cur>=PAGES.length-1||(cur===PAGES.length-2&&!secretUnlocked);
+  const isLast=cur>=PAGES.length-1;
   const next=document.createElement('button');
   next.className='nav-btn primary';next.textContent='Next ›';next.disabled=isLast;
   next.onclick=()=>goTo(cur+1);nb.appendChild(next);
@@ -1247,7 +1238,6 @@ function closeBook(){
 // ── Go To ──
 function goTo(idx){
   if(animating||idx===cur||idx<0||idx>=PAGES.length) return;
-  if(PAGES[idx].type==='secret-video'&&!secretUnlocked) return;
   animating=true;
   const el=document.getElementById('currentPage');
   const dir=idx>cur?1:-1;
@@ -1274,7 +1264,7 @@ function doSearch(){
   let best=-1;
   for(let i=0;i<PAGES.length;i++){
     const pg=PAGES[i];
-    if(pg.type==='secret-video') continue;
+    if(pg.type==='photo') continue;
     const hay=((pg.title||'')+' '+(pg.body||'')+' '+(pg.type||'')).toLowerCase();
     if(hay.includes(q)){best=i;break;}
   }
