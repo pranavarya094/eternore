@@ -377,12 +377,7 @@ html,body{min-height:100%;background:#0d0810}
 .jump-wrap input{width:50px;background:rgba(200,160,80,.08);border:1px solid rgba(200,160,80,.22);color:#e8d080;font-family:'Cormorant Garamond',serif;font-size:13px;padding:6px 8px;border-radius:1px;text-align:center;outline:none}
 .jump-wrap input:focus{border-color:rgba(200,160,80,.5)}
 
-/* ── Cat ── */
-#kitty{position:absolute;bottom:40px;left:60px;pointer-events:auto;z-index:20;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;}
-#kitty svg{display:block;pointer-events:none}
-.kitty-bubble{position:absolute;bottom:56px;left:50%;transform:translateX(-50%);background:#fdf6ec;border:1px solid rgba(139,90,40,.4);border-radius:10px;padding:5px 14px;font-family:'Dancing Script',cursive;font-size:15px;color:#5a3010;white-space:nowrap;opacity:0;transition:opacity .35s;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.15);z-index:30;}
-.kitty-bubble::after{content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);border-left:7px solid transparent;border-right:7px solid transparent;border-top:8px solid #fdf6ec;}
-.kitty-bubble.show{opacity:1}
+
 
 /* ── Story ── */
 .story-wrap{padding:8px 0 0}
@@ -541,39 +536,6 @@ html,body{min-height:100%;background:#0d0810}
 
       <div class="page-block" id="pageBlock">
         <div class="page" id="currentPage" style="position:relative">
-          <div id="kitty">
-            <div class="kitty-bubble" id="kittyBubble">I love you Auri ♥</div>
-            <svg id="kittySvg" width="52" height="52" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="28" cy="36" rx="14" ry="11" fill="#d4a96a"/>
-              <circle cx="28" cy="20" r="11" fill="#d4a96a"/>
-              <polygon points="18,12 14,4 22,10" fill="#d4a96a"/>
-              <polygon points="38,12 42,4 34,10" fill="#d4a96a"/>
-              <polygon points="18,12 15,6 21,10" fill="#e8c0a0"/>
-              <polygon points="38,12 41,6 35,10" fill="#e8c0a0"/>
-              <ellipse cx="23" cy="20" rx="3" ry="3.5" fill="#2c1408"/>
-              <ellipse cx="33" cy="20" rx="3" ry="3.5" fill="#2c1408"/>
-              <ellipse cx="23" cy="20" rx="1.2" ry="1.8" fill="#7fd4e8"/>
-              <ellipse cx="33" cy="20" rx="1.2" ry="1.8" fill="#7fd4e8"/>
-              <circle cx="23.5" cy="19.5" r=".6" fill="white"/>
-              <circle cx="33.5" cy="19.5" r=".6" fill="white"/>
-              <polygon points="28,24 26.5,26 29.5,26" fill="#c07080"/>
-              <path d="M26.5,26 Q28,28 29.5,26" fill="none" stroke="#8b5060" stroke-width=".8"/>
-              <line x1="17" y1="24" x2="25" y2="25" stroke="#8b6b40" stroke-width=".7" opacity=".7"/>
-              <line x1="17" y1="26" x2="25" y2="26" stroke="#8b6b40" stroke-width=".7" opacity=".7"/>
-              <line x1="31" y1="25" x2="39" y2="24" stroke="#8b6b40" stroke-width=".7" opacity=".7"/>
-              <line x1="31" y1="26" x2="39" y2="26" stroke="#8b6b40" stroke-width=".7" opacity=".7"/>
-              <path id="catTail" d="M42,40 Q52,34 50,26" fill="none" stroke="#d4a96a" stroke-width="4" stroke-linecap="round"/>
-              <g id="legsWalk">
-                <rect id="leg1" x="18" y="44" width="5" height="10" rx="2" fill="#c89850"/>
-                <rect id="leg2" x="25" y="44" width="5" height="10" rx="2" fill="#c89850"/>
-                <rect id="leg3" x="32" y="44" width="5" height="10" rx="2" fill="#c89850"/>
-              </g>
-              <g id="legsSit" style="display:none">
-                <ellipse cx="22" cy="46" rx="5" ry="4" fill="#c89850"/>
-                <ellipse cx="34" cy="46" rx="5" ry="4" fill="#c89850"/>
-              </g>
-            </svg>
-          </div>
         </div>
       </div>
     </div>
@@ -864,57 +826,6 @@ resizeCanvas();createStars();requestAnimationFrame(t=>drawStars(t/1000));
 window.addEventListener('resize',()=>{resizeCanvas();createStars();});
 
 // ── Meow ──
-function playMeowSound(){
-  try{
-    const ac=new(window.AudioContext||window.webkitAudioContext)();
-    if(ac.state==='suspended')ac.resume();
-    const t=ac.currentTime;
-    [[480,0],[600,.1],[560,.2],[680,.32],[620,.42]].forEach(([freq,when])=>{
-      const o=ac.createOscillator(),g=ac.createGain();
-      o.type='sine';o.frequency.setValueAtTime(freq,t+when);o.frequency.exponentialRampToValueAtTime(freq*1.35,t+when+.09);
-      g.gain.setValueAtTime(.001,t+when);g.gain.linearRampToValueAtTime(.22,t+when+.03);g.gain.exponentialRampToValueAtTime(.001,t+when+.18);
-      o.connect(g);g.connect(ac.destination);o.start(t+when);o.stop(t+when+.22);
-    });
-  }catch(e){}
-}
-
-
-
-// ── Cat ──
-(function initCat(){
-  document.addEventListener('click',function(e){
-    const kitty=document.getElementById('kitty');
-    if(kitty&&(e.target===kitty||kitty.contains(e.target))){
-      e.stopPropagation();playMeowSound();
-      const bubble=document.getElementById('kittyBubble');
-      if(bubble){bubble.textContent='I love you Auri ♥';bubble.classList.add('show');clearTimeout(kitty._bt);kitty._bt=setTimeout(()=>bubble.classList.remove('show'),3200);}
-      kitty._state='sit';kitty._stateTimer=3500;
-    }
-  },true);
-  let catX=60,catDir=1,flipped=false;
-  const idleSayings=['purrrr ♥','mrow~','*yawns*','zzz...','*blinks*','meow!'];
-  function getMaxX(){const p=document.getElementById('currentPage');return p?Math.max(p.offsetWidth-90,140):420;}
-  function showIdleBubble(){const b=document.getElementById('kittyBubble'),k=document.getElementById('kitty');if(!b||!k)return;b.textContent=idleSayings[Math.floor(Math.random()*idleSayings.length)];b.classList.add('show');clearTimeout(k._bt);k._bt=setTimeout(()=>b.classList.remove('show'),2200);}
-  let lastT=0;
-  function loop(t){
-    const dt=Math.min(t-lastT,50);lastT=t;
-    const kitty=document.getElementById('kitty'),tail=document.getElementById('catTail'),leg1=document.getElementById('leg1'),leg2=document.getElementById('leg2'),leg3=document.getElementById('leg3'),legsWalk=document.getElementById('legsWalk'),legsSit=document.getElementById('legsSit');
-    if(!kitty||!tail){requestAnimationFrame(loop);return;}
-    if(!kitty._state){kitty._state='walk';kitty._stateTimer=2000;}
-    kitty._stateTimer-=dt;
-    const sw=Math.sin(t*.003)*10;
-    tail.setAttribute('d',`M42,40 Q${50+sw},${36+sw*.4} 50,26`);
-    if(kitty._state!=='walk'){if(legsWalk)legsWalk.style.display='none';if(legsSit)legsSit.style.display='block';}
-    else{if(legsWalk)legsWalk.style.display='block';if(legsSit)legsSit.style.display='none';const s=Math.sin(t*.012);if(leg1)leg1.setAttribute('y',44+(s>0?-3:0));if(leg2)leg2.setAttribute('y',44+(s<0?-3:0));if(leg3)leg3.setAttribute('y',44+(s>0?-3:0));}
-    const maxX=getMaxX();
-    if(kitty._state==='walk'){catX+=catDir*.65;if(catX>=maxX){catDir=-1;flipped=true;catX=maxX;}if(catX<=16){catDir=1;flipped=false;catX=16;}if(kitty._stateTimer<=0){if(Math.random()<.35){kitty._state='sit';kitty._stateTimer=2500+Math.random()*3000;showIdleBubble();}else{kitty._stateTimer=1800+Math.random()*2000;}}}
-    else{if(kitty._stateTimer<=0){kitty._state='walk';kitty._stateTimer=2000+Math.random()*2000;}}
-    kitty.style.left=catX+'px';kitty.style.transform=flipped?'scaleX(-1)':'scaleX(1)';
-    requestAnimationFrame(loop);
-  }
-  requestAnimationFrame(loop);
-})();
-
 // ── Lock ──
 // ── Discord Webhook Ping ──
 async function pingDiscord(){
@@ -997,10 +908,7 @@ function toggleNote(el){
 // ── Render Pages ──
 function renderPage(idx,el){
   const p=PAGES[idx];
-  const kittyEl=document.getElementById('kitty');
-  if(kittyEl&&kittyEl.parentNode) kittyEl.parentNode.removeChild(kittyEl);
   el.innerHTML='<div class="page-aged-edge"></div><div class="page-aged-top"></div><div class="page-aged-bottom"></div><div class="ribbon-marker"></div>';
-  if(kittyEl) el.appendChild(kittyEl);
 
   if(p.type==='aurora-video'){
     el.innerHTML+=`<div class="local-video-wrap">
