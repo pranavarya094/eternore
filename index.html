@@ -29,6 +29,33 @@ html,body{min-height:100%;background:#0a0d1a;overflow-x:hidden;font-family:'Corm
   pointer-events:none;
 }
 
+/* ══ CANDLE FLICKER GLOW ══ */
+#candle-glow{
+  position:fixed;
+  z-index:8;
+  pointer-events:none;
+  width:240px;height:300px;
+  left:76%;top:60%;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(ellipse 40% 50% at 50% 45%,rgba(255,190,80,.85) 0%,rgba(255,160,55,.45) 28%,rgba(255,140,45,.15) 55%,transparent 75%);
+  animation:candleFlicker 2s ease-in-out infinite;
+}
+@keyframes candleFlicker{
+  0%   {opacity:.7;  transform:translate(-50%,-50%) scale(1);}
+  20%  {opacity:1;   transform:translate(-50%,-50%) scale(1.06);}
+  40%  {opacity:.6;  transform:translate(-50%,-50%) scale(.95);}
+  55%  {opacity:.95; transform:translate(-50%,-50%) scale(1.04);}
+  70%  {opacity:.7;  transform:translate(-50%,-50%) scale(.98);}
+  85%  {opacity:.9;  transform:translate(-50%,-50%) scale(1.02);}
+  100% {opacity:.7;  transform:translate(-50%,-50%) scale(1);}
+}
+@media(max-width:760px){
+  #candle-glow{
+    left:62%;top:52%;
+    width:200px;height:240px;
+  }
+}
+
 /* ══ CLICKABLE LABELS ══ */
 .spot-label{
   position:fixed;
@@ -193,6 +220,12 @@ html,body{min-height:100%;background:#0a0d1a;overflow-x:hidden;font-family:'Corm
 <!-- Room -->
 <div class="room"></div>
 
+<!-- Twinkling stars overlay -->
+<canvas id="twinkle-canvas" style="position:fixed;inset:0;z-index:5;pointer-events:none"></canvas>
+
+<!-- Candle flicker glow -->
+<div id="candle-glow"></div>
+
 <!-- Weather -->
 <div id="weather-greeting"></div>
 
@@ -220,6 +253,63 @@ html,body{min-height:100%;background:#0a0d1a;overflow-x:hidden;font-family:'Corm
     <div id="overlayContent"></div>
   </div>
 </div>
+
+<script>
+// ══ TWINKLING STARS OVERLAY ══
+(function(){
+  const canvas=document.getElementById('twinkle-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H,stars=[];
+  function isMobile(){return window.innerWidth<=760;}
+  function windowRegion(){
+    if(isMobile()){
+      return {x1:0.18,y1:0.06,x2:0.82,y2:0.52};
+    }
+    return {x1:0.34,y1:0.05,x2:0.66,y2:0.55};
+  }
+  function resize(){
+    W=canvas.width=window.innerWidth;
+    H=canvas.height=window.innerHeight;
+    createStars();
+  }
+  function createStars(){
+    stars=[];
+    const region=windowRegion();
+    const count=isMobile()?45:38;
+    for(let i=0;i<count;i++){
+      stars.push({
+        x:(region.x1+Math.random()*(region.x2-region.x1))*W,
+        y:(region.y1+Math.random()*(region.y2-region.y1))*H,
+        r:Math.random()*1.4+0.4,
+        base:Math.random()*0.4+0.2,
+        amp:Math.random()*0.5+0.3,
+        speed:Math.random()*0.004+0.0018,
+        phase:Math.random()*Math.PI*2
+      });
+    }
+  }
+  function draw(t){
+    ctx.clearRect(0,0,W,H);
+    stars.forEach(s=>{
+      const a=Math.max(0,s.base+s.amp*Math.sin(t*s.speed*1000+s.phase));
+      ctx.beginPath();
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(245,240,220,${a})`;
+      ctx.fill();
+      if(a>0.55){
+        ctx.beginPath();
+        ctx.arc(s.x,s.y,s.r*2.5,0,Math.PI*2);
+        ctx.fillStyle=`rgba(200,220,255,${(a-0.55)*0.25})`;
+        ctx.fill();
+      }
+    });
+    requestAnimationFrame(tt=>draw(tt/1000));
+  }
+  resize();
+  window.addEventListener('resize',resize);
+  requestAnimationFrame(t=>draw(t/1000));
+})();
+</script>
 
 <script>
 // ══════════════════════════════════════════
