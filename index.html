@@ -2,1201 +2,478 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Eternore — With Love For Aurora</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Eternore — For Aurora</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Dancing+Script:wght@400;600&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Dancing+Script:wght@400;600&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{min-height:100%;background:#0d0810}
+html,body{min-height:100%;background:#0a0d1a;overflow-x:hidden;font-family:'Cormorant Garamond',serif}
 
-/* ── Quill Loading Screen ── */
-#quill-screen{
-  position:fixed;inset:0;background:#0d0810;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  z-index:99999;transition:opacity 1s ease;
+/* ══ ROOM BACKGROUND ══ */
+.room{
+  position:fixed;inset:0;
+  width:100%;height:100%;
+  background-image:url('bedroom-desktop.jpg');
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
 }
-#quill-screen.fade-out{opacity:0;pointer-events:none}
-#quill-canvas{display:block}
-.quill-subtitle{
-  font-family:'Cormorant Garamond',serif;font-size:13px;
-  color:#7a6060;letter-spacing:.35em;text-transform:uppercase;
-  margin-top:20px;opacity:0;transition:opacity .8s ease;
+@media(max-width:760px){
+  .room{background-image:url('bedroom-mobile.jpg')}
 }
-.quill-subtitle.show{opacity:1}
+/* subtle vignette */
+.room::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 90% 80% at 50% 55%,transparent 40%,rgba(5,5,15,.45) 100%);
+  pointer-events:none;
+}
 
-/* ── Lock Screen ── */
-#lock-screen{
-  position:fixed;inset:0;background:#0d0810;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  z-index:9999;transition:opacity .8s ease;display:none;
+/* ══ CLICKABLE LABELS ══ */
+.spot-label{
+  position:fixed;
+  z-index:20;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  font-family:'Dancing Script',cursive;
+  font-size:clamp(18px,2.6vw,28px);
+  color:#fff2d8;
+  text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 20px rgba(0,0,0,.8);
+  white-space:nowrap;
+  padding:8px 18px;
+  background:rgba(20,10,5,.45);
+  border:1px solid rgba(255,220,150,.35);
+  border-radius:24px;
+  backdrop-filter:blur(3px);
+  transition:background .2s,transform .2s;
+  user-select:none;
 }
-#lock-screen.fade-out{opacity:0;pointer-events:none}
-.lock-rose{font-size:52px;margin-bottom:2rem;animation:pulse 3s ease-in-out infinite}
+.spot-label:hover{
+  background:rgba(40,22,10,.6);
+  transform:scale(1.05);
+}
+
+/* Desktop positions — EDIT THESE to move the labels */
+#letters-label{ left:38%; top:79%; transform:translateX(-50%); }
+#radio-label{ left:20%; top:58%; transform:translateX(-50%); }
+#letters-label:hover{ transform:translateX(-50%) scale(1.05); }
+#radio-label:hover{ transform:translateX(-50%) scale(1.05); }
+
+@media(max-width:760px){
+  #letters-label{ left:50%; top:64%; }
+  #radio-label{ left:30%; top:76%; }
+}
+
+/* ══ PASSWORD MODAL ══ */
+#pw-modal{
+  position:fixed;inset:0;z-index:9000;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(5,8,20,.88);backdrop-filter:blur(6px);padding:16px;
+}
+#pw-modal.show{display:flex}
+.pw-box{
+  background:linear-gradient(160deg,#1a1008,#0e0a06);
+  border:1px solid rgba(200,160,80,.25);
+  border-radius:6px;padding:44px 40px;text-align:center;max-width:340px;width:100%;
+  box-shadow:0 20px 60px rgba(0,0,0,.7);
+}
+.pw-rose{font-size:40px;margin-bottom:16px;animation:pulse 3s ease-in-out infinite}
 @keyframes pulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.08);opacity:1}}
-.lock-title{font-family:'Dancing Script',cursive;font-size:30px;color:#c9a0a0;margin-bottom:.5rem;letter-spacing:.05em}
-.lock-subtitle{font-family:'Cormorant Garamond',serif;font-size:13px;color:#7a6060;margin-bottom:2.5rem;letter-spacing:.2em;text-transform:uppercase}
-#password-input{
-  background:transparent;border:none;border-bottom:1px solid #4a3040;
-  color:#f0ddd0;font-family:'Cormorant Garamond',serif;
-  font-size:18px;padding:8px 16px;text-align:center;width:240px;
-  letter-spacing:.3em;outline:none;transition:border-color .3s;display:block;
-}
-#password-input::placeholder{color:#4a3040;letter-spacing:.15em;font-size:14px}
-#password-input:focus{border-color:#c9a0a0}
-#unlock-btn{
-  display:block;margin:1.75rem auto 0;
-  background:transparent;border:1px solid #c9a0a0;color:#c9a0a0;
-  font-family:'Cormorant Garamond',serif;font-size:14px;letter-spacing:.25em;text-transform:uppercase;
-  padding:11px 36px;cursor:pointer;transition:all .3s;
-}
-#unlock-btn:hover{background:#c9a0a0;color:#0d0810}
-#error-msg{color:#a05060;font-size:13px;margin-top:1.25rem;letter-spacing:.1em;opacity:0;transition:opacity .3s;text-align:center;font-family:'Cormorant Garamond',serif}
-#error-msg.show{opacity:1}
-#stars-canvas{position:fixed;inset:0;pointer-events:none;z-index:0}
+.pw-title{font-family:'Dancing Script',cursive;font-size:26px;color:#c9a0a0;margin-bottom:6px}
+.pw-sub{font-size:12px;color:#7a6060;letter-spacing:.2em;text-transform:uppercase;margin-bottom:28px}
+.pw-input{background:transparent;border:none;border-bottom:1px solid #4a3040;color:#f0ddd0;font-family:'Cormorant Garamond',serif;font-size:18px;padding:8px 16px;text-align:center;width:100%;letter-spacing:.3em;outline:none;transition:border-color .3s;display:block;margin-bottom:20px}
+.pw-input:focus{border-color:#c9a0a0}
+.pw-btn{background:transparent;border:1px solid #c9a0a0;color:#c9a0a0;font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:.25em;text-transform:uppercase;padding:10px 32px;cursor:pointer;transition:all .3s}
+.pw-btn:hover{background:#c9a0a0;color:#0d0810}
+.pw-err{color:#a05060;font-size:12px;margin-top:14px;letter-spacing:.1em;opacity:0;transition:opacity .3s}
+.pw-err.show{opacity:1}
 
-/* ── Main App ── */
-#app{display:none;opacity:0;transition:opacity 1.2s ease}
-#app.visible{display:block}
-#app.fade-in{opacity:1}
-
-.scene{
-  background:#1a120e;min-height:100vh;
-  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
-  padding:40px 16px 60px;position:relative;overflow:hidden;
-}
-.desk-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 80%,#2a1a0e 0%,#0e0a06 100%)}
-
-/* ── Realistic Candle ── */
-.candle-wrap{
-  position:absolute;top:18px;right:36px;z-index:10;pointer-events:none;
-}
-.candle-body{
-  width:14px;height:48px;
-  background:linear-gradient(to right,#e8d5a0,#f5e8c0,#e0c880,#f5e8c0);
-  border-radius:2px 2px 1px 1px;
-  position:relative;margin:0 auto;
-  box-shadow:inset -2px 0 4px rgba(0,0,0,.15);
-}
-.candle-body::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:8px;
-  background:linear-gradient(to top,rgba(210,170,60,.4),transparent);
-  border-radius:0 0 1px 1px;
-}
-.candle-wick{
-  width:2px;height:7px;
-  background:#2c1408;
-  margin:0 auto;
-  border-radius:1px 1px 0 0;
-  position:relative;
-}
-.candle-flame-wrap{
-  position:relative;width:20px;height:32px;margin:0 auto -2px;
-}
-.flame-outer{
-  position:absolute;left:50%;transform:translateX(-50%);
-  bottom:0;width:14px;height:28px;
-  background:radial-gradient(ellipse 60% 80% at 50% 90%,#ff9000,#ffcc00 40%,rgba(255,200,0,.3) 75%,transparent);
-  border-radius:50% 50% 30% 30%;
-  animation:flameOuter 150ms ease-in-out infinite alternate;
-  filter:blur(.5px);
-}
-.flame-inner{
-  position:absolute;left:50%;transform:translateX(-50%);
-  bottom:2px;width:7px;height:16px;
-  background:radial-gradient(ellipse 60% 80% at 50% 90%,#fff,#fffde0 50%,rgba(255,240,100,.6));
-  border-radius:50% 50% 30% 30%;
-  animation:flameInner 120ms ease-in-out infinite alternate;
-}
-.flame-glow{
-  position:absolute;left:50%;transform:translateX(-50%);
-  bottom:-4px;width:40px;height:40px;
-  background:radial-gradient(circle,rgba(255,160,30,.35) 0%,transparent 70%);
-  animation:flameGlow 200ms ease-in-out infinite alternate;
-}
-@keyframes flameOuter{
-  0%{transform:translateX(-50%) scaleX(1) skewX(0deg);opacity:.95}
-  25%{transform:translateX(-52%) scaleX(.92) skewX(-3deg);opacity:1}
-  50%{transform:translateX(-48%) scaleX(1.06) skewX(2deg);opacity:.9}
-  75%{transform:translateX(-51%) scaleX(.96) skewX(-1deg);opacity:.97}
-  100%{transform:translateX(-50%) scaleX(1.02) skewX(1deg);opacity:.93}
-}
-@keyframes flameInner{
-  0%{transform:translateX(-50%) scaleX(1);height:16px}
-  50%{transform:translateX(-52%) scaleX(.88);height:14px}
-  100%{transform:translateX(-48%) scaleX(1.1);height:18px}
-}
-@keyframes flameGlow{
-  0%{opacity:.7;transform:translateX(-50%) scale(1)}
-  100%{opacity:1;transform:translateX(-50%) scale(1.15)}
-}
-.candle-drip{
-  position:absolute;width:5px;background:linear-gradient(to bottom,#f5e8c0,#e8d5a0);
-  border-radius:0 0 3px 3px;left:4px;
-}
-.desk-glow{
-  position:absolute;width:600px;height:300px;
-  background:radial-gradient(ellipse,rgba(200,140,60,.07) 0%,transparent 70%);
-  top:0;left:50%;transform:translateX(-50%);pointer-events:none;
-  animation:deskGlow 3s ease-in-out infinite;
-}
-@keyframes deskGlow{
-  0%,100%{opacity:.7}50%{opacity:1}
-}
-
-.book-container{position:relative;z-index:2;width:100%;max-width:620px}
-
-/* ── Search ── */
-.search-row{display:flex;gap:8px;justify-content:center;margin-bottom:20px}
-.search-row input{
-  background:rgba(180,130,70,.1);border:1px solid rgba(180,130,70,.3);
-  color:#e8d5b0;font-family:'Cormorant Garamond',serif;font-size:14px;
-  padding:7px 14px;border-radius:1px;width:210px;outline:none;letter-spacing:.05em;
-}
-.search-row input::placeholder{color:#7a6040;font-size:13px}
-.search-row input:focus{border-color:rgba(200,160,80,.5)}
-.search-row button{
-  background:rgba(180,130,70,.15);border:1px solid rgba(180,130,70,.35);
-  color:#c8a050;font-family:'Cormorant Garamond',serif;font-size:13px;
-  letter-spacing:.12em;padding:7px 16px;border-radius:1px;cursor:pointer;transition:all .25s;
-}
-.search-row button:hover{background:rgba(180,130,70,.3)}
-.search-hint{text-align:center;font-family:'Cormorant Garamond',serif;font-size:12px;color:#7a6040;letter-spacing:.1em;margin-bottom:20px;min-height:18px;transition:color .3s}
-
-/* ── Weather greeting ── */
+/* ══ WEATHER ══ */
 #weather-greeting{
-  text-align:center;font-family:'Dancing Script',cursive;font-size:17px;
-  color:#c9a07a;letter-spacing:.04em;margin-bottom:16px;
-  min-height:24px;opacity:0;transition:opacity 1s ease;
+  position:fixed;top:14px;left:50%;transform:translateX(-50%);
+  font-family:'Dancing Script',cursive;font-size:clamp(13px,2vw,17px);
+  color:#f5e0c0;letter-spacing:.04em;z-index:25;
+  opacity:0;transition:opacity 1s;white-space:nowrap;pointer-events:none;
+  text-shadow:0 2px 10px rgba(0,0,0,.8);
 }
 #weather-greeting.show{opacity:1}
 
-/* ── Book Cover ── */
-.book{width:100%;position:relative;perspective:1600px}
-.book-cover{
-  width:100%;min-height:560px;position:relative;
-  border-radius:4px 10px 10px 4px;cursor:pointer;
-  transform-style:preserve-3d;transform-origin:left center;
-  transition:transform .9s cubic-bezier(.4,0,.15,1),box-shadow .5s;
-  box-shadow:6px 6px 0 #1a0e06,8px 8px 0 #140c04,12px 12px 20px rgba(0,0,0,.7),-2px 0 8px rgba(0,0,0,.5);
+/* ══ OVERLAY PANEL ══ */
+#overlay{
+  position:fixed;inset:0;z-index:500;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(5,3,2,.88);backdrop-filter:blur(5px);padding:16px;
 }
-/* Mobile: fade instead of flip */
-@media(max-width:560px){
-  .book-cover{transform-style:flat !important;transition:opacity .6s ease,box-shadow .5s !important}
-  .book-cover.open{transform:none !important;opacity:0 !important}
+#overlay.show{display:flex}
+.overlay-panel{
+  background:linear-gradient(170deg,#f2e4c8 0%,#ecdbb0 30%,#e8d4a8 60%,#f0e0be 100%);
+  border-radius:4px;width:100%;max-width:620px;max-height:88vh;overflow-y:auto;position:relative;
+  box-shadow:0 20px 60px rgba(0,0,0,.7);padding:40px 44px 60px;
+  scrollbar-width:thin;scrollbar-color:rgba(139,90,40,.3) transparent;
 }
-.book-cover.open{transform:rotateY(-155deg);box-shadow:2px 4px 16px rgba(0,0,0,.4)}
-.cover-front{
-  position:absolute;inset:0;
-  background:
-    repeating-linear-gradient(92deg,rgba(0,0,0,.04) 0px,rgba(0,0,0,0) 2px,rgba(255,255,255,.02) 4px,rgba(0,0,0,0) 6px),
-    repeating-linear-gradient(180deg,rgba(0,0,0,.03) 0px,rgba(0,0,0,0) 3px,rgba(255,255,255,.015) 6px,rgba(0,0,0,0) 9px),
-    linear-gradient(160deg,#6b3a1f 0%,#4a2410 30%,#3d1e0c 55%,#5c3018 80%,#4a2810 100%);
-  border-radius:4px 10px 10px 4px;border-left:12px solid #2a1206;
-  backface-visibility:hidden;overflow:hidden;
-}
-.cover-spine-shadow{position:absolute;left:0;top:0;bottom:0;width:18px;background:linear-gradient(to right,rgba(0,0,0,.5),transparent);pointer-events:none}
-.cover-border-outer{position:absolute;inset:12px;border:1px solid rgba(200,160,80,.35);border-radius:3px;pointer-events:none}
-.cover-border-inner{position:absolute;inset:18px;border:1px solid rgba(200,160,80,.2);border-radius:2px;pointer-events:none}
-.cover-corner{position:absolute;width:28px;height:28px;border-color:rgba(200,160,80,.5);border-style:solid}
-.cover-corner.tl{top:10px;left:22px;border-width:2px 0 0 2px;border-radius:2px 0 0 0}
-.cover-corner.tr{top:10px;right:10px;border-width:2px 2px 0 0;border-radius:0 2px 0 0}
-.cover-corner.bl{bottom:10px;left:22px;border-width:0 0 2px 2px;border-radius:0 0 0 2px}
-.cover-corner.br{bottom:10px;right:10px;border-width:0 2px 2px 0;border-radius:0 0 2px 0}
-.cover-center{
-  position:absolute;inset:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;text-align:center;padding:40px 28px;
-}
-.cover-ornament-top{font-size:13px;letter-spacing:.6em;color:rgba(200,160,80,.6);margin-bottom:20px}
-.cover-title{font-family:'UnifrakturMaguntia',serif;font-size:58px;color:#c8a050;line-height:1.1;margin-bottom:6px;text-shadow:0 2px 8px rgba(0,0,0,.4);letter-spacing:.04em}
-.cover-name-emboss{font-family:'Dancing Script',cursive;font-size:16px;color:rgba(200,160,80,.5);letter-spacing:.2em;margin-bottom:10px}
-.cover-rule{width:100px;height:1px;background:linear-gradient(to right,transparent,rgba(200,160,80,.5),transparent);margin:0 auto 14px}
-.cover-subtitle{font-family:'Dancing Script',cursive;font-size:20px;color:rgba(220,185,120,.7);letter-spacing:.06em;margin-bottom:32px}
-.cover-open-hint{font-family:'Cormorant Garamond',serif;font-size:11px;letter-spacing:.35em;text-transform:uppercase;color:rgba(200,160,80,.4);animation:breathe 2.8s ease-in-out infinite}
-@keyframes breathe{0%,100%{opacity:.35}50%{opacity:.8}}
-.cover-clasp{
-  position:absolute;right:-8px;top:50%;transform:translateY(-50%);
-  width:20px;height:44px;background:linear-gradient(to bottom,#c8a050,#8b6820,#c8a050);
-  border-radius:2px;box-shadow:1px 1px 4px rgba(0,0,0,.5);
-  display:flex;align-items:center;justify-content:center;
-}
-.cover-clasp::after{content:'';width:8px;height:8px;background:#2a1206;border-radius:50%;box-shadow:0 0 0 2px rgba(200,160,80,.6)}
-.cover-ribbon{
-  position:absolute;top:0;right:60px;width:14px;height:80px;
-  background:linear-gradient(to bottom,#8b1a1a,#c03030,#8b1a1a);
-  border-radius:0 0 3px 3px;box-shadow:1px 1px 4px rgba(0,0,0,.4);
-}
-.cover-ribbon::after{
-  content:'';position:absolute;bottom:-10px;left:0;
-  border-left:7px solid #c03030;border-right:7px solid #c03030;
-  border-top:10px solid #c03030;border-bottom:10px solid transparent;
-}
-.cover-back{
-  position:absolute;inset:0;
-  background:linear-gradient(160deg,#4a2410 0%,#3a1c0a 50%,#4a2410 100%);
-  border-radius:4px 10px 10px 4px;border-left:12px solid #2a1206;
-  backface-visibility:hidden;transform:rotateY(180deg);
-}
+@media(max-width:520px){.overlay-panel{padding:28px 20px 48px}}
+.overlay-panel::-webkit-scrollbar{width:4px}
+.overlay-panel::-webkit-scrollbar-thumb{background:rgba(139,90,40,.3);border-radius:2px}
+.overlay-close{position:absolute;top:14px;right:16px;background:transparent;border:none;font-family:'Cormorant Garamond',serif;font-size:13px;color:#8b6b40;letter-spacing:.15em;cursor:pointer;text-transform:uppercase;padding:4px 8px;transition:color .2s}
+.overlay-close:hover{color:#3a1e08}
 
-/* ── Pages ── */
-.page-block{display:none;width:100%}
-.page-block.visible{display:block}
-.page{
-  width:100%;
-  background:
-    repeating-linear-gradient(0deg,rgba(139,100,60,.06) 0px,rgba(139,100,60,0) 1px,rgba(255,255,255,.04) 28px,rgba(0,0,0,0) 29px),
-    linear-gradient(170deg,#f2e4c8 0%,#ecdbb0 30%,#e8d4a8 60%,#f0e0be 100%);
-  border-radius:2px 8px 8px 2px;border-left:6px solid #6b3a1f;
-  padding:48px 52px 80px;min-height:560px;position:relative;
-  box-shadow:4px 0 14px rgba(0,0,0,.3),inset 0 0 60px rgba(139,90,40,.08);
-  overflow:visible;
-}
-@media(max-width:520px){.page{padding:36px 24px 60px}}
-.page-aged-edge{position:absolute;right:0;top:0;bottom:0;width:20px;background:linear-gradient(to left,rgba(139,90,40,.15),transparent);pointer-events:none;border-radius:0 8px 8px 0}
-.page-aged-top{position:absolute;left:0;right:0;top:0;height:16px;background:linear-gradient(to bottom,rgba(139,90,40,.12),transparent);pointer-events:none}
-.page-aged-bottom{position:absolute;left:0;right:0;bottom:0;height:20px;background:linear-gradient(to top,rgba(139,90,40,.15),transparent);pointer-events:none;border-radius:0 0 8px 0}
-.ribbon-marker{
-  position:absolute;top:0;right:52px;width:12px;height:56px;
-  background:linear-gradient(to bottom,#8b1a1a,#c03030);border-radius:0 0 3px 3px;
-}
-.ribbon-marker::after{
-  content:'';position:absolute;bottom:-8px;left:0;
-  border-left:6px solid #c03030;border-right:6px solid #c03030;
-  border-top:8px solid #c03030;border-bottom:8px solid transparent;
-}
-.pg-num-left{position:absolute;bottom:24px;left:52px;font-family:'Cormorant Garamond',serif;font-size:12px;color:#8b6b40;letter-spacing:.2em}
-.pg-num-right{position:absolute;bottom:24px;right:52px;font-family:'Cormorant Garamond',serif;font-size:12px;color:#8b6b40;letter-spacing:.2em}
-
-/* ── Wax seal overlay ── */
-#wax-overlay{
-  position:fixed;inset:0;z-index:5000;
-  display:flex;align-items:center;justify-content:center;
-  pointer-events:none;opacity:0;
-}
-#wax-overlay.breaking{pointer-events:auto}
-.wax-seal-big{
-  width:120px;height:120px;border-radius:50%;
-  background:radial-gradient(circle,#a01010 0%,#6a0808 60%,#4a0404 100%);
-  border:3px solid rgba(220,100,100,.5);
-  display:flex;align-items:center;justify-content:center;
-  font-size:44px;
-  box-shadow:0 4px 24px rgba(0,0,0,.5),inset 0 2px 6px rgba(255,150,150,.2);
-  position:relative;
-  animation:none;
-}
-.wax-crack{
-  position:absolute;top:50%;left:50%;
-  width:3px;background:#6a0808;transform-origin:bottom center;
-  border-radius:2px;opacity:0;
-}
-
-/* ── Page types ── */
-.pg-cover-inner{text-align:center;padding-top:40px}
-.pg-title-fraktur{font-family:'UnifrakturMaguntia',serif;font-size:46px;color:#3a1e08;margin-bottom:6px;letter-spacing:.03em}
-.pg-cover-sub{font-family:'Dancing Script',cursive;font-size:20px;color:#6b3a1f;margin-bottom:8px}
-.pg-cover-rule{width:80px;height:1px;background:linear-gradient(to right,transparent,#a07040,transparent);margin:0 auto 20px}
-.countdown-box{
-  background:rgba(139,90,40,.08);border:1px solid rgba(139,90,40,.2);
-  border-radius:2px;padding:14px 20px;margin-bottom:24px;
-  font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:#6b4020;
-  letter-spacing:.05em;line-height:1.8;
-}
-.countdown-num{font-family:'Playfair Display',serif;font-size:22px;font-style:normal;color:#5a3010;font-weight:400}
-.pg-open-book-btn{background:transparent;border:1px solid #8b5e30;color:#5a3010;font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:.2em;text-transform:uppercase;padding:10px 28px;cursor:pointer;transition:all .3s;border-radius:1px}
-.pg-open-book-btn:hover{background:#8b5e30;color:#f2e4c8}
-.pg-section-head{font-family:'UnifrakturMaguntia',serif;font-size:30px;color:#3a1e08;text-align:center;margin-bottom:6px}
-.pg-section-rule{width:60px;height:1px;background:linear-gradient(to right,transparent,#a07040,transparent);margin:0 auto 24px}
-
-/* index */
 .idx-search-wrap{margin-bottom:14px}
-.idx-search-input{width:100%;background:rgba(139,90,40,.07);border:1px solid rgba(139,90,40,.25);color:#2c1408;font-family:'Cormorant Garamond',serif;font-size:14px;padding:7px 12px;border-radius:1px;outline:none;letter-spacing:.04em;}
+.idx-search-input{width:100%;background:rgba(139,90,40,.07);border:1px solid rgba(139,90,40,.25);color:#2c1408;font-family:'Cormorant Garamond',serif;font-size:14px;padding:7px 12px;border-radius:1px;outline:none;letter-spacing:.04em}
 .idx-search-input::placeholder{color:#a07850;font-size:13px}
 .idx-search-input:focus{border-color:rgba(139,90,40,.5)}
-.idx-list{list-style:none;scrollbar-width:thin;scrollbar-color:rgba(139,90,40,.3) transparent}
-.idx-list::-webkit-scrollbar{width:4px}.idx-list::-webkit-scrollbar-thumb{background:rgba(139,90,40,.3);border-radius:2px}
+.idx-list{list-style:none}
 .idx-entry{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(139,90,40,.15);cursor:pointer;transition:background .15s;border-radius:2px}
-.idx-entry:hover{background:rgba(139,90,40,.05)}
+.idx-entry:hover{background:rgba(139,90,40,.06)}
 .idx-entry.hidden{display:none}
 .idx-date{font-family:'Cormorant Garamond',serif;font-size:11px;color:#a07850;letter-spacing:.1em;min-width:82px;font-style:italic;flex-shrink:0}
 .idx-t{font-family:'Cormorant Garamond',serif;font-size:15px;color:#2c1408;flex:1}
 .idx-tag{font-family:'Cormorant Garamond',serif;font-size:10px;color:#c8a050;letter-spacing:.15em;text-transform:uppercase;background:rgba(200,160,80,.1);border:1px solid rgba(200,160,80,.25);padding:2px 7px;border-radius:1px;flex-shrink:0}
-/* poem date */
-.poem-date{font-family:'Cormorant Garamond',serif;font-size:11px;color:#a07850;letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px}
-/* new badge */
-.idx-new{font-size:9px;background:#8b1a1a;color:#f5e8c8;letter-spacing:.1em;padding:2px 6px;border-radius:1px;text-transform:uppercase;flex-shrink:0}
+.video-link-banner{display:flex;align-items:center;justify-content:space-between;background:rgba(139,90,40,.08);border:1px solid rgba(139,90,40,.25);border-radius:2px;padding:12px 16px;cursor:pointer;margin-bottom:16px;transition:background .2s}
+.video-link-banner:hover{background:rgba(139,90,40,.15)}
+.pg-section-head{font-family:'UnifrakturMaguntia',serif;font-size:28px;color:#3a1e08;text-align:center;margin-bottom:6px}
+.pg-section-rule{width:60px;height:1px;background:linear-gradient(to right,transparent,#a07040,transparent);margin:0 auto 20px}
 
-/* dedication */
-.dedication-wrap{padding:20px 0 0;text-align:center}
-.dedication-seal{
-  width:64px;height:64px;border-radius:50%;
-  background:radial-gradient(circle,#8b1a1a 0%,#5a0f0f 100%);
-  border:2px solid rgba(200,100,100,.4);
-  display:flex;align-items:center;justify-content:center;
-  margin:0 auto 20px;font-size:24px;
-  box-shadow:0 2px 8px rgba(0,0,0,.3),inset 0 1px 2px rgba(255,150,150,.2);
-}
-.dedication-text{
-  font-family:'Cormorant Garamond',serif;font-size:17px;font-style:italic;
-  line-height:2;color:#2c1408;
-  border-left:2px solid rgba(139,90,40,.3);
-  padding-left:20px;text-align:left;margin-top:16px;
-}
-.dedication-sig{font-family:'Dancing Script',cursive;font-size:22px;color:#6b3a1f;text-align:right;margin-top:16px}
-
-/* poem */
-.poem-roman{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:11px;letter-spacing:.5em;text-transform:uppercase;color:#a07850;margin-bottom:16px}
+.poem-back{background:transparent;border:none;font-family:'Cormorant Garamond',serif;font-size:12px;color:#8b6b40;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;margin-bottom:20px;padding:0;transition:color .2s;display:block}
+.poem-back:hover{color:#3a1e08}
+.poem-date-sm{font-family:'Cormorant Garamond',serif;font-size:11px;color:#a07850;letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px}
+.poem-roman{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:11px;letter-spacing:.5em;text-transform:uppercase;color:#a07850;margin-bottom:12px}
 .poem-title-pg{font-family:'Dancing Script',cursive;font-size:26px;color:#3a1e08;margin-bottom:18px;font-weight:400}
-.poem-body-pg{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;line-height:2.1;color:#2c1408}
+.poem-body-pg{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;line-height:2.1;color:#2c1408;white-space:pre-line}
+.poem-sig{font-family:'Dancing Script',cursive;font-size:19px;color:#8b5e30;text-align:right;margin-top:20px}
+.poem-orn{margin-top:18px;text-align:center;color:#a07850;font-size:15px;letter-spacing:.6em}
 .typewriter-line{opacity:0;animation:fadeInLine .3s ease forwards}
 @keyframes fadeInLine{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-.poem-orn{margin-top:18px;text-align:center;color:#a07850;font-size:15px;letter-spacing:.6em}
 
-/* epilogue */
-.epilogue-body{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;line-height:2.1;color:#2c1408;text-align:center;margin-top:12px}
+.photo-msg-wrap{text-align:center;padding:8px 0}
+.photo-msg-date{font-family:'Cormorant Garamond',serif;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#a07850;margin-bottom:12px}
+.photo-msg-frame{background:#fff;padding:10px 10px 32px;box-shadow:2px 3px 14px rgba(0,0,0,.18);max-width:300px;margin:0 auto 20px;transform:rotate(-1deg)}
+.photo-msg-frame img{width:100%;display:block;aspect-ratio:4/3;object-fit:cover}
+.photo-msg-text{font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;line-height:1.9;color:#2c1408;max-width:380px;margin:0 auto;border-top:1px solid rgba(139,90,40,.2);padding-top:16px}
 
-/* secret */
-.secret-wrap{text-align:center;padding:30px 0}
-.secret-symbol{font-size:42px;color:#8b1a1a;margin-bottom:20px;animation:pulse 3s ease-in-out infinite}
-.secret-title{font-family:'UnifrakturMaguntia',serif;font-size:28px;color:#3a1e08;margin-bottom:16px}
-.secret-body{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;line-height:2;color:#2c1408}
-.secret-input-row{display:flex;gap:8px;justify-content:center;margin-top:20px}
-.secret-input-row input{background:rgba(139,90,40,.08);border:1px solid rgba(139,90,40,.3);color:#3a1e08;font-family:'Cormorant Garamond',serif;font-size:14px;padding:7px 14px;border-radius:1px;width:180px;outline:none;text-align:center;letter-spacing:.2em}
-.secret-input-row input::placeholder{color:#a07850;font-size:12px}
-.secret-input-row button{background:transparent;border:1px solid #8b5e30;color:#5a3010;font-family:'Cormorant Garamond',serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;padding:7px 16px;cursor:pointer;transition:all .3s;border-radius:1px}
-.secret-input-row button:hover{background:#8b5e30;color:#f2e4c8}
-.secret-msg{font-family:'Cormorant Garamond',serif;font-size:13px;color:#8b3030;text-align:center;margin-top:10px;min-height:18px;font-style:italic}
+.video-page-wrap{text-align:center;padding:16px 0}
+.video-page-title{font-family:'Dancing Script',cursive;font-size:24px;color:#3a1e08;margin-bottom:20px}
+.video-frame-wrap{position:relative;width:100%;max-width:440px;margin:0 auto;background:#1a0e06;border:3px solid rgba(139,90,40,.35);border-radius:3px;overflow:hidden}
+.video-frame-wrap::before{content:'';display:block;padding-top:56.25%}
+.video-frame-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+.local-video-frame{width:100%;max-width:440px;margin:0 auto;border:3px solid rgba(139,90,40,.35);border-radius:3px;overflow:hidden;background:#1a0e06}
+.local-video-frame video{width:100%;display:block}
+.video-caption{font-family:'Dancing Script',cursive;font-size:17px;color:#5a3010;text-align:center;margin-top:14px}
+.local-video-message{font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;line-height:2;color:#2c1408;text-align:center;margin-top:20px}
 
-/* nav */
-.nav-bar{display:flex;align-items:center;justify-content:space-between;margin-top:18px;gap:8px;flex-wrap:wrap}
-.nav-btn{background:rgba(200,160,80,.08);border:1px solid rgba(200,160,80,.25);color:#c8a050;font-family:'Cormorant Garamond',serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:7px 14px;border-radius:1px;cursor:pointer;transition:all .25s;white-space:nowrap}
-.nav-btn:hover{background:rgba(200,160,80,.2);color:#e8d080}
-.nav-btn:disabled{opacity:.25;cursor:default}
-.nav-btn.primary{background:rgba(107,58,31,.3);border-color:rgba(139,90,40,.5);color:#e8c880}
-.nav-btn.primary:hover{background:rgba(107,58,31,.5)}
-.jump-wrap{display:flex;align-items:center;gap:6px}
-.jump-wrap input{width:50px;background:rgba(200,160,80,.08);border:1px solid rgba(200,160,80,.22);color:#e8d080;font-family:'Cormorant Garamond',serif;font-size:13px;padding:6px 8px;border-radius:1px;text-align:center;outline:none}
-.jump-wrap input:focus{border-color:rgba(200,160,80,.5)}
+.radio-panel{text-align:center;padding:40px 0}
+.radio-icon{font-size:52px;margin-bottom:20px;opacity:.7}
+.radio-title{font-family:'UnifrakturMaguntia',serif;font-size:28px;color:#3a1e08;margin-bottom:12px}
+.radio-body{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;color:#5a3820;line-height:1.9}
 
-
-
-/* ── Story ── */
-.story-wrap{padding:8px 0 0}
-.story-dropcap{float:left;font-family:'UnifrakturMaguntia',serif;font-size:72px;line-height:.8;margin:4px 10px 0 0;color:#6b3a1f;}
-.story-body{font-family:'Cormorant Garamond',serif;font-size:16px;line-height:2.1;color:#2c1408;text-align:justify;}
-.story-body p{margin-bottom:14px}
-.story-sig{font-family:'Dancing Script',cursive;font-size:20px;color:#6b3a1f;text-align:right;margin-top:18px;}
-
-/* ── Photo ── */
-.photo-page-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:420px;padding:16px 0;}
-.photo-frame{position:relative;background:#fff;padding:12px 12px 40px;box-shadow:2px 3px 14px rgba(0,0,0,.18),0 1px 3px rgba(0,0,0,.1);max-width:340px;width:100%;transform:rotate(-1deg);transition:transform .3s;}
-.photo-frame:hover{transform:rotate(0deg) scale(1.02)}
-.photo-frame.slot2{transform:rotate(1.2deg)}.photo-frame.slot3{transform:rotate(-.8deg)}.photo-frame.slot4{transform:rotate(1.5deg)}.photo-frame.slot5{transform:rotate(-.5deg)}.photo-frame.slot6{transform:rotate(.9deg)}
-.photo-inner{width:100%;aspect-ratio:4/3;background:linear-gradient(135deg,#e8d5b8 0%,#d4bfa0 50%,#c8ad8c 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;}
-.photo-inner img{width:100%;height:100%;object-fit:cover;display:block;}
-.photo-upload-hint{font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:#8b6b40;text-align:center;padding:12px;pointer-events:none;}
-.photo-upload-hint span{display:block;font-size:20px;margin-bottom:8px;opacity:.5}
-.photo-caption{font-family:'Dancing Script',cursive;font-size:17px;color:#5a3010;text-align:center;margin-top:10px;letter-spacing:.04em;}
-.photo-tape{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:50px;height:20px;background:rgba(255,230,150,.55);border:1px solid rgba(200,170,80,.3);border-radius:2px;}
-.cover-photo-wrap{position:relative;width:90px;height:90px;margin:0 auto 20px;}
-.cover-photo-frame{width:90px;height:90px;background:linear-gradient(135deg,#e8d5b8,#c8ad8c);border:3px solid rgba(200,160,80,.4);border-radius:2px;overflow:hidden;display:flex;align-items:center;justify-content:center;}
-.cover-photo-frame img{width:100%;height:100%;object-fit:cover}
-
-/* ── Video (YouTube) ── */
-.video-page-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 0 16px;}
-.video-label{font-family:'Cormorant Garamond',serif;font-size:11px;letter-spacing:.45em;text-transform:uppercase;color:#a07850;text-align:center;margin-bottom:8px;}
-.video-title{font-family:'Dancing Script',cursive;font-size:24px;color:#3a1e08;text-align:center;margin-bottom:20px;}
-.video-frame-wrap{position:relative;width:100%;max-width:440px;background:#1a0e06;border:3px solid rgba(139,90,40,.35);box-shadow:3px 4px 16px rgba(0,0,0,.25);border-radius:3px;overflow:hidden;}
-.video-frame-wrap::before{content:'';display:block;padding-top:56.25%;}
-.video-frame-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:none;}
-.video-caption{font-family:'Dancing Script',cursive;font-size:17px;color:#5a3010;text-align:center;margin-top:14px;letter-spacing:.04em;}
-.video-tape{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:60px;height:20px;background:rgba(255,230,150,.5);border:1px solid rgba(200,170,80,.3);border-radius:2px;z-index:2;}
-
-/* ── Local video ── */
-.local-video-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 0 16px;}
-.local-video-frame{position:relative;width:100%;max-width:460px;border:3px solid rgba(139,90,40,.35);box-shadow:3px 4px 16px rgba(0,0,0,.25);border-radius:3px;overflow:hidden;background:#1a0e06;}
-.local-video-frame video{width:100%;display:block;border-radius:2px;}
-.local-video-tape{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:60px;height:20px;background:rgba(255,230,150,.5);border:1px solid rgba(200,170,80,.3);border-radius:2px;z-index:2;}
-.local-video-message{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;line-height:2;color:#2c1408;text-align:center;margin-top:22px;padding:0 8px;max-width:420px;}
-
-/* ── Memory Jar ── */
-.jar-page-wrap{text-align:center;padding:8px 0 0}
-.jar-intro{font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;color:#6b4020;margin-bottom:20px;line-height:1.7}
-.jar-svg-wrap{margin:0 auto 24px;position:relative;width:120px;cursor:pointer}
-.jar-svg-wrap:hover .jar-lid{transform:translateY(-4px) rotate(-3deg)}
-.jar-lid{transition:transform .3s ease}
-.notes-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:4px}
-.note-fold{
-  width:90px;min-height:80px;
-  background:linear-gradient(135deg,#fdf6e3,#f5e8c8);
-  border:1px solid rgba(139,90,40,.25);
-  border-radius:1px 4px 4px 1px;
-  cursor:pointer;position:relative;
-  box-shadow:1px 2px 5px rgba(0,0,0,.1);
-  transition:transform .2s,box-shadow .2s;
-  display:flex;align-items:center;justify-content:center;
-  padding:8px;
-}
-.note-fold::before{
-  content:'';position:absolute;top:0;right:0;
-  width:16px;height:16px;
-  background:linear-gradient(225deg,#e8d5a0 50%,transparent 50%);
-  border-radius:0 0 0 3px;
-}
+.jar-intro{font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;color:#6b4020;margin-bottom:20px;line-height:1.7;text-align:center}
+.notes-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.note-fold{width:88px;min-height:78px;background:linear-gradient(135deg,#fdf6e3,#f5e8c8);border:1px solid rgba(139,90,40,.25);border-radius:1px 4px 4px 1px;cursor:pointer;position:relative;box-shadow:1px 2px 5px rgba(0,0,0,.1);transition:transform .2s,box-shadow .2s;display:flex;align-items:center;justify-content:center;padding:8px}
+.note-fold::before{content:'';position:absolute;top:0;right:0;width:14px;height:14px;background:linear-gradient(225deg,#e8d5a0 50%,transparent 50%);border-radius:0 0 0 3px}
 .note-fold:hover{transform:rotate(-1deg) scale(1.05);box-shadow:2px 4px 10px rgba(0,0,0,.15)}
-.note-fold.open{min-height:auto;width:100%;max-width:400px;padding:16px 20px;cursor:default;transform:none;box-shadow:2px 4px 12px rgba(0,0,0,.12)}
-.note-icon{font-size:22px;opacity:.6}
+.note-fold.open{min-height:auto;width:100%;max-width:400px;padding:14px 18px;cursor:default;transform:none;box-shadow:2px 4px 12px rgba(0,0,0,.12)}
+.note-icon{font-size:20px;opacity:.6}
 .note-fold.open .note-icon{display:none}
-.note-text{
-  font-family:'Dancing Script',cursive;font-size:15px;color:#3a1e08;
-  line-height:1.6;text-align:center;display:none;
-}
+.note-text{font-family:'Dancing Script',cursive;font-size:15px;color:#3a1e08;line-height:1.6;text-align:center;display:none}
 .note-fold.open .note-text{display:block}
 .note-label{font-family:'Cormorant Garamond',serif;font-size:11px;color:#a07850;font-style:italic;margin-top:4px;text-align:center;display:none}
 .note-fold.open .note-label{display:block}
 .note-close{font-family:'Cormorant Garamond',serif;font-size:11px;color:#c09060;cursor:pointer;margin-top:8px;letter-spacing:.1em;display:none}
 .note-fold.open .note-close{display:block}
 
+.story-dropcap{float:left;font-family:'UnifrakturMaguntia',serif;font-size:68px;line-height:.8;margin:4px 8px 0 0;color:#6b3a1f}
+.story-body{font-family:'Cormorant Garamond',serif;font-size:15px;line-height:2.1;color:#2c1408;text-align:justify}
+.story-body p{margin-bottom:12px}
+.story-sig{font-family:'Dancing Script',cursive;font-size:19px;color:#6b3a1f;text-align:right;margin-top:16px}
 </style>
 </head>
 <body>
 
-<canvas id="stars-canvas"></canvas>
+<!-- Room -->
+<div class="room"></div>
 
-<!-- Wax Seal Overlay -->
-<div id="wax-overlay">
-  <div class="wax-seal-big" id="waxSealBig">♥</div>
-</div>
+<!-- Weather -->
+<div id="weather-greeting"></div>
 
-<!-- Quill Loading Screen -->
-<div id="quill-screen">
-  <canvas id="quill-canvas" width="320" height="180"></canvas>
-  <div class="quill-subtitle" id="quillSub">a book written with love</div>
-</div>
+<!-- Clickable labels -->
+<div class="spot-label" id="letters-label" onclick="requestOpen('letters')">Read letters</div>
+<div class="spot-label" id="radio-label" onclick="requestOpen('radio')">Listen to Audio</div>
 
-<!-- Lock Screen -->
-<div id="lock-screen">
-  <div class="lock-rose">🌹</div>
-  <div class="lock-title">For Aurora, with love</div>
-  <div class="lock-subtitle">A secret garden awaits</div>
-  <input type="password" id="password-input" placeholder="whisper the password..." autocomplete="off" />
-  <button id="unlock-btn" onclick="tryUnlock()">Enter ✦</button>
-  <div id="error-msg">That's not quite right, my love…</div>
-</div>
-
-<!-- Main App -->
-<div id="app">
-<div class="scene">
-  <div class="desk-bg"></div>
-  <div class="desk-glow"></div>
-
-  <!-- Realistic Candle -->
-  <div class="candle-wrap">
-    <div class="candle-flame-wrap">
-      <div class="flame-glow"></div>
-      <div class="flame-outer"></div>
-      <div class="flame-inner"></div>
-    </div>
-    <div class="candle-wick"></div>
-    <div class="candle-body">
-      <div class="candle-drip" style="height:12px;top:-4px;left:3px"></div>
-      <div class="candle-drip" style="height:7px;top:-2px;left:9px"></div>
-    </div>
-  </div>
-
-  <div class="book-container">
-    <div id="weather-greeting"></div>
-
-    <div class="search-row">
-      <input type="text" id="searchInput" placeholder="Search poems or keywords..." />
-      <button onclick="doSearch()">Search</button>
-    </div>
-    <div class="search-hint" id="searchHint">Type a poem title or keyword to jump to a page</div>
-
-    <div class="book">
-      <div class="book-cover" id="bookCover" onclick="openBook()">
-        <div class="cover-front">
-          <div class="cover-spine-shadow"></div>
-          <div class="cover-border-outer"></div>
-          <div class="cover-border-inner"></div>
-          <div class="cover-corner tl"></div><div class="cover-corner tr"></div>
-          <div class="cover-corner bl"></div><div class="cover-corner br"></div>
-          <div class="cover-ribbon"></div>
-          <div class="cover-center">
-            <div class="cover-ornament-top">— ✦ —</div>
-            <div class="cover-title">Eternore</div>
-            <div class="cover-name-emboss">A U R O R A</div>
-            <div class="cover-rule"></div>
-            <div class="cover-subtitle">With Love For Aurora</div>
-            <div class="cover-open-hint">open to read</div>
-          </div>
-          <div class="cover-clasp"></div>
-        </div>
-        <div class="cover-back"></div>
-      </div>
-
-      <div class="page-block" id="pageBlock">
-        <div class="page" id="currentPage" style="position:relative">
-        </div>
-      </div>
-    </div>
-
-    <div class="nav-bar" id="navBar"></div>
+<!-- Password Modal -->
+<div id="pw-modal" onclick="if(event.target===this)closePwModal()">
+  <div class="pw-box">
+    <div class="pw-rose">🌹</div>
+    <div class="pw-title">For Aurora, with love</div>
+    <div class="pw-sub">a secret garden awaits</div>
+    <input type="password" class="pw-input" id="pw-input" placeholder="whisper the password..." autocomplete="off"/>
+    <button class="pw-btn" onclick="submitPw()">Enter ✦</button>
+    <div class="pw-err" id="pw-err">That's not quite right, my love…</div>
+    <div onclick="closePwModal()" style="margin-top:22px;font-family:'Cormorant Garamond',serif;font-size:12px;color:#7a6060;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:color .2s" onmouseover="this.style.color='#c9a0a0'" onmouseout="this.style.color='#7a6060'">‹ back to room</div>
   </div>
 </div>
+
+<!-- Overlay Panel -->
+<div id="overlay" onclick="handleOverlayClick(event)">
+  <div class="overlay-panel" id="overlayPanel">
+    <button class="overlay-close" onclick="closeOverlay()">✕ close</button>
+    <div id="overlayContent"></div>
+  </div>
 </div>
 
 <script>
 // ══════════════════════════════════════════
-// QUILL LOADING SCREEN
+// CONTENT
 // ══════════════════════════════════════════
-(function(){
-  const qc = document.getElementById('quill-canvas');
-  const qx = qc.getContext('2d');
-  const W = qc.width, H = qc.height;
-  const text = 'Eternore';
-  const font = "italic 52px 'UnifrakturMaguntia', serif";
-
-  // Measure text once fonts load
-  let textWidth = 200;
-  document.fonts.ready.then(() => {
-    qx.font = font;
-    textWidth = qx.measureText(text).width;
-  });
-
-  const startX = (W - 200) / 2;
-  const textY = H / 2 + 18;
-  let progress = 0; // 0..1
-  let quillAngle = 0;
-  let done = false;
-  let subShown = false;
-
-  function easeInOut(t){ return t < .5 ? 2*t*t : -1+(4-2*t)*t; }
-
-  function drawQuill(px, py, angle){
-    qx.save();
-    qx.translate(px, py);
-    qx.rotate(angle - Math.PI * 0.15);
-    // feather body
-    qx.beginPath();
-    qx.moveTo(0,0);
-    qx.bezierCurveTo(-6,-12,-4,-28,0,-44);
-    qx.bezierCurveTo(4,-28,6,-12,0,0);
-    qx.fillStyle = 'rgba(220,195,140,0.85)';
-    qx.fill();
-    // quill tip
-    qx.beginPath();
-    qx.moveTo(0,0);
-    qx.lineTo(-2,-8);
-    qx.lineTo(0,-6);
-    qx.lineTo(2,-8);
-    qx.closePath();
-    qx.fillStyle = '#c8a050';
-    qx.fill();
-    // feather lines
-    for(let i=1;i<=5;i++){
-      const fy = -i*7;
-      qx.beginPath();
-      qx.moveTo(0,fy);
-      qx.lineTo(-10+i,fy-4);
-      qx.strokeStyle='rgba(180,150,90,0.4)';
-      qx.lineWidth=.8;
-      qx.stroke();
-      qx.beginPath();
-      qx.moveTo(0,fy);
-      qx.lineTo(10-i,fy-4);
-      qx.stroke();
-    }
-    qx.restore();
-  }
-
-  function frame(){
-    if(done) return;
-    qx.clearRect(0,0,W,H);
-
-    // Animate progress
-    progress = Math.min(progress + 0.008, 1);
-    const ep = easeInOut(progress);
-
-    // Draw written text so far (clip)
-    qx.save();
-    qx.font = font;
-    qx.fillStyle = '#c8a050';
-    qx.textBaseline = 'alphabetic';
-    const totalW = qx.measureText(text).width || textWidth;
-    const clipW = ep * totalW;
-    qx.beginPath();
-    qx.rect(startX, 0, clipW, H);
-    qx.clip();
-    qx.fillText(text, startX, textY);
-    qx.restore();
-
-    // Subtle ink glow at writing tip
-    const tipX = startX + ep * (qx.measureText(text).width || textWidth);
-    const grad = qx.createRadialGradient(tipX, textY-10, 0, tipX, textY-10, 18);
-    grad.addColorStop(0,'rgba(200,160,60,0.18)');
-    grad.addColorStop(1,'transparent');
-    qx.fillStyle = grad;
-    qx.fillRect(tipX-18, textY-28, 36, 36);
-
-    // Quill wobble
-    quillAngle = Math.sin(Date.now()*0.006)*0.12;
-    drawQuill(tipX, textY - 14, quillAngle);
-
-    if(progress >= 1){
-      done = true;
-      if(!subShown){
-        subShown = true;
-        setTimeout(()=>{
-          document.getElementById('quillSub').classList.add('show');
-        }, 300);
-      }
-      setTimeout(showLockScreen, 1400);
-      return;
-    }
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
-})();
-
-function showLockScreen(){
-  const qs = document.getElementById('quill-screen');
-  qs.classList.add('fade-out');
-  setTimeout(()=>{
-    qs.style.display='none';
-    const ls = document.getElementById('lock-screen');
-    ls.style.display='flex';
-    requestAnimationFrame(()=> requestAnimationFrame(()=> ls.style.opacity='1'));
-  }, 1000);
-}
-
-// ══════════════════════════════════════════
-// WEATHER GREETING
-// ══════════════════════════════════════════
-async function fetchWeatherGreeting(){
-  const greetEl = document.getElementById('weather-greeting');
-  try {
-    // Venice, Italy lat/lon
-    const lat = 45.4408, lon = 12.3155;
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=precipitation_probability&forecast_days=1`;
-    const res = await fetch(url);
-    const data = await res.json();
-    const code = data.current_weather?.weathercode ?? -1;
-    const hour = new Date().getHours();
-
-    let msg = '';
-    // Weather code groups: https://open-meteo.com/en/docs
-    if(code === 0){ msg = hour < 12 ? '☀️ Good morning, Aurora — the sun is shining on Venice today' : '☀️ The Venice sky is clear today, just like your smile'; }
-    else if(code <= 2){ msg = '🌤 A partly cloudy day in Venice — perfect for a walk along the canals'; }
-    else if(code === 3){ msg = '☁️ Overcast skies in Venice today — cosy up with this book ♥'; }
-    else if(code <= 49){ msg = '🌫 A misty day in Venice — I hope you are warm wherever you are'; }
-    else if(code <= 67){ msg = '🌧 It is raining in Venice right now — I wish I were there to hold your hand'; }
-    else if(code <= 77){ msg = '❄️ Snow in Venice today — I hope you are somewhere warm and cosy'; }
-    else if(code <= 82){ msg = '🌦 Rain showers over Venice — sending you warmth from wherever I am'; }
-    else { msg = '⛈ A stormy day in Venice — stay safe, my love ♥'; }
-
-    if(msg){
-      greetEl.textContent = msg;
-      setTimeout(()=> greetEl.classList.add('show'), 300);
-    }
-  } catch(e){
-    // Silently fail — weather is a nice bonus
-  }
-}
-
-// ══════════════════════════════════════════
-// WAX SEAL BREAK ANIMATION
-// ══════════════════════════════════════════
-function playWaxSealBreak(cb){
-  const overlay = document.getElementById('wax-overlay');
-  const seal = document.getElementById('waxSealBig');
-  overlay.style.opacity = '1';
-  overlay.style.transition = 'opacity .4s ease';
-  overlay.classList.add('breaking');
-
-  // Add cracks
-  seal.innerHTML = '♥';
-  const angles = [0, 72, 144, 216, 288];
-  angles.forEach(a => {
-    const crack = document.createElement('div');
-    crack.className = 'wax-crack';
-    crack.style.cssText = `height:${30+Math.random()*30}px;transform:rotate(${a}deg) translateX(-50%);left:50%;top:50%;`;
-    seal.appendChild(crack);
-  });
-
-  // Animate cracks appearing
-  setTimeout(()=>{
-    seal.querySelectorAll('.wax-crack').forEach((c,i)=>{
-      setTimeout(()=>{ c.style.opacity='0.5'; c.style.transition='opacity .2s'; },i*60);
-    });
-  }, 200);
-
-  // Shatter
-  setTimeout(()=>{
-    seal.style.transition = 'transform .5s ease, opacity .5s ease';
-    seal.style.transform = 'scale(1.3)';
-    seal.style.opacity = '0';
-    overlay.style.opacity = '0';
-  }, 700);
-
-  setTimeout(()=>{
-    overlay.classList.remove('breaking');
-    seal.style.transform = '';
-    seal.style.opacity = '';
-    seal.innerHTML = '♥';
-    if(cb) cb();
-  }, 1300);
-}
-
-// ══════════════════════════════════════════
-// PAGES
-// ══════════════════════════════════════════
-const MEMORIES = [
-  { icon:'🌙', text:'That first night we talked until the whole world went quiet around us', label:'the beginning' },
-  { icon:'☕', text:'You stealing sips of my coffee and pretending you didn\'t', label:'mornings' },
-  { icon:'🐱', text:'The way you talk to cats like they understand every word — they do', label:'a theory' },
-  { icon:'🗺', text:'Getting completely lost together and somehow that being the best part', label:'adventures' },
-  { icon:'😂', text:'That thing we laughed about so hard we couldn\'t breathe — you know the one', label:'our secret' },
-  { icon:'🌧', text:'You tucking yourself into my arm on a rainy afternoon, not saying anything, just being there', label:'rainy days' },
-  { icon:'✨', text:'The exact moment I realised I was completely done for', label:'the moment' },
-  { icon:'🍕', text:'Our very strong opinions about which pizza topping is objectively wrong', label:'important debates' },
-  { icon:'💌', text:'Every voice note you send me — I save them all', label:'your voice' },
-  { icon:'🌅', text:'Watching a sunset together and knowing this is exactly where I am supposed to be', label:'home' },
+const MEMORIES=[
+  {icon:'🌙',text:'That first night we talked until the whole world went quiet around us',label:'the beginning'},
+  {icon:'☕',text:"You stealing sips of my coffee and pretending you didn't",label:'mornings'},
+  {icon:'🐱',text:'The way you talk to cats like they understand every word — they do',label:'a theory'},
+  {icon:'🗺',text:'Getting completely lost together and somehow that being the best part',label:'adventures'},
+  {icon:'😂',text:"That thing we laughed about so hard we couldn't breathe — you know the one",label:'our secret'},
+  {icon:'🌧',text:'You tucking yourself into my arm on a rainy afternoon, not saying anything, just being there',label:'rainy days'},
+  {icon:'✨',text:'The exact moment I realised I was completely done for',label:'the moment'},
+  {icon:'🍕',text:'Our very strong opinions about which pizza topping is objectively wrong',label:'important debates'},
+  {icon:'💌',text:'Every voice note you send me — I save them all',label:'your voice'},
+  {icon:'🌅',text:'Watching a sunset together and knowing this is exactly where I am supposed to be',label:'home'},
 ];
 
-const PAGES = [
-  { type: 'index' },
-  { type: 'aurora-video' },
-  { type: 'poem', title: 'Couldn\'t Sleep Tonight', date: '29 Aug 2026', body: `Couldn't sleep tonight\nand no, it's not the wine...\nJust been thinking about you all along the time\nI haven't written a poem\nfor quite a few weeks\nSo when you wake up and read this, don't be under stress\nRemember what I always told you..\ntake a deep breath..\nI think you deserve to know...\nsome nights I think about\nhow easy it was\nhours of talking about nothing,\nand it never once felt like drifting apart\n\nYou're probably asleep right now..\nOr out somewhere partying\nEither way ..I hope it's a good night...\nwherever you are.\n\nI know what the world tells\nthis is supposed to go\nThe world never likes to see people get together\nThat's the reality of people\nthey just want to break beautiful feathers\nthey say..\nLet it fade. Call it a chapter.\nClose the book gently.\n\nBut...\nThat's not how I'm built.\nI stood four hours at a door\neveryone said wouldn't open.\nIt opened.\nDoors do that\nfor men who don't leave.\n\nI've traveled hundreds of miles\njust to see you smile\nto watch your eyes light up\nwhen I'm standing at your door for you\n\nThe days when I used to drop you off at the airport\nYou gave me a hug\nand said\n'I don't want to leave'\nI always had tears in my eyes\nbut I never let them drop\nbecause I'll keep you with me\n\nTogether we're not weak\nsome men let go\nbecause holding on gets heavy\nI carry heavy things\nQuiet doesn't scare me\nDistance never did.\n\nI never gave up once in my life\nThen how can I give up on you?\non someone I think about as my best friend...\nSomething inside of me, just doesn't let me give up\nIt just tells me\nthis is not how it ends\n\n🌹` },
-  { type: 'photo-message', src: '30august.jpg', date: '30 Aug 2026', message: 'If I have to break mountains or cross the oceans, I will not give up on you. Maybe you have never seen someone do this before, or maybe in movies, but I will do it. I love you. 30th August 2026 - Pranav.' },
-  { type: 'photo', slot: 1, src: 'photo3.jpg', caption: 'Us ♥' },
-  { type: 'story' },
-  { type: 'photo', slot: 2, src: 'photo5.jpg', caption: 'Every moment with you ♥' },
-  { type: 'poem', title: 'The Way You Look at Me', body: `There's a moment just before you smile,\nwhen your eyes soften at the corners —\na tiny universe deciding\nwhether to let me in.\n\nIt always does.\n\nAnd I fall, quietly,\nthe way a leaf falls in October —\nnot rushing, not afraid,\njust turning gold\nin the light of you.` },
-  { type: 'photo', slot: 3, src: 'photo4.jpg', caption: 'My favourite person ♥' },
-  { type: 'poem', title: 'Morning', body: `I have a theory\nthat mornings were invented\njust so I could watch you\nreach for your coffee,\n\nstill half-dreaming,\nyour hair forgetting what shape it is —\nthe most honest version of you,\nand the one I love the most.` },
-  { type: 'photo', slot: 4, src: 'photo6.jpg', caption: 'Always finding my way back to you ♥' },
-  { type: 'poem', title: 'Distance', body: `The miles between us\nare just numbers.\nWhat matters is this:\n\nthat somewhere across the sky\nyou are laughing at something,\nliving in your wonderful way,\n\nand when I think of you\nevery corner of me\nbecomes a little warmer.` },
-  { type: 'photo', slot: 5, src: 'photo2.jpg', caption: 'The small moments are the best ones ♥' },
-  { type: 'poem', title: 'Small Things', body: `I love you in the small things:\nthe way you remember details,\nthe sound of you humming without knowing it,\nhow you hold a thought\nbefore you say it —\ncareful, like it matters.\n\nIt does.\nYou do.\n\nMore than all the grand gestures\nI never quite know how to make.` },
-  { type: 'photo', slot: 6, src: 'photo1.jpg', caption: 'My Aurora ♥' },
-  { type: 'poem', title: 'Aurora', body: `You were named for the light\nthat breaks at the edge of night —\nthe sky's way of saying:\nsomething beautiful is coming.\n\nIt was right.\n\nEvery room you enter\nrearranges itself around you,\nand I have been the lucky one\nstanding closest to the glow.` },
-  { type: 'memory-jar' },
-  { type: 'epilogue' },
-  { type: 'video', videoId: '4JNtAtGGNRU', caption: 'A song, just for you ♥' },
+const PAGES=[
+  {type:'index'},
+  {type:'aurora-video'},
+  {type:'photo-message',src:'30august.jpg',date:'30 Aug 2026',message:'If I have to break mountains or cross the oceans, I will not give up on you. Maybe you have never seen someone do this before, or maybe in movies, but I will do it. I love you. 30th August 2026 - Pranav.'},
+  {type:'poem',title:"Couldn't Sleep Tonight",date:'29 Aug 2026',body:`Couldn't sleep tonight\nand no, it's not the wine...\nJust been thinking about you all along the time\nI haven't written a poem\nfor quite a few weeks\nSo when you wake up and read this, don't be under stress\nRemember what I always told you..\ntake a deep breath..\nI think you deserve to know...\nsome nights I think about\nhow easy it was\nhours of talking about nothing,\nand it never once felt like drifting apart\n\nYou're probably asleep right now..\nOr out somewhere partying\nEither way ..I hope it's a good night...\nwherever you are.\n\nI know what the world tells\nthis is supposed to go\nThe world never likes to see people get together\nThat's the reality of people\nthey just want to break beautiful feathers\nthey say..\nLet it fade. Call it a chapter.\nClose the book gently.\n\nBut...\nThat's not how I'm built.\nI stood four hours at a door\neveryone said wouldn't open.\nIt opened.\nDoors do that\nfor men who don't leave.\n\nI've traveled hundreds of miles\njust to see you smile\nto watch your eyes light up\nwhen I'm standing at your door for you\n\nThe days when I used to drop you off at the airport\nYou gave me a hug\nand said\n'I don't want to leave'\nI always had tears in my eyes\nbut I never let them drop\nbecause I'll keep you with me\n\nTogether we're not weak\nsome men let go\nbecause holding on gets heavy\nI carry heavy things\nQuiet doesn't scare me\nDistance never did.\n\nI never gave up once in my life\nThen how can I give up on you?\non someone I think about as my best friend...\nSomething inside of me, just doesn't let me give up\nIt just tells me\nthis is not how it ends\n\n🌹`},
+  {type:'photo',slot:1,src:'photo3.jpg',caption:'Us ♥'},
+  {type:'story'},
+  {type:'photo',slot:2,src:'photo5.jpg',caption:'Every moment with you ♥'},
+  {type:'poem',title:'The Way You Look at Me',body:`There's a moment just before you smile,\nwhen your eyes soften at the corners —\na tiny universe deciding\nwhether to let me in.\n\nIt always does.\n\nAnd I fall, quietly,\nthe way a leaf falls in October —\nnot rushing, not afraid,\njust turning gold\nin the light of you.`},
+  {type:'photo',slot:3,src:'photo4.jpg',caption:'My favourite person ♥'},
+  {type:'poem',title:'Morning',body:`I have a theory\nthat mornings were invented\njust so I could watch you\nreach for your coffee,\n\nstill half-dreaming,\nyour hair forgetting what shape it is —\nthe most honest version of you,\nand the one I love the most.`},
+  {type:'photo',slot:4,src:'photo6.jpg',caption:'Always finding my way back to you ♥'},
+  {type:'poem',title:'Distance',body:`The miles between us\nare just numbers.\nWhat matters is this:\n\nthat somewhere across the sky\nyou are laughing at something,\nliving in your wonderful way,\n\nand when I think of you\nevery corner of me\nbecomes a little warmer.`},
+  {type:'photo',slot:5,src:'photo2.jpg',caption:'The small moments are the best ones ♥'},
+  {type:'poem',title:'Small Things',body:`I love you in the small things:\nthe way you remember details,\nthe sound of you humming without knowing it,\nhow you hold a thought\nbefore you say it —\ncareful, like it matters.\n\nIt does.\nYou do.\n\nMore than all the grand gestures\nI never quite know how to make.`},
+  {type:'photo',slot:6,src:'photo1.jpg',caption:'My Aurora ♥'},
+  {type:'poem',title:'Aurora',body:`You were named for the light\nthat breaks at the edge of night —\nthe sky's way of saying:\nsomething beautiful is coming.\n\nIt was right.\n\nEvery room you enter\nrearranges itself around you,\nand I have been the lucky one\nstanding closest to the glow.`},
+  {type:'memory-jar'},
+  {type:'epilogue'},
+  {type:'video',videoId:'4JNtAtGGNRU',caption:'A song, just for you ♥'},
 ];
 
-let cur = 0, animating = false, bookOpen = false;
-let countdownTickInterval = null;
-
-// ── Countdown ──
-function getCountdown(){
-  const target = new Date('2026-04-24T22:00:00+02:00');
-  const diff = target - new Date();
-  if(diff<=0) return {days:0,hours:0,minutes:0,seconds:0,passed:true};
-  return {
-    days:Math.floor(diff/86400000),
-    hours:Math.floor(diff%86400000/3600000),
-    minutes:Math.floor(diff%3600000/60000),
-    seconds:Math.floor(diff%60000/1000),
-    passed:false
-  };
-}
-function startCountdownTick(){
-  clearInterval(countdownTickInterval);
-  countdownTickInterval = setInterval(()=>{
-    const cd=getCountdown();
-    const s=document.getElementById('cdSecs');
-    if(!s){clearInterval(countdownTickInterval);return;}
-    if(cd.passed){clearInterval(countdownTickInterval);const b=document.getElementById('countdownBox');if(b)b.innerHTML=`<span style="font-family:'Dancing Script',cursive;font-size:20px;color:#5a3010">The wait is over ♥</span>`;return;}
-    ['Days','Hours','Mins','Secs'].forEach((k,i)=>{
-      const el=document.getElementById('cd'+k);
-      if(el) el.textContent=[cd.days,cd.hours,cd.minutes,cd.seconds][i];
-    });
-  },1000);
+// ══ WEATHER ══
+async function fetchWeather(){
+  const el=document.getElementById('weather-greeting');
+  try{
+    const res=await fetch('https://api.open-meteo.com/v1/forecast?latitude=45.9667&longitude=12.7667&current_weather=true&forecast_days=1');
+    const d=await res.json();
+    const code=d.current_weather?.weathercode??-1;
+    const hour=new Date().getHours();
+    let msg='';
+    if(code===0){msg=hour<12?'☀️ Good morning, Aurora — clear skies today':'☀️ Clear skies today, just like your smile';}
+    else if(code<=2){msg='🌤 Partly cloudy — perfect for a cosy afternoon ♥';}
+    else if(code===3){msg='☁️ Overcast skies — come read something I wrote for you';}
+    else if(code<=49){msg='🌫 Misty outside — I hope you are somewhere warm';}
+    else if(code<=67){msg='🌧 It is raining — I wish I were there to hold your hand';}
+    else if(code<=77){msg='❄️ Cold outside — stay warm, my love ♥';}
+    else{msg='⛈ Stormy skies — stay safe, Aurora ♥';}
+    if(msg){el.textContent=msg;setTimeout(()=>el.classList.add('show'),600);}
+  }catch(e){}
 }
 
-// ── Stars ──
-const starsCanvas = document.getElementById('stars-canvas');
-const sCtx = starsCanvas.getContext('2d');
-let stars=[];
-function resizeCanvas(){starsCanvas.width=window.innerWidth;starsCanvas.height=window.innerHeight;}
-function createStars(){stars=[];for(let i=0;i<150;i++)stars.push({x:Math.random()*starsCanvas.width,y:Math.random()*starsCanvas.height,r:Math.random()*1.3+.2,alpha:Math.random()*.5+.1,speed:Math.random()*.003+.001,phase:Math.random()*Math.PI*2});}
-function drawStars(t){sCtx.clearRect(0,0,starsCanvas.width,starsCanvas.height);stars.forEach(s=>{const a=s.alpha*(.6+.4*Math.sin(t*s.speed*1000+s.phase));sCtx.beginPath();sCtx.arc(s.x,s.y,s.r,0,Math.PI*2);sCtx.fillStyle=`rgba(240,221,208,${a})`;sCtx.fill();});requestAnimationFrame(t=>drawStars(t/1000));}
-resizeCanvas();createStars();requestAnimationFrame(t=>drawStars(t/1000));
-window.addEventListener('resize',()=>{resizeCanvas();createStars();});
-
-// ── Meow ──
-// ── Lock ──
-// ── Discord Webhook Ping ──
+// ══ DISCORD ══
 async function pingDiscord(){
-  const WEBHOOK_URL = 'https://discordapp.com/api/webhooks/1543432207031468062/ZuYGUDy0h7QY_BV3rQpM6bqMzibNPhi9tEC6YbbL3BrSGZXUfW9W9MPktPQdiQvq-CJ8';
-  try {
-    const geo = await fetch('https://ipapi.co/json/').then(r=>r.json());
-    const city = geo.city || 'Unknown city';
-    const country = geo.country_name || 'Unknown country';
-    const region = geo.region || '';
-    const time = new Date().toLocaleString('en-GB', {
-      timeZone: geo.timezone || 'UTC',
-      dateStyle: 'full',
-      timeStyle: 'short'
-    });
-    await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        embeds: [{
-          title: '🌹 Eternore was opened',
-          color: 0xc9a0a0,
-          fields: [
-            { name: '📍 Location', value: `${city}${region ? ', ' + region : ''}, ${country}`, inline: true },
-            { name: '🕐 Time', value: time, inline: true },
-          ],
-          footer: { text: 'She found it ♥' }
-        }]
-      })
-    });
-  } catch(e) { /* fail silently */ }
+  const W='https://discordapp.com/api/webhooks/1543432207031468062/ZuYGUDy0h7QY_BV3rQpM6bqMzibNPhi9tEC6YbbL3BrSGZXUfW9W9MPktPQdiQvq-CJ8';
+  try{
+    const geo=await fetch('https://ipapi.co/json/').then(r=>r.json());
+    const city=geo.city||'Unknown',country=geo.country_name||'Unknown',region=geo.region||'';
+    const time=new Date().toLocaleString('en-GB',{timeZone:geo.timezone||'UTC',dateStyle:'full',timeStyle:'short'});
+    await fetch(W,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({embeds:[{title:'🌹 Eternore was opened',color:0xc9a0a0,fields:[{name:'📍 Location',value:`${city}${region?', '+region:''}, ${country}`,inline:true},{name:'🕐 Time',value:time,inline:true}],footer:{text:'She found it ♥'}}]})});
+  }catch(e){}
 }
 
-function tryUnlock(){
-  const val=document.getElementById('password-input').value.trim().toLowerCase().replace(/\s/g,'');
+// ══ PASSWORD ══
+let unlocked=false;
+let pendingAction=null;
+function requestOpen(action){
+  if(unlocked){doOpen(action);return;}
+  pendingAction=action;
+  document.getElementById('pw-input').value='';
+  document.getElementById('pw-err').classList.remove('show');
+  document.getElementById('pw-modal').classList.add('show');
+  setTimeout(()=>document.getElementById('pw-input').focus(),100);
+}
+function closePwModal(){
+  document.getElementById('pw-modal').classList.remove('show');
+  pendingAction=null;
+}
+function submitPw(){
+  const val=document.getElementById('pw-input').value.trim().replace(/\s/g,'');
   if(val==='1128'){
-    const ls=document.getElementById('lock-screen');
-    ls.classList.add('fade-out');
-    setTimeout(()=>{
-      ls.style.display='none';
-      const app=document.getElementById('app');
-      app.style.display='block';
-      requestAnimationFrame(()=>requestAnimationFrame(()=>app.classList.add('visible','fade-in')));
-      fetchWeatherGreeting();
-      pingDiscord();
-    },800);
-  } else {
-    const err=document.getElementById('error-msg');
+    unlocked=true;
+    document.getElementById('pw-modal').classList.remove('show');
+    fetchWeather();pingDiscord();
+    if(pendingAction)doOpen(pendingAction);
+    pendingAction=null;
+  }else{
+    const err=document.getElementById('pw-err');
     err.classList.add('show');setTimeout(()=>err.classList.remove('show'),2500);
-    document.getElementById('password-input').value='';
+    document.getElementById('pw-input').value='';
   }
 }
-document.getElementById('password-input').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock();});
+document.getElementById('pw-input').addEventListener('keydown',e=>{if(e.key==='Enter')submitPw();});
 
-// ── Helpers ──
+// ══ OVERLAY ══
+function closeOverlay(){document.getElementById('overlay').classList.remove('show');document.getElementById('overlayContent').innerHTML='';}
+function handleOverlayClick(e){if(e.target===document.getElementById('overlay'))closeOverlay();}
+function doOpen(action){if(action==='letters')openLetters();else if(action==='radio')openRadio();}
+
+// ══ HELPERS ══
 function toRoman(n){const v=[1000,900,500,400,100,90,50,40,10,9,5,4,1],s=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];let r='';for(let i=0;i<v.length;i++)while(n>=v[i]){r+=s[i];n-=v[i];}return r;}
-const isMobile = ()=> window.innerWidth <= 560;
+function filterIndex(q){const term=q.trim().toLowerCase();document.querySelectorAll('.idx-entry').forEach(li=>{const hay=li.dataset.search||'';li.classList.toggle('hidden',term.length>0&&!hay.includes(term));});}
+function toggleNote(el){const isOpen=el.classList.contains('open');document.querySelectorAll('.note-fold.open').forEach(n=>n.classList.remove('open'));if(!isOpen)el.classList.add('open');}
 
-// ── Open Book ──
-function openBook(){
-  if(bookOpen) return; bookOpen=true;
-  const cover=document.getElementById('bookCover');
-  cover.classList.add('open');
-  const delay = isMobile() ? 650 : 850;
-  setTimeout(()=>{
-    cover.style.display='none';
-    document.getElementById('pageBlock').classList.add('visible');
-    renderPage(0,document.getElementById('currentPage'));
-    renderNav();
-  },delay);
+// ══ LETTERS / INDEX ══
+function openLetters(){
+  const labels={story:'How It Began','memory-jar':'Memory Jar',video:'A Song For You',epilogue:'Epilogue','aurora-video':'A Video For You','photo-message':'30th August'};
+  const typeTag={poem:'poem',story:'story','memory-jar':'memories',video:'video',epilogue:'epilogue','aurora-video':'video','photo-message':'memory'};
+  const entries=[];
+  PAGES.forEach((pg,i)=>{
+    if(i<1)return;
+    if(pg.type==='photo')return;
+    const label=pg.type==='poem'?pg.title:(labels[pg.type]||pg.type);
+    const date=pg.date||'';
+    const tag=typeTag[pg.type]||pg.type;
+    entries.push({i,label,date,tag});
+  });
+  entries.sort((a,b)=>{if(!a.date&&!b.date)return 0;if(!a.date)return 1;if(!b.date)return -1;return new Date(b.date)-new Date(a.date);});
+  const rowsHTML=entries.map(e=>`
+    <li class="idx-entry" data-search="${e.label.toLowerCase()} ${e.tag}" onclick="openPage(${e.i})">
+      ${e.date?`<span class="idx-date">${e.date}</span>`:''}
+      <span class="idx-t">${e.label}</span>
+      <span class="idx-tag">${e.tag}</span>
+    </li>`).join('');
+  document.getElementById('overlayContent').innerHTML=`
+    <div class="pg-section-head">Eternore</div>
+    <div class="pg-section-rule"></div>
+    <div onclick="openPage(1)" class="video-link-banner">
+      <span style="font-family:'Dancing Script',cursive;font-size:19px;color:#3a1e08">▶ A message for you</span>
+      <span style="font-family:'Cormorant Garamond',serif;font-size:10px;color:#c8a050;letter-spacing:.15em;text-transform:uppercase;border:1px solid rgba(200,160,80,.3);padding:2px 8px;border-radius:1px">video</span>
+    </div>
+    <div class="idx-search-wrap">
+      <input type="text" class="idx-search-input" placeholder="search..." oninput="filterIndex(this.value)">
+    </div>
+    <ul class="idx-list">${rowsHTML}</ul>`;
+  document.getElementById('overlay').classList.add('show');
 }
 
-// ── Memory jar toggle ──
-function toggleNote(el){
-  const isOpen=el.classList.contains('open');
-  // close all open notes first
-  document.querySelectorAll('.note-fold.open').forEach(n=>n.classList.remove('open'));
-  if(!isOpen) el.classList.add('open');
-}
-
-// ── Render Pages ──
-function renderPage(idx,el){
+// ══ OPEN PAGE ══
+function openPage(idx){
   const p=PAGES[idx];
-  el.innerHTML='<div class="page-aged-edge"></div><div class="page-aged-top"></div><div class="page-aged-bottom"></div><div class="ribbon-marker"></div>';
-
+  const oc=document.getElementById('overlayContent');
   if(p.type==='aurora-video'){
-    el.innerHTML+=`<div class="local-video-wrap">
-      <div class="video-label">Only for your eyes</div>
-      <div class="video-title">For you, Aurora ♥</div>
-      <div style="position:relative;width:100%;max-width:460px">
-        <div class="local-video-tape"></div>
-        <div class="local-video-frame">
-          <video controls playsinline style="width:100%;display:block;border-radius:2px">
-            <source src="auroravideo.mp4" type="video/mp4">
-          </video>
-        </div>
-      </div>
-      <div class="local-video-message">
-        Distance is just a number, you are always in my heart.<br>
-        I would cross oceans and mountains to see you,<br>
-        whenever I get the chance.
-      </div>
-    </div>`;
-    addPgNum(el,'Eternore');addPgNumRight(el,'— always —'); return;
+    oc.innerHTML=`
+      <button class="poem-back" onclick="openLetters()">‹ back to index</button>
+      <div class="video-page-wrap">
+        <div class="video-page-title">For you, Aurora ♥</div>
+        <div class="local-video-frame"><video controls playsinline style="width:100%;display:block"><source src="auroravideo.mp4" type="video/mp4"></video></div>
+        <div class="local-video-message">Distance is just a number, you are always in my heart.<br>I would cross oceans and mountains to see you,<br>whenever I get the chance.</div>
+      </div>`;return;
   }
-
-  if(p.type==='index'){
-    const labels={story:'How It Began','memory-jar':'Memory Jar',video:'A Song For You',epilogue:'Epilogue','aurora-video':'A Video For You','photo-message':'30th August'};
-    const typeTag={poem:'poem',story:'story','memory-jar':'memories',video:'video',epilogue:'epilogue','aurora-video':'video','photo-message':'memory'};
-    const entries=[];
-    PAGES.forEach((pg,i)=>{
-      if(i<2) return; // skip index and aurora-video
-      if(pg.type==='photo') return;
-      const label=pg.type==='poem'?pg.title:(labels[pg.type]||pg.type);
-      const date=pg.date||'';
-      const tag=typeTag[pg.type]||pg.type;
-      entries.push({i,label,date,tag});
-    });
-    entries.sort((a,b)=>{
-      if(!a.date&&!b.date) return 0;
-      if(!a.date) return 1;
-      if(!b.date) return -1;
-      return new Date(b.date) - new Date(a.date);
-    });
-    const rowsHTML=entries.map(e=>`
-      <li class="idx-entry" data-search="${e.label.toLowerCase()} ${e.tag}" onclick="goTo(${e.i})">
-        ${e.date?`<span class="idx-date">${e.date}</span>`:''}
-        <span class="idx-t">${e.label}</span>
-        <span class="idx-tag">${e.tag}</span>
-      </li>`).join('');
-    el.innerHTML+=`
-      <div class="pg-section-head" style="font-size:24px">Eternore</div>
-      <div class="pg-section-rule"></div>
-      <div onclick="goTo(1)" style="
-        display:flex;align-items:center;justify-content:space-between;
-        background:rgba(139,90,40,.08);
-        border:1px solid rgba(139,90,40,.25);
-        border-radius:2px;
-        padding:12px 16px;
-        cursor:pointer;
-        margin-bottom:16px;
-        transition:background .2s;
-      " onmouseover="this.style.background='rgba(139,90,40,.15)'" onmouseout="this.style.background='rgba(139,90,40,.08)'">
-        <span style="font-family:'Dancing Script',cursive;font-size:19px;color:#3a1e08">▶ A message for you</span>
-        <span style="font-family:'Cormorant Garamond',serif;font-size:11px;color:#c8a050;letter-spacing:.15em;text-transform:uppercase;border:1px solid rgba(200,160,80,.3);padding:2px 8px;border-radius:1px">video</span>
-      </div>
-      <div class="idx-search-wrap">
-        <input type="text" id="idxSearch" class="idx-search-input" placeholder="search..." oninput="filterIndex(this.value)">
-      </div>
-      <ul class="idx-list" id="idxList" style="max-height:400px;overflow-y:auto;padding-right:4px">${rowsHTML}</ul>`;
-    addPgNum(el,'Eternore');addPgNumRight(el,'— latest first —'); return;
-  }
-
   if(p.type==='poem'){
     const num=PAGES.slice(0,idx).filter(x=>x.type==='poem').length+1;
-    const lines=p.body.split('\n');
-    const linesHTML=lines.map((l,i)=>`<div class="typewriter-line" style="animation-delay:${i*80}ms">${l||'&nbsp;'}</div>`).join('');
-    el.innerHTML+=`
-      ${p.date?`<div class="poem-date">${p.date}</div>`:''}
-      <div class="poem-roman">${toRoman(num)}</div>
-      <div class="poem-title-pg">${p.title}</div>
-      <div class="poem-body-pg">${linesHTML}</div>
-      <div class="poem-orn">· · ·</div>
-      <div style="font-family:'Dancing Script',cursive;font-size:19px;color:#8b5e30;text-align:right;margin-top:16px;padding-right:8px">— Pranav Arya</div>`;
-    addPgNum(el,'Eternore');addPgNumRight(el,`— ${num} —`); return;
+    const linesHTML=p.body.split('\n').map((l,i)=>`<div class="typewriter-line" style="animation-delay:${i*60}ms">${l||'&nbsp;'}</div>`).join('');
+    oc.innerHTML=`
+      <button class="poem-back" onclick="openLetters()">‹ back to index</button>
+      <div class="poem-view">
+        ${p.date?`<div class="poem-date-sm">${p.date}</div>`:''}
+        <div class="poem-roman">${toRoman(num)}</div>
+        <div class="poem-title-pg">${p.title}</div>
+        <div class="poem-body-pg">${linesHTML}</div>
+        <div class="poem-orn">· · ·</div>
+        <div class="poem-sig">— Pranav Arya</div>
+      </div>`;return;
   }
-
+  if(p.type==='photo-message'){
+    oc.innerHTML=`
+      <button class="poem-back" onclick="openLetters()">‹ back to index</button>
+      <div class="photo-msg-wrap">
+        <div class="photo-msg-date">${p.date}</div>
+        <div class="photo-msg-frame"><img src="${p.src}" alt="${p.date}" onerror="this.style.display='none'"></div>
+        <div class="photo-msg-text">${p.message}</div>
+      </div>`;return;
+  }
   if(p.type==='story'){
-    el.innerHTML+=`<div class="story-wrap">
+    oc.innerHTML=`
+      <button class="poem-back" onclick="openLetters()">‹ back to index</button>
       <div class="pg-section-head" style="font-size:22px;margin-bottom:4px">How It Began</div>
       <div class="pg-section-rule"></div>
       <div class="story-body">
         <p><span class="story-dropcap">I</span>t was an ordinary street on an ordinary day — or so I thought. Then you walked into it, and the ordinary world quietly ceased to exist.</p>
         <p>I don't think either of us knew, in that first moment, what had just happened. But something had. A door had opened. And I have never once wished it closed.</p>
         <p>You are my Catwoman — clever, fearless, a little unpredictable, and entirely impossible to forget. I am your Batman — stubborn, devoted, always finding my way back to you no matter how dark the night gets. We are a strange and perfect pair.</p>
-        <p>Life will bring us its highs and its lows. There will be days that shimmer, and days that are harder to carry. But through all of it, I want you to know this: I will always reach for your hand. I will always look you in the eyes and remind you how extraordinary you are. We will face whatever comes — together, without question.</p>
-        <p>And whenever you miss me, or feel angry, or happy, or sad, or excited, or simply need somewhere to go — come back to this book. There will always be something new waiting for you here.</p>
+        <p>Life will bring us its highs and its lows. There will be days that shimmer, and days that are harder to carry. But through all of it, I want you to know this: I will always reach for your hand.</p>
         <p style="text-align:center;margin-top:4px">Happy Valentine's Day, Aurora.</p>
       </div>
-      <div class="story-sig">— Pranav Arya</div>
-    </div>`;
-    addPgNum(el,'Eternore');addPgNumRight(el,'— our beginning —'); return;
+      <div class="story-sig">— Pranav Arya</div>`;return;
   }
-
-  if(p.type==='photo-message'){
-    el.innerHTML+=`<div class="photo-page-wrap" style="gap:20px">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#a07850;text-align:center;margin-bottom:4px">${p.date}</div>
-      <div class="photo-frame slot1" style="max-width:300px">
-        <div class="photo-tape"></div>
-        <div class="photo-inner">
-          <img src="${p.src}" alt="30 august" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="photo-upload-hint" style="display:none"><span>📷</span>${p.src}</div>
-        </div>
-      </div>
-      <div style="
-        font-family:'Cormorant Garamond',serif;
-        font-size:15px;font-style:italic;
-        line-height:1.9;color:#2c1408;
-        text-align:center;
-        max-width:400px;
-        padding:0 8px;
-        border-top:1px solid rgba(139,90,40,.2);
-        padding-top:16px;
-        margin-top:4px;
-      ">${p.message}</div>
-    </div>`;
-    addPgNum(el,'Eternore');addPgNumRight(el,'— 30 Aug 2026 —'); return;
-  }
-
-  if(p.type==='photo'){
-    el.innerHTML+=`<div class="photo-page-wrap">
-      <div class="photo-frame slot${p.slot}">
-        <div class="photo-tape"></div>
-        <div class="photo-inner">
-          <img src="${p.src}" alt="our photo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="photo-upload-hint" style="display:none"><span>📷</span>${p.src}</div>
-        </div>
-        <div class="photo-caption">${p.caption}</div>
-      </div>
-    </div>`;
-    addPgNum(el,'Eternore'); return;
-  }
-
   if(p.type==='memory-jar'){
-    const notesHTML = MEMORIES.map((m,i)=>`
-      <div class="note-fold" onclick="toggleNote(this)" data-idx="${i}">
+    const notesHTML=MEMORIES.map(m=>`
+      <div class="note-fold" onclick="toggleNote(this)">
         <span class="note-icon">${m.icon}</span>
         <div class="note-text">${m.text}</div>
         <div class="note-label">— ${m.label}</div>
         <div class="note-close" onclick="event.stopPropagation();this.parentNode.classList.remove('open')">fold away ×</div>
       </div>`).join('');
-    el.innerHTML+=`<div class="jar-page-wrap">
-      <div class="pg-section-head" style="font-size:24px">Memory Jar</div>
+    oc.innerHTML=`
+      <button class="poem-back" onclick="openLetters()">‹ back to index</button>
+      <div class="pg-section-head" style="font-size:22px">Memory Jar</div>
       <div class="pg-section-rule"></div>
       <div class="jar-intro">Ten little notes, folded up and kept for you.<br>Tap one to unfold it.</div>
-      <div class="jar-svg-wrap">
-        <svg width="120" height="110" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
-          <g class="jar-lid">
-            <rect x="28" y="12" width="64" height="14" rx="4" fill="#c8a050" opacity=".85"/>
-            <rect x="32" y="8" width="56" height="8" rx="3" fill="#e8c870" opacity=".7"/>
-          </g>
-          <ellipse cx="60" cy="28" rx="34" ry="8" fill="#e8d5a0" opacity=".6"/>
-          <path d="M26,28 Q20,60 22,90 Q22,100 60,100 Q98,100 98,90 Q100,60 94,28 Z" fill="#f5e8c8" stroke="#c8a050" stroke-width="1.5" opacity=".9"/>
-          <path d="M26,28 Q20,60 22,90 Q22,100 60,100 Q98,100 98,90 Q100,60 94,28 Z" fill="url(#jarGrad)" opacity=".4"/>
-          <defs><linearGradient id="jarGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#fff" stop-opacity=".6"/><stop offset="50%" stop-color="#fff" stop-opacity=".0"/><stop offset="100%" stop-color="#000" stop-opacity=".08"/></linearGradient></defs>
-          <text x="60" y="70" text-anchor="middle" font-family="Dancing Script,cursive" font-size="13" fill="#8b5030" opacity=".7">our memories</text>
-        </svg>
-      </div>
-      <div class="notes-grid">${notesHTML}</div>
-    </div>`;
-    addPgNum(el,'Eternore');addPgNumRight(el,'— a jar of us —'); return;
+      <div class="notes-grid">${notesHTML}</div>`;return;
   }
-
   if(p.type==='epilogue'){
-    el.innerHTML+=`<div style="padding-top:48px">
-      <div class="pg-section-head">Epilogue</div>
-      <div class="pg-section-rule"></div>
-      <div class="epilogue-body">This book has no last page,<br>only the next chapter<br>we haven't written yet.<br><br>Every day with you<br>is a sentence worth keeping.<br><br>Sempre, Aurora.</div>
-      <div class="poem-orn" style="margin-top:28px">✦</div>
-    </div>`;
-    addPgNum(el,'Eternore');addPgNumRight(el,'— fin —'); return;
-  }
-
-  if(p.type==='video'){
-    el.innerHTML+=`<div class="video-page-wrap">
-      <div class="video-label">A song for you</div>
-      <div class="video-title">Press play ♥</div>
-      <div style="position:relative;width:100%;max-width:440px">
-        <div class="video-tape"></div>
-        <div class="video-frame-wrap">
-          <iframe src="https://www.youtube.com/embed/${p.videoId}?rel=0&modestbranding=1&color=white"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    oc.innerHTML=`
+      <button class="poem-back" onclick="openLetters()">‹ back to index</button>
+      <div style="padding-top:24px;text-align:center">
+        <div class="pg-section-head">Epilogue</div>
+        <div class="pg-section-rule"></div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;line-height:2.1;color:#2c1408">
+          This book has no last page,<br>only the next chapter<br>we haven't written yet.<br><br>
+          Every day with you<br>is a sentence worth keeping.<br><br>Sempre, Aurora.
         </div>
-      </div>
-      <div class="video-caption">${p.caption}</div>
+        <div class="poem-orn" style="margin-top:24px">✦</div>
+      </div>`;return;
+  }
+  if(p.type==='video'){
+    oc.innerHTML=`
+      <button class="poem-back" onclick="openLetters()">‹ back to index</button>
+      <div class="video-page-wrap">
+        <div class="video-page-title">Press play ♥</div>
+        <div class="video-frame-wrap"><iframe src="https://www.youtube.com/embed/${p.videoId}?rel=0&modestbranding=1&color=white" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+        <div class="video-caption">${p.caption}</div>
+      </div>`;return;
+  }
+  if(p.type==='photo'){
+    oc.innerHTML=`
+      <button class="poem-back" onclick="openLetters()">‹ back to index</button>
+      <div style="text-align:center;padding:16px 0">
+        <div style="background:#fff;padding:10px 10px 32px;display:inline-block;box-shadow:2px 3px 14px rgba(0,0,0,.18);transform:rotate(-1deg)">
+          <img src="${p.src}" alt="photo" style="width:280px;display:block;aspect-ratio:4/3;object-fit:cover" onerror="this.style.display='none'">
+        </div>
+        <div style="font-family:'Dancing Script',cursive;font-size:18px;color:#5a3010;margin-top:14px">${p.caption}</div>
+      </div>`;return;
+  }
+}
+
+// ══ RADIO ══
+function openRadio(){
+  document.getElementById('overlayContent').innerHTML=`
+    <div class="radio-panel">
+      <div class="radio-icon">📻</div>
+      <div class="radio-title">Voice Messages</div>
+      <div class="radio-body">Something special is coming here soon.<br><br>I am recording something just for you.<br>Check back soon, Aurora ♥</div>
+      <div class="poem-orn" style="margin-top:28px">· · ·</div>
     </div>`;
-    addPgNum(el,'Eternore');addPgNumRight(el,'— for you —'); return;
-  }
-
+  document.getElementById('overlay').classList.add('show');
 }
-
-function filterIndex(q){
-  const term=q.trim().toLowerCase();
-  document.querySelectorAll('.idx-entry').forEach(li=>{
-    const hay=li.dataset.search||'';
-    li.classList.toggle('hidden', term.length>0 && !hay.includes(term));
-  });
-}
-
-function addPgNum(el,t){const d=document.createElement('div');d.className='pg-num-left';d.textContent=t;el.appendChild(d);}
-function addPgNumRight(el,t){const d=document.createElement('div');d.className='pg-num-right';d.textContent=t;el.appendChild(d);}
-
-// ── Nav ──
-function renderNav(){
-  const nb=document.getElementById('navBar'); nb.innerHTML='';
-  if(!bookOpen) return;
-
-  const close=document.createElement('button');
-  close.className='nav-btn';close.textContent='✕ Close';close.onclick=()=>closeBook();nb.appendChild(close);
-
-  const back=document.createElement('button');
-  back.className='nav-btn';back.textContent='‹ Back';back.disabled=cur<=0;
-  back.onclick=()=>{if(cur>0)goTo(cur-1);else closeBook();};nb.appendChild(back);
-
-  const idx=document.createElement('button');
-  idx.className='nav-btn';idx.textContent='Index';idx.disabled=cur===0;idx.onclick=()=>goTo(0);nb.appendChild(idx);
-
-  const jw=document.createElement('div');jw.className='jump-wrap';
-  const ji=document.createElement('input');ji.type='number';ji.min='1';ji.max=PAGES.length-3;ji.placeholder='pg';ji.id='jumpInput';
-  const jb=document.createElement('button');jb.className='nav-btn';jb.textContent='Go';
-  jb.onclick=()=>{const v=parseInt(document.getElementById('jumpInput').value);if(v>=1&&v<=PAGES.length-3)goTo(v+2);};
-  ji.addEventListener('keydown',e=>{if(e.key==='Enter')jb.click();});
-  jw.appendChild(ji);jw.appendChild(jb);nb.appendChild(jw);
-
-  const isLast=cur>=PAGES.length-1;
-  const next=document.createElement('button');
-  next.className='nav-btn primary';next.textContent='Next ›';next.disabled=isLast;
-  next.onclick=()=>goTo(cur+1);nb.appendChild(next);
-}
-
-// ── Close Book ──
-function closeBook(){
-  if(animating) return;
-  bookOpen=false;
-  document.getElementById('pageBlock').classList.remove('visible');
-  const cover=document.getElementById('bookCover');
-  cover.style.display='';cover.classList.remove('open');
-  cur=0;document.getElementById('navBar').innerHTML='';
-}
-
-// ── Go To ──
-function goTo(idx){
-  if(animating||idx===cur||idx<0||idx>=PAGES.length) return;
-  animating=true;
-  const el=document.getElementById('currentPage');
-  const dir=idx>cur?1:-1;
-  el.style.transition='opacity .25s, transform .3s';
-  el.style.opacity='0';
-  el.style.transform=dir>0?'rotateY(-15deg) translateX(-12px)':'rotateY(15deg) translateX(12px)';
-  setTimeout(()=>{
-    cur=idx;renderPage(cur,el);renderNav();
-    el.style.transition='none';el.style.opacity='0';
-    el.style.transform=dir>0?'rotateY(12deg) translateX(12px)':'rotateY(-12deg) translateX(-12px)';
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      el.style.transition='opacity .35s, transform .45s cubic-bezier(.2,0,.3,1)';
-      el.style.opacity='1';el.style.transform='rotateY(0deg) translateX(0)';
-      setTimeout(()=>{el.style.transition='';animating=false;},460);
-    }));
-  },300);
-}
-
-// ── Search ──
-function doSearch(){
-  const q=document.getElementById('searchInput').value.trim().toLowerCase();
-  const hint=document.getElementById('searchHint');
-  if(!q){hint.textContent='Type a poem title or keyword to jump to a page';hint.style.color='#7a6040';return;}
-  let best=-1;
-  for(let i=0;i<PAGES.length;i++){
-    const pg=PAGES[i];
-    if(pg.type==='photo') continue;
-    const hay=((pg.title||'')+' '+(pg.body||'')+' '+(pg.type||'')).toLowerCase();
-    if(hay.includes(q)){best=i;break;}
-  }
-  if(best>-1){
-    hint.style.color='#c8a050';hint.textContent='Found — turning pages…';
-    if(!bookOpen){openBook();setTimeout(()=>goTo(best),1000);}
-    else setTimeout(()=>goTo(best),300);
-  } else {
-    hint.style.color='#a05030';hint.textContent='No match found — try another word';
-  }
-}
-document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
 </script>
 </body>
 </html>
