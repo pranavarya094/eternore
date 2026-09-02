@@ -332,6 +332,7 @@ const PAGES=[
   {type:'index'},
   {type:'aurora-video'},
   {type:'photo-message',src:'30august.jpg',date:'30 Aug 2026',message:'If I have to break mountains or cross the oceans, I will not give up on you. Maybe you have never seen someone do this before, or maybe in movies, but I will do it. I love you. 30th August 2026 - Pranav.'},
+  {type:'poem',title:'I Miss You',date:'2 Sep 2026',body:`I miss you. Not in a dramatic way, just in the way that sits in my chest all day and doesn't leave. I keep finding you in small things. A song plays and suddenly you're everywhere. Something funny happens and you're the first person I want to tell, before I remember I have to wait.\n\nPeople don't talk about this part. How missing someone isn't loud. It's quiet. It's reaching for someone who isn't there yet and feeling the space they usually fill.\n\nI don't know how to explain what you mean to me without sounding like too much. So maybe I'll just say this. On an ordinary day, doing nothing, you're still the person my mind walks back to. Every time.\n\nI hope something good finds you today. And I hope, just for a second, you feel me missing you from here.\n\nYours,\nPranav`},
   {type:'poem',title:'31st August',date:'31 Aug 2026',body:`I have a serious thought in my mind today...
 
 Sometimes I think, was it worth putting in so much effort for someone,
@@ -455,7 +456,7 @@ function openLetters(){
   document.getElementById('overlayContent').innerHTML=`
     <div class="pg-section-head">Eternore</div>
     <div class="pg-section-rule"></div>
-    <div onclick="openPage(1)" class="video-link-banner">
+    <div onclick="openPage(PAGES.findIndex(p=>p.type==='aurora-video'))" class="video-link-banner">
       <span style="font-family:'Dancing Script',cursive;font-size:19px;color:#3a1e08">▶ A message for you</span>
       <span style="font-family:'Cormorant Garamond',serif;font-size:10px;color:#c8a050;letter-spacing:.15em;text-transform:uppercase;border:1px solid rgba(200,160,80,.3);padding:2px 8px;border-radius:1px">video</span>
     </div>
