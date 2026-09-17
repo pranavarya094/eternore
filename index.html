@@ -136,7 +136,7 @@ html,body{min-height:100%;background:#0a0d1a;overflow-x:hidden;font-family:'Corm
 #overlay.show{display:flex}
 .overlay-panel{
   background:linear-gradient(170deg,#f2e4c8 0%,#ecdbb0 30%,#e8d4a8 60%,#f0e0be 100%);
-  border-radius:4px;width:100%;max-width:620px;max-height:88vh;overflow-y:auto;position:relative;
+  border-radius:4px;width:100%;max-width:720px;max-height:88vh;overflow-y:auto;position:relative;
   box-shadow:0 20px 60px rgba(0,0,0,.7);padding:40px 44px 60px;
   scrollbar-width:thin;scrollbar-color:rgba(139,90,40,.3) transparent;
 }
@@ -157,6 +157,19 @@ html,body{min-height:100%;background:#0a0d1a;overflow-x:hidden;font-family:'Corm
 .idx-date{font-family:'Cormorant Garamond',serif;font-size:11px;color:#a07850;letter-spacing:.1em;min-width:82px;font-style:italic;flex-shrink:0}
 .idx-t{font-family:'Cormorant Garamond',serif;font-size:15px;color:#2c1408;flex:1}
 .idx-tag{font-family:'Cormorant Garamond',serif;font-size:10px;color:#c8a050;letter-spacing:.15em;text-transform:uppercase;background:rgba(200,160,80,.1);border:1px solid rgba(200,160,80,.25);padding:2px 7px;border-radius:1px;flex-shrink:0}
+.idx-columns{display:flex;gap:0;align-items:flex-start}
+.idx-column{flex:1;min-width:0;padding:0 22px}
+.idx-column:first-child{padding-left:0}
+.idx-column:last-child{padding-right:0}
+.idx-column+.idx-column{border-left:1px solid rgba(139,90,40,.25)}
+.idx-col-head{font-family:'Dancing Script',cursive;font-size:19px;color:#3a1e08;text-align:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(139,90,40,.25)}
+.idx-column .idx-list{min-height:20px}
+.idx-empty-note{font-family:'Cormorant Garamond',serif;font-size:12px;font-style:italic;color:#a07850;text-align:center;padding:12px 0}
+@media(max-width:600px){
+  .idx-columns{flex-direction:column}
+  .idx-column{padding:0}
+  .idx-column+.idx-column{border-left:none;border-top:1px solid rgba(139,90,40,.25);padding-top:18px;margin-top:10px}
+}
 .video-link-banner{display:flex;align-items:center;justify-content:space-between;background:rgba(139,90,40,.08);border:1px solid rgba(139,90,40,.25);border-radius:2px;padding:12px 16px;cursor:pointer;margin-bottom:16px;transition:background .2s}
 .video-link-banner:hover{background:rgba(139,90,40,.15)}
 .pg-section-head{font-family:'UnifrakturMaguntia',serif;font-size:28px;color:#3a1e08;text-align:center;margin-bottom:6px}
