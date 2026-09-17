@@ -170,11 +170,9 @@ html,body{min-height:100%;background:#0a0d1a;overflow-x:hidden;font-family:'Corm
 .idx-empty-note{font-family:'Cormorant Garamond',serif;font-size:12px;font-style:italic;color:#a07850;text-align:center;padding:12px 0}
 @media(max-width:600px){
   .idx-tabs{display:flex}
-  .idx-col-head{display:none}
   .idx-columns{flex-direction:column}
-  .idx-column{display:none;padding:0}
-  .idx-column.active{display:block}
-  .idx-column+.idx-column{border-left:none}
+  .idx-column{padding:0}
+  .idx-column+.idx-column{border-left:none;border-top:1px solid rgba(139,90,40,.25);padding-top:18px;margin-top:14px}
 }
 .video-link-banner{display:flex;align-items:center;justify-content:space-between;background:rgba(139,90,40,.08);border:1px solid rgba(139,90,40,.25);border-radius:2px;padding:12px 16px;cursor:pointer;margin-bottom:16px;transition:background .2s}
 .video-link-banner:hover{background:rgba(139,90,40,.15)}
@@ -615,8 +613,12 @@ function openLetters(){
     <div class="idx-search-wrap">
       <input type="text" class="idx-search-input" placeholder="search..." oninput="filterIndex(this.value)">
     </div>
+    <div class="idx-tabs">
+      <button class="idx-tab active" onclick="switchIdxTab(this,0)">Letters for Aurora</button>
+      <button class="idx-tab" onclick="switchIdxTab(this,1)">The Book</button>
+    </div>
     <div class="idx-columns">
-      <div class="idx-column">
+      <div class="idx-column active">
         <div class="idx-col-head">Letters for Aurora</div>
         <ul class="idx-list">${rowsHTML(lettersForAurora)}</ul>
         ${lettersForAurora.length?'':'<div class="idx-empty-note">nothing here yet</div>'}
@@ -628,6 +630,11 @@ function openLetters(){
       </div>
     </div>`;
   document.getElementById('overlay').classList.add('show');
+}
+function switchIdxTab(btn,i){
+  document.querySelectorAll('.idx-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.idx-column').forEach((c,idx)=>c.classList.toggle('active',idx===i));
 }
 
 // ══ OPEN PAGE ══
