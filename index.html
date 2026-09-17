@@ -157,6 +157,9 @@ html,body{min-height:100%;background:#0a0d1a;overflow-x:hidden;font-family:'Corm
 .idx-date{font-family:'Cormorant Garamond',serif;font-size:11px;color:#a07850;letter-spacing:.1em;min-width:82px;font-style:italic;flex-shrink:0}
 .idx-t{font-family:'Cormorant Garamond',serif;font-size:15px;color:#2c1408;flex:1}
 .idx-tag{font-family:'Cormorant Garamond',serif;font-size:10px;color:#c8a050;letter-spacing:.15em;text-transform:uppercase;background:rgba(200,160,80,.1);border:1px solid rgba(200,160,80,.25);padding:2px 7px;border-radius:1px;flex-shrink:0}
+.idx-tabs{display:none;gap:8px;margin-bottom:16px}
+.idx-tab{flex:1;background:rgba(139,90,40,.08);border:1px solid rgba(139,90,40,.3);color:#6b4020;font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:.03em;padding:10px 6px;cursor:pointer;border-radius:2px;transition:background .2s,color .2s;-webkit-tap-highlight-color:transparent}
+.idx-tab.active{background:#3a1e08;color:#f2e4c8;border-color:#3a1e08}
 .idx-columns{display:flex;gap:0;align-items:flex-start}
 .idx-column{flex:1;min-width:0;padding:0 22px}
 .idx-column:first-child{padding-left:0}
@@ -166,9 +169,12 @@ html,body{min-height:100%;background:#0a0d1a;overflow-x:hidden;font-family:'Corm
 .idx-column .idx-list{min-height:20px}
 .idx-empty-note{font-family:'Cormorant Garamond',serif;font-size:12px;font-style:italic;color:#a07850;text-align:center;padding:12px 0}
 @media(max-width:600px){
+  .idx-tabs{display:flex}
+  .idx-col-head{display:none}
   .idx-columns{flex-direction:column}
-  .idx-column{padding:0}
-  .idx-column+.idx-column{border-left:none;border-top:1px solid rgba(139,90,40,.25);padding-top:18px;margin-top:10px}
+  .idx-column{display:none;padding:0}
+  .idx-column.active{display:block}
+  .idx-column+.idx-column{border-left:none}
 }
 .video-link-banner{display:flex;align-items:center;justify-content:space-between;background:rgba(139,90,40,.08);border:1px solid rgba(139,90,40,.25);border-radius:2px;padding:12px 16px;cursor:pointer;margin-bottom:16px;transition:background .2s}
 .video-link-banner:hover{background:rgba(139,90,40,.15)}
@@ -578,22 +584,27 @@ function toggleNote(el){const isOpen=el.classList.contains('open');document.quer
 function openLetters(){
   const labels={story:'How It Began','memory-jar':'Memory Jar',video:'A Song For You',epilogue:'Epilogue','aurora-video':'A Video For You','photo-message':'30th August'};
   const typeTag={poem:'poem',story:'story','memory-jar':'memories',video:'video',epilogue:'epilogue','aurora-video':'video','photo-message':'memory'};
-  const entries=[];
+  const lettersForAurora=[];
+  const theBook=[];
   PAGES.forEach((pg,i)=>{
     if(i<1)return;
-    if(pg.type==='photo')return;
+    if(pg.type==='photo'||pg.type==='aurora-video')return;
     const label=pg.type==='poem'?pg.title:(labels[pg.type]||pg.type);
     const date=pg.date||'';
     const tag=typeTag[pg.type]||pg.type;
-    entries.push({i,label,date,tag});
+    const entry={i,label,date,tag};
+    if(date)lettersForAurora.push(entry);
+    else theBook.push(entry);
   });
-  entries.sort((a,b)=>{if(!a.date&&!b.date)return 0;if(!a.date)return 1;if(!b.date)return -1;return new Date(b.date)-new Date(a.date);});
-  const rowsHTML=entries.map(e=>`
+  lettersForAurora.sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  const rowsHTML=list=>list.map(e=>`
     <li class="idx-entry" data-search="${e.label.toLowerCase()} ${e.tag}" onclick="openPage(${e.i})">
       ${e.date?`<span class="idx-date">${e.date}</span>`:''}
       <span class="idx-t">${e.label}</span>
       <span class="idx-tag">${e.tag}</span>
     </li>`).join('');
+
   document.getElementById('overlayContent').innerHTML=`
     <div class="pg-section-head">Eternore</div>
     <div class="pg-section-rule"></div>
@@ -604,7 +615,18 @@ function openLetters(){
     <div class="idx-search-wrap">
       <input type="text" class="idx-search-input" placeholder="search..." oninput="filterIndex(this.value)">
     </div>
-    <ul class="idx-list">${rowsHTML}</ul>`;
+    <div class="idx-columns">
+      <div class="idx-column">
+        <div class="idx-col-head">Letters for Aurora</div>
+        <ul class="idx-list">${rowsHTML(lettersForAurora)}</ul>
+        ${lettersForAurora.length?'':'<div class="idx-empty-note">nothing here yet</div>'}
+      </div>
+      <div class="idx-column">
+        <div class="idx-col-head">The Book</div>
+        <ul class="idx-list">${rowsHTML(theBook)}</ul>
+        ${theBook.length?'':'<div class="idx-empty-note">nothing here yet</div>'}
+      </div>
+    </div>`;
   document.getElementById('overlay').classList.add('show');
 }
 
