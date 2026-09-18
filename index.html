@@ -5,748 +5,126 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Eternore — For Aurora</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Dancing+Script:wght@400;600&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{min-height:100%;background:#0a0d1a;overflow-x:hidden;font-family:'Cormorant Garamond',serif}
-
-/* ══ ROOM BACKGROUND ══ */
-.room{
-  position:fixed;inset:0;
-  width:100%;height:100%;
-  background-image:url('desk1.jpg');
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-}
-@media(max-width:760px){
-  .room{background-image:url('mob1.jpg')}
-}
-/* subtle vignette */
-.room::after{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 90% 80% at 50% 55%,transparent 40%,rgba(5,5,15,.45) 100%);
-  pointer-events:none;
+html,body{height:100%}
+body{
+  min-height:100vh;
+  background:radial-gradient(ellipse 120% 100% at 50% -10%,#241a30 0%,#0c0812 55%,#050308 100%);
+  font-family:'Cormorant Garamond',serif;
+  color:#f1ece0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow-x:hidden;
+  position:relative;
 }
 
-/* ══ CANDLE FLICKER GLOW ══ */
-#candle-glow{
-  position:fixed;
-  z-index:8;
-  pointer-events:none;
-  width:240px;height:300px;
-  left:76%;top:60%;
-  transform:translate(-50%,-50%);
-  background:radial-gradient(ellipse 40% 50% at 50% 45%,rgba(255,190,80,.85) 0%,rgba(255,160,55,.45) 28%,rgba(255,140,45,.15) 55%,transparent 75%);
-  animation:candleFlicker 2s ease-in-out infinite;
+/* faint drifting stars for texture, purely decorative, no libraries */
+.sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.star{position:absolute;border-radius:50%;background:#f2e7cf;opacity:.55;animation:twinkle 5s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.75}}
+
+.wrap{position:relative;z-index:1;width:100%;max-width:920px;padding:40px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:44px}
+
+.eyebrow{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:#c9a97a;opacity:.85;margin-bottom:6px}
+h1{font-family:'Cinzel',serif;font-weight:600;font-size:clamp(34px,7vw,64px);letter-spacing:.06em;color:#f2e7cf;text-shadow:0 0 24px rgba(232,194,122,.25)}
+.sub{font-size:clamp(15px,2.4vw,19px);font-style:italic;color:#cfc6d8;max-width:520px;line-height:1.6;margin-top:2px}
+
+.choices{display:flex;gap:28px;flex-wrap:wrap;justify-content:center;width:100%}
+.choice{
+  flex:1 1 300px;max-width:340px;
+  position:relative;
+  border-radius:6px;
+  padding:38px 26px 32px;
+  text-decoration:none;
+  color:inherit;
+  border:1px solid rgba(232,194,122,.22);
+  background:rgba(20,15,32,.55);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  overflow:hidden;
+  transition:transform .35s ease,border-color .35s ease,box-shadow .35s ease;
+  display:flex;flex-direction:column;align-items:center;gap:14px;
 }
-@keyframes candleFlicker{
-  0%   {opacity:.7;  transform:translate(-50%,-50%) scale(1);}
-  20%  {opacity:1;   transform:translate(-50%,-50%) scale(1.06);}
-  40%  {opacity:.6;  transform:translate(-50%,-50%) scale(.95);}
-  55%  {opacity:.95; transform:translate(-50%,-50%) scale(1.04);}
-  70%  {opacity:.7;  transform:translate(-50%,-50%) scale(.98);}
-  85%  {opacity:.9;  transform:translate(-50%,-50%) scale(1.02);}
-  100% {opacity:.7;  transform:translate(-50%,-50%) scale(1);}
+.choice:hover{
+  transform:translateY(-6px);
+  border-color:rgba(232,194,122,.55);
+  box-shadow:0 18px 50px rgba(0,0,0,.45),0 0 30px rgba(232,194,122,.08);
 }
-@media(max-width:760px){
-  #candle-glow{
-    left:68%;top:62%;
-    width:150px;height:190px;
-  }
+.choice-glow{
+  position:absolute;inset:-40% -40% auto -40%;height:70%;
+  filter:blur(30px);opacity:.35;pointer-events:none;
+  transition:opacity .35s ease;
 }
+.choice:hover .choice-glow{opacity:.55}
+.choice.bedroom .choice-glow{background:radial-gradient(circle,rgba(214,140,70,.55),transparent 70%)}
+.choice.universe .choice-glow{background:radial-gradient(circle,rgba(120,110,220,.55),transparent 70%)}
 
-/* ══ CLICKABLE LABELS ══ */
-.spot-label{
-  position:fixed;
-  z-index:20;
-  cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-  font-family:'Dancing Script',cursive;
-  font-size:clamp(18px,2.6vw,28px);
-  color:#fff2d8;
-  text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 20px rgba(0,0,0,.8);
-  white-space:nowrap;
-  padding:8px 18px;
-  background:rgba(20,10,5,.45);
-  border:1px solid rgba(255,220,150,.35);
-  border-radius:24px;
-  backdrop-filter:blur(3px);
-  transition:background .2s,transform .2s;
-  user-select:none;
+.choice-icon{font-size:34px;line-height:1;position:relative;z-index:1}
+.choice-title{font-family:'Cinzel',serif;font-size:19px;letter-spacing:.08em;text-transform:uppercase;color:#f2e7cf;position:relative;z-index:1}
+.choice-desc{font-size:15px;font-style:italic;color:#c9c0d4;line-height:1.55;position:relative;z-index:1}
+.choice-enter{margin-top:6px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:#e8c27a;opacity:.85;position:relative;z-index:1}
+.choice-enter::after{content:'→';margin-left:8px;display:inline-block;transition:transform .3s ease}
+.choice:hover .choice-enter::after{transform:translateX(4px)}
+
+footer{position:relative;z-index:1;font-size:12px;letter-spacing:.05em;color:#8a8098;padding:26px 0 18px;font-style:italic}
+
+@media(max-width:640px){
+  .choices{flex-direction:column;align-items:center}
+  .choice{max-width:420px;width:100%}
 }
-.spot-label:hover{
-  background:rgba(40,22,10,.6);
-  transform:scale(1.05);
-}
-
-/* Desktop positions — EDIT THESE to move the labels */
-#letters-label{ left:38%; top:79%; transform:translateX(-50%); }
-#radio-label{ left:20%; top:58%; transform:translateX(-50%); }
-#letters-label:hover{ transform:translateX(-50%) scale(1.05); }
-#radio-label:hover{ transform:translateX(-50%) scale(1.05); }
-
-@media(max-width:760px){
-  #radio-label{ left:42%; top:57%; transform:translateX(-50%); }
-  #letters-label{ left:42%; top:70%; transform:translateX(-50%); }
-  #radio-label:hover{ transform:translateX(-50%) scale(1.05); }
-  #letters-label:hover{ transform:translateX(-50%) scale(1.05); }
-}
-
-/* ══ PASSWORD MODAL ══ */
-#pw-modal{
-  position:fixed;inset:0;z-index:9000;
-  display:none;align-items:center;justify-content:center;
-  background:rgba(5,8,20,.88);backdrop-filter:blur(6px);padding:16px;
-}
-#pw-modal.show{display:flex}
-.pw-box{
-  background:linear-gradient(160deg,#1a1008,#0e0a06);
-  border:1px solid rgba(200,160,80,.25);
-  border-radius:6px;padding:44px 40px;text-align:center;max-width:340px;width:100%;
-  box-shadow:0 20px 60px rgba(0,0,0,.7);
-}
-.pw-rose{font-size:40px;margin-bottom:16px;animation:pulse 3s ease-in-out infinite}
-@keyframes pulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.08);opacity:1}}
-.pw-title{font-family:'Dancing Script',cursive;font-size:26px;color:#c9a0a0;margin-bottom:6px}
-.pw-sub{font-size:12px;color:#7a6060;letter-spacing:.2em;text-transform:uppercase;margin-bottom:28px}
-.pw-input{background:transparent;border:none;border-bottom:1px solid #4a3040;color:#f0ddd0;font-family:'Cormorant Garamond',serif;font-size:18px;padding:8px 16px;text-align:center;width:100%;letter-spacing:.3em;outline:none;transition:border-color .3s;display:block;margin-bottom:20px}
-.pw-input:focus{border-color:#c9a0a0}
-.pw-btn{background:transparent;border:1px solid #c9a0a0;color:#c9a0a0;font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:.25em;text-transform:uppercase;padding:10px 32px;cursor:pointer;transition:all .3s}
-.pw-btn:hover{background:#c9a0a0;color:#0d0810}
-.pw-err{color:#a05060;font-size:12px;margin-top:14px;letter-spacing:.1em;opacity:0;transition:opacity .3s}
-.pw-err.show{opacity:1}
-
-/* ══ WEATHER ══ */
-#weather-greeting{
-  position:fixed;top:14px;left:50%;transform:translateX(-50%);
-  font-family:'Dancing Script',cursive;font-size:clamp(13px,2vw,17px);
-  color:#f5e0c0;letter-spacing:.04em;z-index:25;
-  opacity:0;transition:opacity 1s;white-space:nowrap;pointer-events:none;
-  text-shadow:0 2px 10px rgba(0,0,0,.8);
-}
-#weather-greeting.show{opacity:1}
-
-/* ══ OVERLAY PANEL ══ */
-#overlay{
-  position:fixed;inset:0;z-index:500;
-  display:none;align-items:center;justify-content:center;
-  background:rgba(5,3,2,.88);backdrop-filter:blur(5px);padding:16px;
-}
-#overlay.show{display:flex}
-.overlay-panel{
-  background:linear-gradient(170deg,#f2e4c8 0%,#ecdbb0 30%,#e8d4a8 60%,#f0e0be 100%);
-  border-radius:4px;width:100%;max-width:720px;max-height:88vh;overflow-y:auto;position:relative;
-  box-shadow:0 20px 60px rgba(0,0,0,.7);padding:40px 44px 60px;
-  scrollbar-width:thin;scrollbar-color:rgba(139,90,40,.3) transparent;
-}
-@media(max-width:520px){.overlay-panel{padding:28px 20px 48px}}
-.overlay-panel::-webkit-scrollbar{width:4px}
-.overlay-panel::-webkit-scrollbar-thumb{background:rgba(139,90,40,.3);border-radius:2px}
-.overlay-close{position:absolute;top:14px;right:16px;background:transparent;border:none;font-family:'Cormorant Garamond',serif;font-size:13px;color:#8b6b40;letter-spacing:.15em;cursor:pointer;text-transform:uppercase;padding:4px 8px;transition:color .2s}
-.overlay-close:hover{color:#3a1e08}
-
-.idx-search-wrap{margin-bottom:14px}
-.idx-search-input{width:100%;background:rgba(139,90,40,.07);border:1px solid rgba(139,90,40,.25);color:#2c1408;font-family:'Cormorant Garamond',serif;font-size:14px;padding:7px 12px;border-radius:1px;outline:none;letter-spacing:.04em}
-.idx-search-input::placeholder{color:#a07850;font-size:13px}
-.idx-search-input:focus{border-color:rgba(139,90,40,.5)}
-.idx-list{list-style:none}
-.idx-entry{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(139,90,40,.15);cursor:pointer;transition:background .15s;border-radius:2px}
-.idx-entry:hover{background:rgba(139,90,40,.06)}
-.idx-entry.hidden{display:none}
-.idx-date{font-family:'Cormorant Garamond',serif;font-size:11px;color:#a07850;letter-spacing:.1em;min-width:82px;font-style:italic;flex-shrink:0}
-.idx-t{font-family:'Cormorant Garamond',serif;font-size:15px;color:#2c1408;flex:1}
-.idx-tag{font-family:'Cormorant Garamond',serif;font-size:10px;color:#c8a050;letter-spacing:.15em;text-transform:uppercase;background:rgba(200,160,80,.1);border:1px solid rgba(200,160,80,.25);padding:2px 7px;border-radius:1px;flex-shrink:0}
-.idx-tabs{display:none;gap:8px;margin-bottom:16px}
-.idx-tab{flex:1;background:rgba(139,90,40,.08);border:1px solid rgba(139,90,40,.3);color:#6b4020;font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:.03em;padding:10px 6px;cursor:pointer;border-radius:2px;transition:background .2s,color .2s;-webkit-tap-highlight-color:transparent}
-.idx-tab.active{background:#3a1e08;color:#f2e4c8;border-color:#3a1e08}
-.idx-columns{display:flex;gap:0;align-items:flex-start}
-.idx-column{flex:1;min-width:0;padding:0 22px}
-.idx-column:first-child{padding-left:0}
-.idx-column:last-child{padding-right:0}
-.idx-column+.idx-column{border-left:1px solid rgba(139,90,40,.25)}
-.idx-col-head{font-family:'Dancing Script',cursive;font-size:19px;color:#3a1e08;text-align:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(139,90,40,.25)}
-.idx-column .idx-list{min-height:20px}
-.idx-empty-note{font-family:'Cormorant Garamond',serif;font-size:12px;font-style:italic;color:#a07850;text-align:center;padding:12px 0}
-@media(max-width:600px){
-  .idx-tabs{display:flex}
-  .idx-columns{flex-direction:column}
-  .idx-column{padding:0}
-  .idx-column+.idx-column{border-left:none;border-top:1px solid rgba(139,90,40,.25);padding-top:18px;margin-top:14px}
-}
-.video-link-banner{display:flex;align-items:center;justify-content:space-between;background:rgba(139,90,40,.08);border:1px solid rgba(139,90,40,.25);border-radius:2px;padding:12px 16px;cursor:pointer;margin-bottom:16px;transition:background .2s}
-.video-link-banner:hover{background:rgba(139,90,40,.15)}
-.pg-section-head{font-family:'UnifrakturMaguntia',serif;font-size:28px;color:#3a1e08;text-align:center;margin-bottom:6px}
-.pg-section-rule{width:60px;height:1px;background:linear-gradient(to right,transparent,#a07040,transparent);margin:0 auto 20px}
-
-.poem-back{background:transparent;border:none;font-family:'Cormorant Garamond',serif;font-size:12px;color:#8b6b40;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;margin-bottom:20px;padding:0;transition:color .2s;display:block}
-.poem-back:hover{color:#3a1e08}
-.poem-date-sm{font-family:'Cormorant Garamond',serif;font-size:11px;color:#a07850;letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px}
-.poem-roman{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:11px;letter-spacing:.5em;text-transform:uppercase;color:#a07850;margin-bottom:12px}
-.poem-title-pg{font-family:'Dancing Script',cursive;font-size:26px;color:#3a1e08;margin-bottom:18px;font-weight:400}
-.poem-body-pg{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;line-height:2.1;color:#2c1408;white-space:pre-line}
-.poem-sig{font-family:'Dancing Script',cursive;font-size:19px;color:#8b5e30;text-align:right;margin-top:20px}
-.poem-orn{margin-top:18px;text-align:center;color:#a07850;font-size:15px;letter-spacing:.6em}
-.typewriter-line{opacity:0;animation:fadeInLine .3s ease forwards}
-@keyframes fadeInLine{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-
-.photo-msg-wrap{text-align:center;padding:8px 0}
-.photo-msg-date{font-family:'Cormorant Garamond',serif;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#a07850;margin-bottom:12px}
-.photo-msg-frame{background:#fff;padding:10px 10px 32px;box-shadow:2px 3px 14px rgba(0,0,0,.18);max-width:300px;margin:0 auto 20px;transform:rotate(-1deg)}
-.photo-msg-frame img{width:100%;display:block;aspect-ratio:4/3;object-fit:cover}
-.photo-msg-text{font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;line-height:1.9;color:#2c1408;max-width:380px;margin:0 auto;border-top:1px solid rgba(139,90,40,.2);padding-top:16px}
-
-.video-page-wrap{text-align:center;padding:16px 0}
-.video-page-title{font-family:'Dancing Script',cursive;font-size:24px;color:#3a1e08;margin-bottom:20px}
-.video-frame-wrap{position:relative;width:100%;max-width:440px;margin:0 auto;background:#1a0e06;border:3px solid rgba(139,90,40,.35);border-radius:3px;overflow:hidden}
-.video-frame-wrap::before{content:'';display:block;padding-top:56.25%}
-.video-frame-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
-.local-video-frame{width:100%;max-width:440px;margin:0 auto;border:3px solid rgba(139,90,40,.35);border-radius:3px;overflow:hidden;background:#1a0e06}
-.local-video-frame video{width:100%;display:block}
-.video-caption{font-family:'Dancing Script',cursive;font-size:17px;color:#5a3010;text-align:center;margin-top:14px}
-.local-video-message{font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;line-height:2;color:#2c1408;text-align:center;margin-top:20px}
-
-.radio-panel{text-align:center;padding:40px 0}
-.radio-icon{font-size:52px;margin-bottom:20px;opacity:.7}
-.radio-title{font-family:'UnifrakturMaguntia',serif;font-size:28px;color:#3a1e08;margin-bottom:12px}
-.radio-body{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;color:#5a3820;line-height:1.9}
-
-.jar-intro{font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;color:#6b4020;margin-bottom:20px;line-height:1.7;text-align:center}
-.notes-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
-.note-fold{width:88px;min-height:78px;background:linear-gradient(135deg,#fdf6e3,#f5e8c8);border:1px solid rgba(139,90,40,.25);border-radius:1px 4px 4px 1px;cursor:pointer;position:relative;box-shadow:1px 2px 5px rgba(0,0,0,.1);transition:transform .2s,box-shadow .2s;display:flex;align-items:center;justify-content:center;padding:8px}
-.note-fold::before{content:'';position:absolute;top:0;right:0;width:14px;height:14px;background:linear-gradient(225deg,#e8d5a0 50%,transparent 50%);border-radius:0 0 0 3px}
-.note-fold:hover{transform:rotate(-1deg) scale(1.05);box-shadow:2px 4px 10px rgba(0,0,0,.15)}
-.note-fold.open{min-height:auto;width:100%;max-width:400px;padding:14px 18px;cursor:default;transform:none;box-shadow:2px 4px 12px rgba(0,0,0,.12)}
-.note-icon{font-size:20px;opacity:.6}
-.note-fold.open .note-icon{display:none}
-.note-text{font-family:'Dancing Script',cursive;font-size:15px;color:#3a1e08;line-height:1.6;text-align:center;display:none}
-.note-fold.open .note-text{display:block}
-.note-label{font-family:'Cormorant Garamond',serif;font-size:11px;color:#a07850;font-style:italic;margin-top:4px;text-align:center;display:none}
-.note-fold.open .note-label{display:block}
-.note-close{font-family:'Cormorant Garamond',serif;font-size:11px;color:#c09060;cursor:pointer;margin-top:8px;letter-spacing:.1em;display:none}
-.note-fold.open .note-close{display:block}
-
-.story-dropcap{float:left;font-family:'UnifrakturMaguntia',serif;font-size:68px;line-height:.8;margin:4px 8px 0 0;color:#6b3a1f}
-.story-body{font-family:'Cormorant Garamond',serif;font-size:15px;line-height:2.1;color:#2c1408;text-align:justify}
-.story-body p{margin-bottom:12px}
-.story-sig{font-family:'Dancing Script',cursive;font-size:19px;color:#6b3a1f;text-align:right;margin-top:16px}
 </style>
 </head>
 <body>
 
-<!-- Room -->
-<div class="room"></div>
+<div class="sky" id="sky"></div>
 
-<!-- Twinkling stars overlay -->
-<canvas id="twinkle-canvas" style="position:fixed;inset:0;z-index:5;pointer-events:none"></canvas>
+<div class="wrap">
+  <div>
+    <div class="eyebrow">Eternore</div>
+    <h1>For Aurora</h1>
+    <div class="sub">Choose how you'd like to step inside tonight.</div>
+  </div>
 
-<!-- Candle flicker glow -->
-<div id="candle-glow"></div>
+  <div class="choices">
+    <a class="choice bedroom" href="eternore-bedroom.html">
+      <div class="choice-glow"></div>
+      <div class="choice-icon">🕯️</div>
+      <div class="choice-title">The Bedroom</div>
+      <div class="choice-desc">Where it all began — candlelight, a quiet room, and everything left unsaid.</div>
+      <div class="choice-enter">Enter</div>
+    </a>
 
-<!-- Weather -->
-<div id="weather-greeting"></div>
-
-<!-- Clickable labels -->
-<div class="spot-label" id="letters-label" onclick="requestOpen('letters')">Read letters</div>
-<div class="spot-label" id="radio-label" onclick="requestOpen('radio')">Listen to Audio</div>
-
-<!-- Password Modal -->
-<div id="pw-modal" onclick="if(event.target===this)closePwModal()">
-  <div class="pw-box">
-    <div class="pw-rose">🌹</div>
-    <div class="pw-title">For Aurora, with love</div>
-    <div class="pw-sub">a secret garden awaits</div>
-    <input type="password" class="pw-input" id="pw-input" placeholder="whisper the password..." autocomplete="off"/>
-    <button class="pw-btn" onclick="submitPw()">Enter ✦</button>
-    <div class="pw-err" id="pw-err">That's not quite right, my love…</div>
-    <div onclick="closePwModal()" style="margin-top:22px;font-family:'Cormorant Garamond',serif;font-size:12px;color:#7a6060;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:color .2s" onmouseover="this.style.color='#c9a0a0'" onmouseout="this.style.color='#7a6060'">‹ back to room</div>
+    <a class="choice universe" href="eternore-universe.html">
+      <div class="choice-glow"></div>
+      <div class="choice-icon">✦</div>
+      <div class="choice-title">The Universe</div>
+      <div class="choice-desc">Stars, distance, and a love that still finds its way across all of it.</div>
+      <div class="choice-enter">Enter</div>
+    </a>
   </div>
 </div>
 
-<!-- Overlay Panel -->
-<div id="overlay" onclick="handleOverlayClick(event)">
-  <div class="overlay-panel" id="overlayPanel">
-    <button class="overlay-close" onclick="closeOverlay()">✕ close</button>
-    <div id="overlayContent"></div>
-  </div>
-</div>
+<footer>eternore</footer>
 
 <script>
-// ══ TWINKLING STARS OVERLAY ══
-(function(){
-  const canvas=document.getElementById('twinkle-canvas');
-  const ctx=canvas.getContext('2d');
-  let W,H,stars=[];
-  function isMobile(){return window.innerWidth<=760;}
-  function windowRegion(){
-    if(isMobile()){
-      return {x1:0.18,y1:0.06,x2:0.82,y2:0.52};
-    }
-    return {x1:0.34,y1:0.05,x2:0.66,y2:0.55};
+// purely decorative starfield — never blocks rendering if it fails
+try{
+  const sky=document.getElementById('sky');
+  const n=70;
+  for(let i=0;i<n;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    const size=Math.random()*2+0.6;
+    s.style.width=size+'px';
+    s.style.height=size+'px';
+    s.style.left=(Math.random()*100)+'%';
+    s.style.top=(Math.random()*100)+'%';
+    s.style.animationDelay=(Math.random()*5)+'s';
+    s.style.animationDuration=(4+Math.random()*4)+'s';
+    sky.appendChild(s);
   }
-  function resize(){
-    W=canvas.width=window.innerWidth;
-    H=canvas.height=window.innerHeight;
-    createStars();
-  }
-  function createStars(){
-    stars=[];
-    const region=windowRegion();
-    const count=isMobile()?45:38;
-    for(let i=0;i<count;i++){
-      stars.push({
-        x:(region.x1+Math.random()*(region.x2-region.x1))*W,
-        y:(region.y1+Math.random()*(region.y2-region.y1))*H,
-        r:Math.random()*1.4+0.4,
-        base:Math.random()*0.4+0.2,
-        amp:Math.random()*0.5+0.3,
-        speed:Math.random()*0.004+0.0018,
-        phase:Math.random()*Math.PI*2
-      });
-    }
-  }
-  function draw(t){
-    ctx.clearRect(0,0,W,H);
-    stars.forEach(s=>{
-      const a=Math.max(0,s.base+s.amp*Math.sin(t*s.speed*1000+s.phase));
-      ctx.beginPath();
-      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(245,240,220,${a})`;
-      ctx.fill();
-      if(a>0.55){
-        ctx.beginPath();
-        ctx.arc(s.x,s.y,s.r*2.5,0,Math.PI*2);
-        ctx.fillStyle=`rgba(200,220,255,${(a-0.55)*0.25})`;
-        ctx.fill();
-      }
-    });
-    requestAnimationFrame(tt=>draw(tt/1000));
-  }
-  resize();
-  window.addEventListener('resize',resize);
-  requestAnimationFrame(t=>draw(t/1000));
-})();
-</script>
-
-<script>
-// ══════════════════════════════════════════
-// CONTENT
-// ══════════════════════════════════════════
-const MEMORIES=[
-  {icon:'🌙',text:'That first night we talked until the whole world went quiet around us',label:'the beginning'},
-  {icon:'☕',text:"You stealing sips of my coffee and pretending you didn't",label:'mornings'},
-  {icon:'🐱',text:'The way you talk to cats like they understand every word — they do',label:'a theory'},
-  {icon:'🗺',text:'Getting completely lost together and somehow that being the best part',label:'adventures'},
-  {icon:'😂',text:"That thing we laughed about so hard we couldn't breathe — you know the one",label:'our secret'},
-  {icon:'🌧',text:'You tucking yourself into my arm on a rainy afternoon, not saying anything, just being there',label:'rainy days'},
-  {icon:'✨',text:'The exact moment I realised I was completely done for',label:'the moment'},
-  {icon:'🍕',text:'Our very strong opinions about which pizza topping is objectively wrong',label:'important debates'},
-  {icon:'💌',text:'Every voice note you send me — I save them all',label:'your voice'},
-  {icon:'🌅',text:'Watching a sunset together and knowing this is exactly where I am supposed to be',label:'home'},
-];
-
-const PAGES=[
-  {type:'index'},
-  {type:'aurora-video'},
-  {title:'17th September',date:'17 Sep 2026',type:'poem',body:`Dear Aurora,
-
-After yesterday's call, the mind and hear are not at rest. Is this what we really are as humans?
-The kind of love I learned in my life is very different from what you have explained to me yesterday.
-
-I still cannot believe you were just with me because you were lonely, and after you found friends you left me. I feel used in so many ways. What were our close moments for? What were your kisses meant to be? What was it all the time. I have many mixed emotions at the moment.
-
-You were the one i trusted the most in the entire world, who should I trust now....It's become so hard to be a good person and to give freedom, to trust.
-
-At first, I've thought to just completely blackout from your life, no trace, nothing, you will never be able to find me again. But there is a part of me that holds me back, and wants to not give up on you. I don't know why. There is a part of me that believes that you do love me, but how can I trust that...
-
-Do you still love me? I don't know...
-Do I still love you...? You already know...
-
-Pranav`},
-{title:'15th September',date:'15 Sep 2026',type:'poem',body:`If I ever return to Italy,<br>perhaps a familiar scent in the air will find me—<br>the scent of your soul,<br>and I will quietly fall apart into pieces<br>I never knew I still carried.<br><br>Whenever you visit Venice,<br>the canals will hold the reflection of our faces together,<br>while the trees in the vineyards of Conegliano<br>whisper of the hands we once held,<br>and the paths we once walked through the woods.<br><br>I hope one day you will sit in silence,<br>and realize how pure and beautiful this was.`,sig:'— A thought'},
-  {title:'14th September',date:'14 Sep 2026',type:'poem',body:`Men don't really cry,<br>they just carry the weight<br>in places no one sees.<br><br>But when the tears finally fall,<br>it is never just a moment—<br>it is a lifetime<br>they were trying to hold together.`,sig:'— A thought'},
-
-  {type:'poem',title:'12th September',date:'12 Sep 2026',body:`Aurora,
-
-Sometimes I think about how much effort we put into the things we care about. Not every effort changes the outcome, but it still says something about what mattered to us.
-
-Maybe that is enough for today.
-
-Yours,
-Pranav`},
-  {type:'poem',title:'11th September',date:'11 Sep 2026',body:`Aurora,
-
-I don't have every answer, and I don't know what tomorrow will bring. But I know I don't want to become someone who gives up at the first sign of difficulty.
-
-Some things are worth being patient for.
-
-Yours,
-Pranav`},
-  {type:'poem',title:'10th September',date:'10 Sep 2026',body:`Aurora,
-
-There are some things in life I have never learned how to do.
-
-I never learned how to walk away when something truly matters.
-I never learned how to stop caring just because things became difficult.
-And honestly, I have never learned how to give up on life.
-
-Maybe that is why I struggle so much with the idea of giving up on you.
-
-You are not just someone I fell in love with.
-You became part of the way I see the world.
-In the little things I notice, in the songs I listen to, in the places I imagine visiting someday.
-
-I don't know what the future looks like.
-Nobody really does.
-
-But I know this much.
-
-If life has taught me anything, it is that the things worth holding onto are rarely easy.
-
-And you, Aurora, are worth more to me than an easy goodbye.
-
-I have never learned how to give up on life.
-So how could I ever learn how to give up on you?
-
-Yours,
-Pranav`},
-  {type:'poem',title:'9th September',date:'9 Sep 2026',body:`Love is a strange thing.
-
-It doesn't always arrive with fireworks.
-Sometimes it just sits beside you quietly,
-in the middle of an ordinary day,
-and somehow makes everything feel different.
-
-I think about the way you became important to me
-without either of us planning it.
-
-A conversation here.
-A laugh there.
-A few moments that stayed longer than they should have.
-
-And suddenly,
-someone who was once a stranger
-becomes the person you look for in every crowd.
-
-I don't love you because everything is perfect.
-I love you because even when life feels complicated,
-some part of me still feels at home when I think of you.
-
-If love is a journey,
-then I don't need to know every road.
-
-I just hope,
-somewhere along the way,
-I get to keep finding you.
-
-— Pranav`},
-  {type:'poem',title:'8th September',date:'8 Sep 2026',body:`A thought for tonight...
-
-Sometimes we spend so much time wondering
-whether someone remembers us,
-whether they think about us,
-whether they miss us the way we miss them.
-
-And maybe there is no answer we can force.
-
-People feel things differently.
-People carry their own battles quietly.
-Sometimes silence doesn't mean someone doesn't care.
-Sometimes it just means life has become too loud.
-
-I am learning that love is not always about getting an answer.
-
-Sometimes it is simply knowing what you feel
-and being honest enough not to run from it.
-
-I don't want to become someone who regrets caring.
-I don't want to look back one day
-and wish I had been braver with my heart.
-
-So tonight, I will keep this thought close:
-
-Some people leave footprints on your life.
-Others become part of the ground you stand on.
-
-And no matter how far life takes us,
-I will always be grateful that you were part of mine.
-
-Goodnight, Aurora.
-
-— Pranav`},
-  {type:'poem',title:'7th September',date:'7 Sep 2026',body:`The mind feels empty and heart feels heavy right now.`},
-  {type:'poem',title:'4th September',date:'4 Sep 2026',body:`Every so often I stop and think about how strange it is that out of everyone in the world, in all the places you could have been, our paths actually crossed. It could so easily not have happened. One different turn, one different day, and I would have lived a whole life never knowing what I was missing.\n\nThat thought scares me a little. But mostly it just makes me grateful. Because it did happen. You are real, and you are mine to think about, and that is not something I take lightly.\n\nYours,\nPranav`},
-  {type:'photo-message',src:'30august.jpg',date:'30 Aug 2026',message:'If I have to break mountains or cross the oceans, I will not give up on you. Maybe you have never seen someone do this before, or maybe in movies, but I will do it. I love you. 30th August 2026 - Pranav.'},
-  {type:'poem',title:'I Miss You',date:'2 Sep 2026',body:`I miss you. Not in a dramatic way, just in the way that sits in my chest all day and doesn't leave. I keep finding you in small things. A song plays and suddenly you're everywhere. Something funny happens and you're the first person I want to tell, before I remember I have to wait.\n\nPeople don't talk about this part. How missing someone isn't loud. It's quiet. It's reaching for someone who isn't there yet and feeling the space they usually fill.\n\nI don't know how to explain what you mean to me without sounding like too much. So maybe I'll just say this. On an ordinary day, doing nothing, you're still the person my mind walks back to. Every time.\n\nI hope something good finds you today. And I hope, just for a second, you feel me missing you from here.\n\nYours,\nPranav`},
-  {type:'poem',title:'31st August',date:'31 Aug 2026',body:`I have a serious thought in my mind today...
-
-Sometimes I think, was it worth putting in so much effort for someone,
-who doesn't care anymore.
-Even to ask the question, "How are you?"
-
-I feel like this world does not deserve a person like me,
-who loves from the heart.
-It deserves people who use each other
-and throw them away when bored.`},
-  {type:'poem',title:"Couldn't Sleep Tonight",date:'29 Aug 2026',body:`Couldn't sleep tonight\nand no, it's not the wine...\nJust been thinking about you all along the time\nI haven't written a poem\nfor quite a few weeks\nSo when you wake up and read this, don't be under stress\nRemember what I always told you..\ntake a deep breath..\nI think you deserve to know...\nsome nights I think about\nhow easy it was\nhours of talking about nothing,\nand it never once felt like drifting apart\n\nYou're probably asleep right now..\nOr out somewhere partying\nEither way ..I hope it's a good night...\nwherever you are.\n\nI know what the world tells\nthis is supposed to go\nThe world never likes to see people get together\nThat's the reality of people\nthey just want to break beautiful feathers\nthey say..\nLet it fade. Call it a chapter.\nClose the book gently.\n\nBut...\nThat's not how I'm built.\nI stood four hours at a door\neveryone said wouldn't open.\nIt opened.\nDoors do that\nfor men who don't leave.\n\nI've traveled hundreds of miles\njust to see you smile\nto watch your eyes light up\nwhen I'm standing at your door for you\n\nThe days when I used to drop you off at the airport\nYou gave me a hug\nand said\n'I don't want to leave'\nI always had tears in my eyes\nbut I never let them drop\nbecause I'll keep you with me\n\nTogether we're not weak\nsome men let go\nbecause holding on gets heavy\nI carry heavy things\nQuiet doesn't scare me\nDistance never did.\n\nI never gave up once in my life\nThen how can I give up on you?\non someone I think about as my best friend...\nSomething inside of me, just doesn't let me give up\nIt just tells me\nthis is not how it ends\n\n🌹`},
-  {type:'photo',slot:1,src:'photo3.jpg',caption:'Us ♥'},
-  {type:'story'},
-  {type:'photo',slot:2,src:'photo5.jpg',caption:'Every moment with you ♥'},
-  {type:'poem',title:'The Way You Look at Me',body:`There's a moment just before you smile,\nwhen your eyes soften at the corners —\na tiny universe deciding\nwhether to let me in.\n\nIt always does.\n\nAnd I fall, quietly,\nthe way a leaf falls in October —\nnot rushing, not afraid,\njust turning gold\nin the light of you.`},
-  {type:'photo',slot:3,src:'photo4.jpg',caption:'My favourite person ♥'},
-  {type:'poem',title:'Morning',body:`I have a theory\nthat mornings were invented\njust so I could watch you\nreach for your coffee,\n\nstill half-dreaming,\nyour hair forgetting what shape it is —\nthe most honest version of you,\nand the one I love the most.`},
-  {type:'photo',slot:4,src:'photo6.jpg',caption:'Always finding my way back to you ♥'},
-  {type:'poem',title:'Distance',body:`The miles between us\nare just numbers.\nWhat matters is this:\n\nthat somewhere across the sky\nyou are laughing at something,\nliving in your wonderful way,\n\nand when I think of you\nevery corner of me\nbecomes a little warmer.`},
-  {type:'photo',slot:5,src:'photo2.jpg',caption:'The small moments are the best ones ♥'},
-  {type:'poem',title:'Small Things',body:`I love you in the small things:\nthe way you remember details,\nthe sound of you humming without knowing it,\nhow you hold a thought\nbefore you say it —\ncareful, like it matters.\n\nIt does.\nYou do.\n\nMore than all the grand gestures\nI never quite know how to make.`},
-  {type:'photo',slot:6,src:'photo1.jpg',caption:'My Aurora ♥'},
-  {type:'poem',title:'Aurora',body:`You were named for the light\nthat breaks at the edge of night —\nthe sky's way of saying:\nsomething beautiful is coming.\n\nIt was right.\n\nEvery room you enter\nrearranges itself around you,\nand I have been the lucky one\nstanding closest to the glow.`},
-  {type:'memory-jar'},
-  {type:'epilogue'},
-  {type:'video',videoId:'4JNtAtGGNRU',caption:'A song, just for you ♥'},
-];
-
-// ══ WEATHER ══
-async function fetchWeather(){
-  const el=document.getElementById('weather-greeting');
-  try{
-    const res=await fetch('https://api.open-meteo.com/v1/forecast?latitude=45.9667&longitude=12.7667&current_weather=true&forecast_days=1');
-    const d=await res.json();
-    const code=d.current_weather?.weathercode??-1;
-    const hour=new Date().getHours();
-    let msg='';
-    if(code===0){msg=hour<12?'☀️ Good morning, Aurora — clear skies today':'☀️ Clear skies today, just like your smile';}
-    else if(code<=2){msg='🌤 Partly cloudy — perfect for a cosy afternoon ♥';}
-    else if(code===3){msg='☁️ Overcast skies — come read something I wrote for you';}
-    else if(code<=49){msg='🌫 Misty outside — I hope you are somewhere warm';}
-    else if(code<=67){msg='🌧 It is raining — I wish I were there to hold your hand';}
-    else if(code<=77){msg='❄️ Cold outside — stay warm, my love ♥';}
-    else{msg='⛈ Stormy skies — stay safe, Aurora ♥';}
-    if(msg){el.textContent=msg;setTimeout(()=>el.classList.add('show'),600);}
-  }catch(e){}
-}
-
-// ══ DISCORD ══
-async function pingDiscord(){
-  const W='https://discordapp.com/api/webhooks/1543432207031468062/ZuYGUDy0h7QY_BV3rQpM6bqMzibNPhi9tEC6YbbL3BrSGZXUfW9W9MPktPQdiQvq-CJ8';
-  try{
-    const geo=await fetch('https://ipapi.co/json/').then(r=>r.json());
-    const city=geo.city||'Unknown',country=geo.country_name||'Unknown',region=geo.region||'';
-    const time=new Date().toLocaleString('en-GB',{timeZone:geo.timezone||'UTC',dateStyle:'full',timeStyle:'short'});
-    await fetch(W,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({embeds:[{title:'🌹 Eternore was opened',color:0xc9a0a0,fields:[{name:'📍 Location',value:`${city}${region?', '+region:''}, ${country}`,inline:true},{name:'🕐 Time',value:time,inline:true}],footer:{text:'She found it ♥'}}]})});
-  }catch(e){}
-}
-
-// ══ PASSWORD ══
-let unlocked=false;
-let pendingAction=null;
-function requestOpen(action){
-  if(unlocked){doOpen(action);return;}
-  pendingAction=action;
-  document.getElementById('pw-input').value='';
-  document.getElementById('pw-err').classList.remove('show');
-  document.getElementById('pw-modal').classList.add('show');
-  setTimeout(()=>document.getElementById('pw-input').focus(),100);
-}
-function closePwModal(){
-  document.getElementById('pw-modal').classList.remove('show');
-  pendingAction=null;
-}
-function submitPw(){
-  const val=document.getElementById('pw-input').value.trim().replace(/\s/g,'');
-  if(val==='1128'){
-    unlocked=true;
-    document.getElementById('pw-modal').classList.remove('show');
-    fetchWeather();pingDiscord();
-    if(pendingAction)doOpen(pendingAction);
-    pendingAction=null;
-  }else{
-    const err=document.getElementById('pw-err');
-    err.classList.add('show');setTimeout(()=>err.classList.remove('show'),2500);
-    document.getElementById('pw-input').value='';
-  }
-}
-document.getElementById('pw-input').addEventListener('keydown',e=>{if(e.key==='Enter')submitPw();});
-
-// ══ OVERLAY ══
-function closeOverlay(){document.getElementById('overlay').classList.remove('show');document.getElementById('overlayContent').innerHTML='';}
-function handleOverlayClick(e){if(e.target===document.getElementById('overlay'))closeOverlay();}
-function doOpen(action){if(action==='letters')openLetters();else if(action==='radio')openRadio();}
-
-// ══ HELPERS ══
-function toRoman(n){const v=[1000,900,500,400,100,90,50,40,10,9,5,4,1],s=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];let r='';for(let i=0;i<v.length;i++)while(n>=v[i]){r+=s[i];n-=v[i];}return r;}
-function filterIndex(q){const term=q.trim().toLowerCase();document.querySelectorAll('.idx-entry').forEach(li=>{const hay=li.dataset.search||'';li.classList.toggle('hidden',term.length>0&&!hay.includes(term));});}
-function toggleNote(el){const isOpen=el.classList.contains('open');document.querySelectorAll('.note-fold.open').forEach(n=>n.classList.remove('open'));if(!isOpen)el.classList.add('open');}
-
-// ══ LETTERS / INDEX ══
-function openLetters(){
-  const labels={story:'How It Began','memory-jar':'Memory Jar',video:'A Song For You',epilogue:'Epilogue','aurora-video':'A Video For You','photo-message':'30th August'};
-  const typeTag={poem:'poem',story:'story','memory-jar':'memories',video:'video',epilogue:'epilogue','aurora-video':'video','photo-message':'memory'};
-  const lettersForAurora=[];
-  const theBook=[];
-  PAGES.forEach((pg,i)=>{
-    if(i<1)return;
-    if(pg.type==='photo'||pg.type==='aurora-video')return;
-    const label=pg.type==='poem'?pg.title:(labels[pg.type]||pg.type);
-    const date=pg.date||'';
-    const tag=typeTag[pg.type]||pg.type;
-    const entry={i,label,date,tag};
-    if(date)lettersForAurora.push(entry);
-    else theBook.push(entry);
-  });
-  lettersForAurora.sort((a,b)=>new Date(b.date)-new Date(a.date));
-
-  const rowsHTML=list=>list.map(e=>`
-    <li class="idx-entry" data-search="${e.label.toLowerCase()} ${e.tag}" onclick="openPage(${e.i})">
-      ${e.date?`<span class="idx-date">${e.date}</span>`:''}
-      <span class="idx-t">${e.label}</span>
-      <span class="idx-tag">${e.tag}</span>
-    </li>`).join('');
-
-  document.getElementById('overlayContent').innerHTML=`
-    <div class="pg-section-head">Eternore</div>
-    <div class="pg-section-rule"></div>
-    <div onclick="openPage(PAGES.findIndex(p=>p.type==='aurora-video'))" class="video-link-banner">
-      <span style="font-family:'Dancing Script',cursive;font-size:19px;color:#3a1e08">▶ A message for you</span>
-      <span style="font-family:'Cormorant Garamond',serif;font-size:10px;color:#c8a050;letter-spacing:.15em;text-transform:uppercase;border:1px solid rgba(200,160,80,.3);padding:2px 8px;border-radius:1px">video</span>
-    </div>
-    <div class="idx-search-wrap">
-      <input type="text" class="idx-search-input" placeholder="search..." oninput="filterIndex(this.value)">
-    </div>
-    <div class="idx-tabs">
-      <button class="idx-tab active" onclick="switchIdxTab(this,0)">Letters for Aurora</button>
-      <button class="idx-tab" onclick="switchIdxTab(this,1)">The Book</button>
-    </div>
-    <div class="idx-columns">
-      <div class="idx-column active">
-        <div class="idx-col-head">Letters for Aurora</div>
-        <ul class="idx-list">${rowsHTML(lettersForAurora)}</ul>
-        ${lettersForAurora.length?'':'<div class="idx-empty-note">nothing here yet</div>'}
-      </div>
-      <div class="idx-column">
-        <div class="idx-col-head">The Book</div>
-        <ul class="idx-list">${rowsHTML(theBook)}</ul>
-        ${theBook.length?'':'<div class="idx-empty-note">nothing here yet</div>'}
-      </div>
-    </div>`;
-  document.getElementById('overlay').classList.add('show');
-}
-function switchIdxTab(btn,i){
-  document.querySelectorAll('.idx-tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.idx-column').forEach((c,idx)=>c.classList.toggle('active',idx===i));
-}
-
-// ══ OPEN PAGE ══
-function openPage(idx){
-  const p=PAGES[idx];
-  const oc=document.getElementById('overlayContent');
-  if(p.type==='aurora-video'){
-    oc.innerHTML=`
-      <button class="poem-back" onclick="openLetters()">‹ back to index</button>
-      <div class="video-page-wrap">
-        <div class="video-page-title">For you, Aurora ♥</div>
-        <div class="local-video-frame"><video controls playsinline style="width:100%;display:block"><source src="auroravideo.mp4" type="video/mp4"></video></div>
-        <div class="local-video-message">Distance is just a number, you are always in my heart.<br>I would cross oceans and mountains to see you,<br>whenever I get the chance.</div>
-      </div>`;return;
-  }
-  if(p.type==='poem'){
-    const num=PAGES.slice(0,idx).filter(x=>x.type==='poem').length+1;
-    const linesHTML=p.body.split('\n').map((l,i)=>`<div class="typewriter-line" style="animation-delay:${i*60}ms">${l||'&nbsp;'}</div>`).join('');
-    oc.innerHTML=`
-      <button class="poem-back" onclick="openLetters()">‹ back to index</button>
-      <div class="poem-view">
-        ${p.date?`<div class="poem-date-sm">${p.date}</div>`:''}
-        <div class="poem-roman">${toRoman(num)}</div>
-        <div class="poem-title-pg">${p.title}</div>
-        <div class="poem-body-pg">${linesHTML}</div>
-        <div class="poem-orn">· · ·</div>
-        <div class="poem-sig">— Pranav Arya</div>
-      </div>`;return;
-  }
-  if(p.type==='photo-message'){
-    oc.innerHTML=`
-      <button class="poem-back" onclick="openLetters()">‹ back to index</button>
-      <div class="photo-msg-wrap">
-        <div class="photo-msg-date">${p.date}</div>
-        <div class="photo-msg-frame"><img src="${p.src}" alt="${p.date}" onerror="this.style.display='none'"></div>
-        <div class="photo-msg-text">${p.message}</div>
-      </div>`;return;
-  }
-  if(p.type==='story'){
-    oc.innerHTML=`
-      <button class="poem-back" onclick="openLetters()">‹ back to index</button>
-      <div class="pg-section-head" style="font-size:22px;margin-bottom:4px">How It Began</div>
-      <div class="pg-section-rule"></div>
-      <div class="story-body">
-        <p><span class="story-dropcap">I</span>t was an ordinary street on an ordinary day — or so I thought. Then you walked into it, and the ordinary world quietly ceased to exist.</p>
-        <p>I don't think either of us knew, in that first moment, what had just happened. But something had. A door had opened. And I have never once wished it closed.</p>
-        <p>You are my Catwoman — clever, fearless, a little unpredictable, and entirely impossible to forget. I am your Batman — stubborn, devoted, always finding my way back to you no matter how dark the night gets. We are a strange and perfect pair.</p>
-        <p>Life will bring us its highs and its lows. There will be days that shimmer, and days that are harder to carry. But through all of it, I want you to know this: I will always reach for your hand.</p>
-        <p style="text-align:center;margin-top:4px">Happy Valentine's Day, Aurora.</p>
-      </div>
-      <div class="story-sig">— Pranav Arya</div>`;return;
-  }
-  if(p.type==='memory-jar'){
-    const notesHTML=MEMORIES.map(m=>`
-      <div class="note-fold" onclick="toggleNote(this)">
-        <span class="note-icon">${m.icon}</span>
-        <div class="note-text">${m.text}</div>
-        <div class="note-label">— ${m.label}</div>
-        <div class="note-close" onclick="event.stopPropagation();this.parentNode.classList.remove('open')">fold away ×</div>
-      </div>`).join('');
-    oc.innerHTML=`
-      <button class="poem-back" onclick="openLetters()">‹ back to index</button>
-      <div class="pg-section-head" style="font-size:22px">Memory Jar</div>
-      <div class="pg-section-rule"></div>
-      <div class="jar-intro">Ten little notes, folded up and kept for you.<br>Tap one to unfold it.</div>
-      <div class="notes-grid">${notesHTML}</div>`;return;
-  }
-  if(p.type==='epilogue'){
-    oc.innerHTML=`
-      <button class="poem-back" onclick="openLetters()">‹ back to index</button>
-      <div style="padding-top:24px;text-align:center">
-        <div class="pg-section-head">Epilogue</div>
-        <div class="pg-section-rule"></div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;line-height:2.1;color:#2c1408">
-          This book has no last page,<br>only the next chapter<br>we haven't written yet.<br><br>
-          Every day with you<br>is a sentence worth keeping.<br><br>Sempre, Aurora.
-        </div>
-        <div class="poem-orn" style="margin-top:24px">✦</div>
-      </div>`;return;
-  }
-  if(p.type==='video'){
-    oc.innerHTML=`
-      <button class="poem-back" onclick="openLetters()">‹ back to index</button>
-      <div class="video-page-wrap">
-        <div class="video-page-title">Press play ♥</div>
-        <div class="video-frame-wrap"><iframe src="https://www.youtube.com/embed/${p.videoId}?rel=0&modestbranding=1&color=white" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
-        <div class="video-caption">${p.caption}</div>
-      </div>`;return;
-  }
-  if(p.type==='photo'){
-    oc.innerHTML=`
-      <button class="poem-back" onclick="openLetters()">‹ back to index</button>
-      <div style="text-align:center;padding:16px 0">
-        <div style="background:#fff;padding:10px 10px 32px;display:inline-block;box-shadow:2px 3px 14px rgba(0,0,0,.18);transform:rotate(-1deg)">
-          <img src="${p.src}" alt="photo" style="width:280px;display:block;aspect-ratio:4/3;object-fit:cover" onerror="this.style.display='none'">
-        </div>
-        <div style="font-family:'Dancing Script',cursive;font-size:18px;color:#5a3010;margin-top:14px">${p.caption}</div>
-      </div>`;return;
-  }
-}
-
-// ══ RADIO ══
-function openRadio(){
-  document.getElementById('overlayContent').innerHTML=`
-    <div class="radio-panel">
-      <div class="radio-icon">📻</div>
-      <div class="radio-title">Voice Messages</div>
-      <div class="radio-body">Something special is coming here soon.<br><br>I am recording something just for you.<br>Check back soon, Aurora ♥</div>
-      <div class="poem-orn" style="margin-top:28px">· · ·</div>
-    </div>`;
-  document.getElementById('overlay').classList.add('show');
-}
+}catch(e){}
 </script>
 </body>
 </html>
