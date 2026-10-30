@@ -913,9 +913,70 @@ updateThemeIcon();
   let lastSearch = 0;
   let lastError = 0;
   const allowed = new Set(['page_open','gate_success','gate_failure','section_view','navigation','letter_open','letter_close','photo_open','photo_close','photo_next','photo_previous','video_play','video_pause','video_ended','theme_change','search_used','scroll_milestone','page_hidden','script_error','media_error']);
+  // Visitor details are looked up once, as on pranavarya.com.
+  // If the lookup is blocked or times out, alerts still send with Unknown fields.
+  let visitorGeo = {};
+  let geoReady = false;
+  const waitingEvents = [];
+  function visitorField(value) {
+    const text = value == null || value === '' ? 'Unknown' : String(value);
+    return text.slice(0,1024);
+  }
+  function sendDiscord(event) {
+    if (!DISCORD_ENABLED || sent >= MAX_SENT_PER_TAB) return;
+    sent++;
+    try {
+      const geo = visitorGeo;
+      const visitorLocation = geo.city
+        ? [geo.city,geo.region,geo.country_name].filter(Boolean).join(', ')
+        : 'Unknown';
+      const fields = [
+        {name:'Location',value:visitorField(visitorLocation),inline:true},
+        {name:'IP',value:visitorField(geo.ip),inline:true},
+        {name:'ISP',value:visitorField(geo.org),inline:true},
+        {name:'Page',value:visitorField(window.location.pathname || '/'),inline:true},
+        {name:'Referrer',value:visitorField(document.referrer || 'Direct / none'),inline:true},
+        {name:'Language',value:visitorField(navigator.language),inline:true},
+        {name:'Screen',value:visitorField(window.screen.width + 'x' + window.screen.height),inline:true},
+        {name:'Device / Browser',value:visitorField(navigator.userAgent),inline:false}
+      ];
+      if (event.type !== 'page_open') {
+        fields.push(
+          {name:'Event',value:visitorField(event.type.replace(/_/g,' ')),inline:true},
+          {name:'Time on page',value:Math.round(event.elapsed_ms/1000)+' seconds',inline:true}
+        );
+        const extras = Object.entries(event)
+          .filter(([key]) => !['site_id','type','elapsed_ms'].includes(key))
+          .map(([key,value]) => key.replace(/_/g,' ')+': '+value);
+        if (extras.length) fields.push({name:'Action detail',value:visitorField(extras.join(' | ')),inline:false});
+      }
+      const payload = {
+        username:'Eternore Visitor Alerts',
+        embeds:[{
+          title:event.type === 'page_open' ? 'New visit — eternore.com' : 'Eternore — '+event.type.replace(/_/g,' '),
+          color:10236742,
+          fields:fields,
+          timestamp:new Date().toISOString()
+        }]
+      };
+      fetch(DISCORD_WEBHOOK_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload)
+      }).catch(function(error){console.warn('Eternore Discord delivery failed:',error);});
+    } catch(error) {
+      console.warn('Eternore Discord notification error:',error);
+    }
+  }
+  function finishVisitorLookup(data) {
+    if (geoReady) return;
+    geoReady = true;
+    visitorGeo = data && typeof data === 'object' && !data.error ? data : {};
+    while (waitingEvents.length) sendDiscord(waitingEvents.shift());
+  }
   function record(type, details) {
     if (!allowed.has(type)) return;
-    const event = {site_id:SITE_ID, type:type, elapsed_ms:Date.now()-start};
+    const event = {site_id:SITE_ID,type:type,elapsed_ms:Date.now()-start};
     if (details && typeof details === 'object') {
       for (const [key,value] of Object.entries(details)) {
         if (['section','milestone','mode','media','result'].includes(key) && (typeof value === 'string' || typeof value === 'number')) {
@@ -925,31 +986,19 @@ updateThemeIcon();
     }
     events.push(event);
     if (events.length > MAX_EVENTS) events.shift();
-    // Best-effort direct Discord delivery. No IP, location, passwords, or search text collected.
-    if (DISCORD_ENABLED && sent < MAX_SENT_PER_TAB) {
-      sent++;
-      try {
-        const payload = {
-          username: 'Eternore Visitor Alerts',
-          embeds: [{
-            title: event.type === 'page_open' ? 'New visit — eternore.com' : 'Eternore — ' + event.type.replace(/_/g,' '),
-            color: 10236742,
-            fields: [
-              {name:'Event',value:event.type,inline:true},
-              {name:'Page',value:location.pathname || '/',inline:true},
-              {name:'Time on page',value:Math.round(event.elapsed_ms/1000)+' seconds',inline:true},
-              {name:'Details',value:JSON.stringify(event).slice(0,1000),inline:false}
-            ],
-            timestamp: new Date().toISOString()
-          }]
-        };
-        fetch(DISCORD_WEBHOOK_URL, {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify(payload)
-        }).catch(function(error){console.warn('Eternore Discord delivery failed:',error);});
-      } catch (_) {}
+    if (DISCORD_ENABLED && sent + waitingEvents.length < MAX_SENT_PER_TAB) {
+      if (geoReady) sendDiscord(event);
+      else waitingEvents.push(event);
     }
+  }
+  if (DISCORD_ENABLED) {
+    fetch('https://ipapi.co/json/')
+      .then(function(response){if(!response.ok)throw new Error('IP lookup unavailable');return response.json();})
+      .then(finishVisitorLookup)
+      .catch(function(){finishVisitorLookup({});});
+    setTimeout(function(){finishVisitorLookup({});},4000);
+  } else {
+    finishVisitorLookup({});
   }
   record('page_open');
   // Local export remains available; direct Discord delivery is attempted when a webhook is configured; browser restrictions may block it.
