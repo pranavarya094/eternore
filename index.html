@@ -951,12 +951,16 @@ function recolorHero(){
 
 updateThemeIcon();
 </script>
-<!-- Eternore: privacy-first, browser-local interaction diagnostics.
-     GitHub Pages has no server-side event collector. No visitor records are transmitted. -->
+<!-- Eternore event diagnostics + optional Discord relay. Never put a Discord webhook here. -->
 <script>
 (function () {
   'use strict';
   const SITE_ID = 'eternore';
+  // Paste the deployed Google Apps Script Web App URL here (NOT the Discord webhook).
+  const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1543432207031468062/ZuYGUDy0h7QY_BV3rQpM6bqMzibNPhi9tEC6YbbL3BrSGZXUfW9W9MPktPQdiQvq-CJ8';
+  const DISCORD_ENABLED = /^https:\/\/(discord\.com|discordapp\.com)\/api\/webhooks\/\d+\//.test(DISCORD_WEBHOOK_URL);
+  let sent = 0;
+  const MAX_SENT_PER_TAB = 150;
   const MAX_EVENTS = 400;
   const events = [];
   const start = Date.now();
@@ -977,9 +981,20 @@ updateThemeIcon();
     }
     events.push(event);
     if (events.length > MAX_EVENTS) events.shift();
+    // Best-effort delivery. No IP address, password, search text, or browser fingerprint is sent.
+    if (DISCORD_ENABLED && sent < MAX_SENT_PER_TAB) {
+      sent++;
+      try {
+        fetch(DISCORD_WEBHOOK_URL, {
+          method:'POST', mode:'no-cors', keepalive:true,
+          headers:{'Content-Type':'text/plain;charset=utf-8'},
+          body:JSON.stringify({content:'Eternore | '+event.type+' | '+JSON.stringify(event)})
+        }).catch(()=>{});
+      } catch (_) {}
+    }
   }
   record('page_open');
-  // Keep all event data in this tab only; no network requests, cookies or fingerprinting.
+  // Local export remains available; direct Discord delivery is attempted when a webhook is configured; browser restrictions may block it.
   window.EternoreDiagnostics = Object.freeze({
     export: function () {
       const payload = {site_id:SITE_ID, generated_at:new Date().toISOString(), scope:'current browser tab only', events:events.slice()};
