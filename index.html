@@ -951,5 +951,112 @@ function recolorHero(){
 
 updateThemeIcon();
 </script>
+<!-- Eternore: privacy-first, browser-local interaction diagnostics.
+     GitHub Pages has no server-side event collector. No visitor records are transmitted. -->
+<script>
+(function () {
+  'use strict';
+  const SITE_ID = 'eternore';
+  const MAX_EVENTS = 400;
+  const events = [];
+  const start = Date.now();
+  let deepestScroll = 0;
+  let lastScroll = 0;
+  let lastSearch = 0;
+  let lastError = 0;
+  const allowed = new Set(['page_open','gate_success','gate_failure','section_view','navigation','letter_open','letter_close','memory_open','memory_close','photo_open','photo_close','photo_next','photo_previous','video_play','video_pause','video_ended','theme_change','search_used','scroll_milestone','page_hidden','script_error','media_error']);
+  function record(type, details) {
+    if (!allowed.has(type)) return;
+    const event = {site_id:SITE_ID, type:type, elapsed_ms:Date.now()-start};
+    if (details && typeof details === 'object') {
+      for (const [key,value] of Object.entries(details)) {
+        if (['section','milestone','mode','media','result'].includes(key) && (typeof value === 'string' || typeof value === 'number')) {
+          event[key] = String(value).slice(0,64);
+        }
+      }
+    }
+    events.push(event);
+    if (events.length > MAX_EVENTS) events.shift();
+  }
+  record('page_open');
+  // Keep all event data in this tab only; no network requests, cookies or fingerprinting.
+  window.EternoreDiagnostics = Object.freeze({
+    export: function () {
+      const payload = {site_id:SITE_ID, generated_at:new Date().toISOString(), scope:'current browser tab only', events:events.slice()};
+      const url = URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));
+      const link = document.createElement('a');
+      link.href=url; link.download='eternore-local-events.json'; link.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+    },
+    summary: function () {
+      return {site_id:SITE_ID, total_events:events.length, event_counts:events.reduce((a,e)=>(a[e.type]=(a[e.type]||0)+1,a),{})};
+    },
+    clear: function () {events.length=0;}
+  });
+  // Observe successful access without reading or retaining the gate input.
+  const originalGate = window.submitGate;
+  if (typeof originalGate === 'function') {
+    window.submitGate = function () {
+      const before = document.getElementById('site')?.classList.contains('show');
+      const result = originalGate.apply(this,arguments);
+      const after = document.getElementById('site')?.classList.contains('show');
+      if (!before) record(after?'gate_success':'gate_failure');
+      return result;
+    };
+  }
+  const originalTheme = window.toggleTheme;
+  if (typeof originalTheme === 'function') {
+    window.toggleTheme = function () {
+      const result=originalTheme.apply(this,arguments);
+      record('theme_change',{mode:document.documentElement.dataset.theme});
+      return result;
+    };
+  }
+  document.addEventListener('click', function (e) {
+    const target=e.target;
+    if (!(target instanceof Element)) return;
+    const anchor=target.closest('a[href^="#"]');
+    if (anchor) record('navigation',{section:(anchor.getAttribute('href')||'').slice(1)});
+    const letter=target.closest('.letter-head');
+    if (letter) record(letter.closest('.letter-item')?.classList.contains('open')?'letter_close':'letter_open');
+    const note=target.closest('.note-fold');
+    if (note) record(note.classList.contains('open')?'memory_close':'memory_open');
+    const photo=target.closest('.photo-card');
+    if (photo) record('photo_open');
+    if (target.closest('#lightbox-close')) record('photo_close');
+    if (target.closest('#lightbox-next')) record('photo_next');
+    if (target.closest('#lightbox-prev')) record('photo_previous');
+  },true);
+  const search=document.getElementById('letters-search');
+  if (search) search.addEventListener('input',function () {
+    if (Date.now()-lastSearch>3000) {lastSearch=Date.now();record('search_used');}
+  });
+  document.addEventListener('play',e=>{if(e.target instanceof HTMLMediaElement)record('video_play',{media:'local_video'});},true);
+  document.addEventListener('pause',e=>{if(e.target instanceof HTMLMediaElement)record('video_pause',{media:'local_video'});},true);
+  document.addEventListener('ended',e=>{if(e.target instanceof HTMLMediaElement)record('video_ended',{media:'local_video'});},true);
+  document.addEventListener('error',e=>{if(e.target instanceof HTMLImageElement || e.target instanceof HTMLMediaElement)record('media_error');},true);
+  window.addEventListener('error',function () {if(Date.now()-lastError>3000){lastError=Date.now();record('script_error');}});
+  window.addEventListener('scroll',function () {
+    if(Date.now()-lastScroll<250)return;
+    lastScroll=Date.now();
+    const total=Math.max(1,document.documentElement.scrollHeight-innerHeight);
+    const percentage=Math.min(100,Math.floor(scrollY/total*100));
+    for(const milestone of [25,50,75,100])if(percentage>=milestone && deepestScroll<milestone)record('scroll_milestone',{milestone});
+    deepestScroll=Math.max(deepestScroll,percentage);
+  },{passive:true});
+  if('IntersectionObserver' in window){
+    const observed=new Set();
+    const observer=new IntersectionObserver(entries=>{
+      for(const entry of entries){
+        if(entry.isIntersecting && !observed.has(entry.target.id)){
+          observed.add(entry.target.id);record('section_view',{section:entry.target.id});
+        }
+      }
+    },{threshold:0.25});
+    document.querySelectorAll('section.block[id]').forEach(el=>observer.observe(el));
+  }
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')record('page_hidden');});
+})();
+</script>
 </body>
 </html>
