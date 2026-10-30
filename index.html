@@ -132,21 +132,6 @@ section.block{position:relative;z-index:2;max-width:720px;margin:0 auto;padding:
 .letter-sig{font-family:'Dancing Script',cursive;font-size:20px;color:var(--accent);text-align:right;margin-top:18px}
 .no-results{display:none;text-align:center;color:var(--muted);font-style:italic;padding:30px 0}
 
-/* ── MEMORY JAR ── */
-.notes-grid{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
-.note-fold{width:96px;min-height:86px;background:var(--card);border:1px solid var(--line);border-radius:2px 7px 7px 2px;cursor:pointer;position:relative;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;padding:10px;transition:transform .25s,box-shadow .25s}
-.note-fold::before{content:'';position:absolute;top:0;right:0;width:16px;height:16px;background:linear-gradient(225deg,var(--bg2) 50%,transparent 50%);border-radius:0 0 0 4px}
-.note-fold:hover{transform:translateY(-4px) rotate(-1.5deg)}
-.note-fold.open{width:100%;max-width:440px;min-height:auto;padding:22px 26px;cursor:default;transform:none}
-.note-icon{font-size:24px;opacity:.75}
-.note-fold.open .note-icon{display:none}
-.note-text{display:none;font-family:'Dancing Script',cursive;font-size:19px;color:var(--ink);line-height:1.6;text-align:center}
-.note-fold.open .note-text{display:block}
-.note-label{display:none;font-family:'Fraunces',serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:10px;text-align:center}
-.note-fold.open .note-label{display:block}
-.note-close{display:none;font-size:11px;color:var(--accent);cursor:pointer;margin-top:12px;letter-spacing:.1em;text-align:center}
-.note-fold.open .note-close{display:block}
-
 /* ── STORY ── */
 .story-card{background:var(--card);border:1px solid var(--line);border-radius:3px;padding:44px 46px;box-shadow:var(--shadow)}
 .story-dropcap{float:left;font-family:'Fraunces',serif;font-weight:500;font-size:68px;line-height:.78;margin:6px 14px 0 0;color:var(--accent)}
@@ -239,7 +224,6 @@ footer::before{content:'✦';display:block;color:var(--accent);margin-bottom:16p
   <div class="nav-right">
     <div class="nav-links">
       <a href="#letters" data-sec="letters">Letters</a>
-      <a href="#memories" data-sec="memories">Memories</a>
       <a href="#story" data-sec="story">Our Story</a>
       <a href="#photos" data-sec="photos">Photos</a>
       <a href="#film" data-sec="film">Film</a>
@@ -254,7 +238,6 @@ footer::before{content:'✦';display:block;color:var(--accent);margin-bottom:16p
   <button class="menu-close" onclick="closeMenu()" aria-label="Close menu">&#10005;</button>
   <nav class="menu-links">
     <a href="#letters" onclick="closeMenu()">Letters</a>
-    <a href="#memories" onclick="closeMenu()">Memories</a>
     <a href="#story" onclick="closeMenu()">Our Story</a>
     <a href="#photos" onclick="closeMenu()">Photos</a>
     <a href="#film" onclick="closeMenu()">Film</a>
@@ -293,19 +276,9 @@ footer::before{content:'✦';display:block;color:var(--accent);margin-bottom:16p
   <div class="no-results" id="letters-empty">nothing matches that search</div>
 </section>
 
-<!-- MEMORY JAR -->
-<section class="block" id="memories">
-  <div class="sec-num reveal">II.</div>
-  <div class="sec-eyebrow reveal">A jar of small things</div>
-  <h2 class="sec-title reveal">Memory Jar</h2>
-  <div class="sec-rule reveal"></div>
-  <div class="sec-intro reveal">Ten little notes, folded up and kept for you. Tap one to unfold it.</div>
-  <div class="notes-grid reveal" id="notes-grid"></div>
-</section>
-
 <!-- STORY -->
 <section class="block" id="story">
-  <div class="sec-num reveal">III.</div>
+  <div class="sec-num reveal">II.</div>
   <div class="sec-eyebrow reveal">Where it began</div>
   <h2 class="sec-title reveal">How It Began</h2>
   <div class="sec-rule reveal"></div>
@@ -323,7 +296,7 @@ footer::before{content:'✦';display:block;color:var(--accent);margin-bottom:16p
 
 <!-- PHOTOS -->
 <section class="block" id="photos">
-  <div class="sec-num reveal">IV.</div>
+  <div class="sec-num reveal">III.</div>
   <div class="sec-eyebrow reveal">Moments kept</div>
   <h2 class="sec-title reveal">Photos</h2>
   <div class="sec-rule reveal"></div>
@@ -332,7 +305,7 @@ footer::before{content:'✦';display:block;color:var(--accent);margin-bottom:16p
 
 <!-- FILM -->
 <section class="block" id="film">
-  <div class="sec-num reveal">V.</div>
+  <div class="sec-num reveal">IV.</div>
   <div class="sec-eyebrow reveal">Press play</div>
   <h2 class="sec-title reveal">Film</h2>
   <div class="sec-rule reveal"></div>
@@ -376,18 +349,6 @@ footer::before{content:'✦';display:block;color:var(--accent);margin-bottom:16p
 
 <script>
 // ══ CONTENT ══
-const MEMORIES=[
-  {icon:'🌙',text:'That first night we talked until the whole world went quiet around us',label:'the beginning'},
-  {icon:'☕',text:"You stealing sips of my coffee and pretending you didn't",label:'mornings'},
-  {icon:'🐱',text:'The way you talk to cats like they understand every word — they do',label:'a theory'},
-  {icon:'🗺',text:'Getting completely lost together and somehow that being the best part',label:'adventures'},
-  {icon:'😂',text:"That thing we laughed about so hard we couldn't breathe — you know the one",label:'our secret'},
-  {icon:'🌧',text:'You tucking yourself into my arm on a rainy afternoon, not saying anything, just being there',label:'rainy days'},
-  {icon:'✨',text:'The exact moment I realised I was completely done for',label:'the moment'},
-  {icon:'🍕',text:'Our very strong opinions about which pizza topping is objectively wrong',label:'important debates'},
-  {icon:'💌',text:'Every voice note you send me — I save them all',label:'your voice'},
-  {icon:'🌅',text:'Watching a sunset together and knowing this is exactly where I am supposed to be',label:'home'},
-];
 const PAGES=[
   {type:'index'},
   {type:'aurora-video'},
@@ -671,7 +632,6 @@ and throw them away when bored.`},
   {type:'poem',title:'Small Things',body:`I love you in the small things:\nthe way you remember details,\nthe sound of you humming without knowing it,\nhow you hold a thought\nbefore you say it —\ncareful, like it matters.\n\nIt does.\nYou do.\n\nMore than all the grand gestures\nI never quite know how to make.`},
   {type:'photo',slot:6,src:'photo1.jpg',caption:'My Aurora ♥'},
   {type:'poem',title:'Aurora',body:`You were named for the light\nthat breaks at the edge of night —\nthe sky's way of saying:\nsomething beautiful is coming.\n\nIt was right.\n\nEvery room you enter\nrearranges itself around you,\nand I have been the lucky one\nstanding closest to the glow.`},
-  {type:'memory-jar'},
   {type:'epilogue'},
   {type:'video',videoId:'4JNtAtGGNRU',caption:'A song, just for you ♥'},
 ];
@@ -721,7 +681,7 @@ function submitGate(){
     document.getElementById('gate').classList.add('hide');
     document.getElementById('site').classList.add('show');
     fetchWeather();
-    buildLetters();buildMemories();buildPhotos();
+    buildLetters();buildPhotos();
     initReveal();initNavScroll();
     setTimeout(initHero3D,60);
   }else{
@@ -776,22 +736,6 @@ function filterLetters(q){
     l.style.display=hasVisible?'':'none';
   });
   document.getElementById('letters-empty').style.display=any?'none':'block';
-}
-
-// ══ MEMORY JAR ══
-function buildMemories(){
-  document.getElementById('notes-grid').innerHTML=MEMORIES.map(m=>`
-    <div class="note-fold" onclick="toggleNote(this)">
-      <span class="note-icon">${m.icon}</span>
-      <div class="note-text">${m.text}</div>
-      <div class="note-label">${m.label}</div>
-      <div class="note-close" onclick="event.stopPropagation();this.parentNode.classList.remove('open')">fold away &#215;</div>
-    </div>`).join('');
-}
-function toggleNote(el){
-  const isOpen=el.classList.contains('open');
-  document.querySelectorAll('.note-fold.open').forEach(n=>n.classList.remove('open'));
-  if(!isOpen)el.classList.add('open');
 }
 
 // ══ PHOTOS + LIGHTBOX ══
@@ -968,7 +912,7 @@ updateThemeIcon();
   let lastScroll = 0;
   let lastSearch = 0;
   let lastError = 0;
-  const allowed = new Set(['page_open','gate_success','gate_failure','section_view','navigation','letter_open','letter_close','memory_open','memory_close','photo_open','photo_close','photo_next','photo_previous','video_play','video_pause','video_ended','theme_change','search_used','scroll_milestone','page_hidden','script_error','media_error']);
+  const allowed = new Set(['page_open','gate_success','gate_failure','section_view','navigation','letter_open','letter_close','photo_open','photo_close','photo_next','photo_previous','video_play','video_pause','video_ended','theme_change','search_used','scroll_milestone','page_hidden','script_error','media_error']);
   function record(type, details) {
     if (!allowed.has(type)) return;
     const event = {site_id:SITE_ID, type:type, elapsed_ms:Date.now()-start};
@@ -1048,8 +992,6 @@ updateThemeIcon();
     if (anchor) record('navigation',{section:(anchor.getAttribute('href')||'').slice(1)});
     const letter=target.closest('.letter-head');
     if (letter) record(letter.closest('.letter-item')?.classList.contains('open')?'letter_close':'letter_open');
-    const note=target.closest('.note-fold');
-    if (note) record(note.classList.contains('open')?'memory_close':'memory_open');
     const photo=target.closest('.photo-card');
     if (photo) record('photo_open');
     if (target.closest('#lightbox-close')) record('photo_close');
