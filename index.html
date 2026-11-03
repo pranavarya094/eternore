@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dark" data-world="aurora">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -562,6 +562,219 @@ footer::before{color:var(--rose)}
   .world-intro,.world-switcher button,.world-choice,.world-explore{transition:none}
 }
 
+/* ═══ THE THREE WORLDS: continuous palettes from entrance to epilogue ═══ */
+:root[data-world="aurora"][data-theme="dark"]{
+ --bg:#0f1020;--bg2:#1a1730;--card:#231b35;--ink:#f9eef9;--ink2:#d6c6e8;--muted:#aea3c4;
+ --line:rgba(199,168,242,.23);--rose:#f2a5cf;--gold:#ecc897;--accent:#f2a5cf;
+ --accent-soft:rgba(231,141,202,.13);--nav-bg:rgba(15,16,32,.90);
+ --vig:rgba(4,6,19,.78);--grain:.046;--shadow:0 32px 80px -35px rgba(0,0,0,.68);
+ --highlight:rgba(158,112,220,.12);--ornament:rgba(221,181,241,.25);--veil:rgba(31,24,49,.87);
+ --world-haze1:rgba(111,76,210,.27);--world-haze2:rgba(227,97,162,.14);
+}
+:root[data-world="particles"][data-theme="dark"]{
+ --bg:#1c0e16;--bg2:#2b141e;--card:#351c29;--ink:#fff0e7;--ink2:#e8c7c9;--muted:#c49da7;
+ --line:rgba(244,188,167,.24);--rose:#f5a9b5;--gold:#f1ca92;--accent:#f5a9b5;
+ --accent-soft:rgba(241,163,164,.13);--nav-bg:rgba(28,14,22,.9);
+ --vig:rgba(19,4,11,.76);--grain:.05;--shadow:0 32px 80px -34px rgba(0,0,0,.7);
+ --highlight:rgba(216,117,127,.13);--ornament:rgba(239,178,163,.27);--veil:rgba(48,24,37,.87);
+ --world-haze1:rgba(210,86,113,.22);--world-haze2:rgba(230,175,94,.14);
+}
+:root[data-world="starfield"][data-theme="dark"]{
+ --bg:#090f20;--bg2:#111d35;--card:#17263d;--ink:#f1f5ff;--ink2:#c6d8f2;--muted:#a1b3d1;
+ --line:rgba(158,191,242,.24);--rose:#adc5f9;--gold:#dfd4bd;--accent:#adc5f9;
+ --accent-soft:rgba(118,173,248,.14);--nav-bg:rgba(9,15,32,.91);
+ --vig:rgba(2,7,18,.79);--grain:.035;--shadow:0 32px 85px -34px rgba(0,0,0,.75);
+ --highlight:rgba(105,161,226,.13);--ornament:rgba(170,194,247,.25);--veil:rgba(19,34,58,.88);
+ --world-haze1:rgba(55,111,201,.26);--world-haze2:rgba(129,104,211,.15);
+}
+:root[data-world="aurora"][data-theme="light"]{
+ --bg:#f3effb;--bg2:#f9f4fc;--card:#fffbff;--ink:#322749;--ink2:#695977;--muted:#83748f;
+ --line:rgba(115,77,151,.20);--rose:#964579;--gold:#91694f;--accent:#964579;
+ --accent-soft:rgba(145,76,160,.09);--nav-bg:rgba(246,241,252,.92);
+ --vig:rgba(74,45,115,.11);--grain:.025;--shadow:0 27px 70px -31px rgba(74,46,111,.27);
+ --highlight:rgba(157,108,209,.09);--ornament:rgba(125,93,163,.25);--veil:rgba(255,251,255,.88);
+ --world-haze1:rgba(180,148,229,.24);--world-haze2:rgba(239,169,210,.16);
+}
+:root[data-world="particles"][data-theme="light"]{
+ --bg:#faefea;--bg2:#fff7f0;--card:#fffbf6;--ink:#472c33;--ink2:#7d5960;--muted:#9a767b;
+ --line:rgba(149,88,91,.20);--rose:#a74766;--gold:#987044;--accent:#a74766;
+ --accent-soft:rgba(186,94,99,.09);--nav-bg:rgba(255,245,240,.92);
+ --vig:rgba(112,49,61,.12);--grain:.03;--shadow:0 27px 70px -32px rgba(95,44,52,.24);
+ --highlight:rgba(214,129,137,.10);--ornament:rgba(172,109,111,.26);--veil:rgba(255,251,246,.89);
+ --world-haze1:rgba(230,157,164,.23);--world-haze2:rgba(241,203,145,.18);
+}
+:root[data-world="starfield"][data-theme="light"]{
+ --bg:#ecf2fa;--bg2:#f6f9ff;--card:#fcfdff;--ink:#263951;--ink2:#586c88;--muted:#788ba6;
+ --line:rgba(81,120,165,.20);--rose:#4b719e;--gold:#85725d;--accent:#4b719e;
+ --accent-soft:rgba(82,132,183,.10);--nav-bg:rgba(242,247,253,.92);
+ --vig:rgba(45,83,132,.12);--grain:.02;--shadow:0 27px 70px -32px rgba(38,70,109,.25);
+ --highlight:rgba(118,168,216,.11);--ornament:rgba(110,148,190,.28);--veil:rgba(252,253,255,.89);
+ --world-haze1:rgba(139,186,240,.24);--world-haze2:rgba(191,177,233,.17);
+}
+body{transition:background .8s ease,color .8s ease}
+.bg{
+ background:
+  radial-gradient(ellipse 64% 55% at 9% 16%,var(--world-haze1),transparent 75%),
+  radial-gradient(ellipse 58% 53% at 91% 65%,var(--world-haze2),transparent 77%),
+  linear-gradient(158deg,var(--bg2),var(--bg) 44%,var(--bg2));
+ transition:background .8s ease;
+}
+.bg::before{background:radial-gradient(ellipse at 55% 20%,var(--world-haze1),transparent 73%)}
+#gate{
+ opacity:0;visibility:hidden;pointer-events:none;
+ background:
+  radial-gradient(ellipse 70% 60% at 52% 38%,var(--world-haze1),transparent 73%),
+  linear-gradient(153deg,var(--bg2),var(--bg));
+ transition:opacity .8s ease,visibility .8s ease;
+}
+#gate.ready{opacity:1;visibility:visible;pointer-events:auto}
+#gate.ready.hide{opacity:0;visibility:hidden;pointer-events:none}
+.gate-change-world{
+ display:block;margin:19px auto 0;background:none;border:0;cursor:pointer;
+ font:italic 16px 'Cormorant Garamond',serif;color:var(--muted);
+ padding:7px 10px;
+}
+.gate-change-world:hover{color:var(--accent)}
+.hero-worlds{
+ background:#070712;
+}
+.hero-worlds::after{
+ display:block;content:'';position:absolute;bottom:-2px;left:0;right:0;
+ width:100%;height:min(42vh,365px);z-index:2;transform:none;pointer-events:none;
+ background:linear-gradient(to bottom,transparent 0%,var(--bg) 100%);
+}
+.hero-worlds .world-explore{
+ bottom:35px;z-index:8;color:var(--ink);
+ border-bottom:1px solid var(--ornament);text-shadow:none;
+}
+.hero-worlds .world-explore:hover{color:var(--accent);border-color:var(--accent)}
+.hero-worlds .world-hint{bottom:100px;z-index:7}
+.hero-worlds .world-overlay{z-index:3}
+.hero-prologue{
+ background:linear-gradient(to bottom,transparent,var(--world-haze1) 110%);
+}
+.hero-prologue .hero-letter,.story-card{
+ background:linear-gradient(145deg,var(--card),var(--bg2));
+}
+.letter-item.open{background:var(--veil)}
+.photo-card,.video-frame{border-color:var(--ornament)}
+.nav-links .nav-change-world{
+ position:relative;align-self:center;
+ font:400 11px 'Fraunces',serif;letter-spacing:.18em;text-transform:uppercase;
+ border:0;background:none;color:var(--ink2);cursor:pointer;padding:4px 0;
+ transition:color .3s;white-space:nowrap;
+}
+.nav-links .nav-change-world::after{
+ content:'';position:absolute;left:0;right:100%;bottom:-2px;height:1px;
+ background:var(--accent);transition:right .35s;
+}
+.nav-links .nav-change-world:hover{color:var(--ink)}
+.nav-links .nav-change-world:hover::after{right:0}
+.menu-links .mobile-world-change{
+ background:transparent;border:0;color:var(--accent);
+ font:400 29px 'Fraunces',serif;cursor:pointer;padding:2px 10px;
+}
+.menu-links .mobile-world-change:hover{color:var(--ink)}
+:root[data-theme="light"] #mainnav:not(.scrolled) .nav-change-world{color:#f3eee7}
+
+/* World picker is a standalone first screen, not part of the scrollable hero. */
+.world-selection-screen{
+ --picker-one:#a44793;--picker-two:#5468b9;--picker-three:#e1bd92;
+ position:fixed;inset:0;z-index:12000;overflow-y:auto;
+ display:flex;justify-content:center;align-items:center;
+ text-align:center;padding:clamp(28px,5vw,65px) 22px;
+ color:#f3eee7;
+ background:radial-gradient(ellipse 95% 75% at 50% 40%,#20182b,#080711 75%);
+ opacity:1;visibility:visible;transition:opacity .68s ease,visibility .68s;
+}
+.world-selection-screen[data-preview="aurora"]{
+ --picker-one:#b750a3;--picker-two:#6974e0;--picker-three:#e3bd8e;
+}
+.world-selection-screen[data-preview="particles"]{
+ --picker-one:#dd6f89;--picker-two:#a4475d;--picker-three:#ebbc85;
+}
+.world-selection-screen[data-preview="starfield"]{
+ --picker-one:#6292e9;--picker-two:#404ea2;--picker-three:#d4d8ee;
+}
+.world-selection-screen::before{
+ content:'';position:fixed;inset:-20%;pointer-events:none;
+ background:
+  radial-gradient(ellipse 40% 38% at 32% 42%,var(--picker-one),transparent 78%),
+  radial-gradient(ellipse 42% 38% at 72% 54%,var(--picker-two),transparent 77%),
+  radial-gradient(ellipse 24% 27% at 56% 27%,var(--picker-three),transparent 78%);
+ opacity:.36;filter:blur(45px);
+ animation:world-selection-breathe 13s ease-in-out infinite alternate;
+ transition:background 1s;
+}
+@keyframes world-selection-breathe{
+ from{transform:translate3d(-2%,2%,0) scale(1)}
+ to{transform:translate3d(3%,-3%,0) scale(1.12)}
+}
+.world-selection-screen::after{
+ content:'';position:fixed;inset:16px;pointer-events:none;
+ border:1px solid rgba(243,238,231,.14);
+}
+.world-selection-screen.hide{
+ opacity:0;visibility:hidden;pointer-events:none;
+}
+.world-selection-stars{
+ position:fixed;inset:0;pointer-events:none;opacity:.23;
+ background-image:
+  radial-gradient(circle at 12% 24%,#fff 0 1px,transparent 2px),
+  radial-gradient(circle at 73% 36%,#fff 0 1px,transparent 2px),
+  radial-gradient(circle at 42% 83%,#fff 0 1px,transparent 2px),
+  radial-gradient(circle at 92% 12%,#fff 0 1px,transparent 2px),
+  radial-gradient(circle at 26% 67%,#fff 0 1px,transparent 2px);
+ background-size:210px 180px;
+}
+.world-selection-content{position:relative;z-index:1;width:min(100%,850px);margin:auto}
+.world-selection-mark{
+ font:500 12px 'Fraunces',serif;letter-spacing:.44em;
+ color:rgba(243,238,231,.76);margin-bottom:clamp(18px,4vw,42px);
+}
+.world-selection-mark span{color:var(--picker-three);margin-left:4px}
+.world-selection-screen .world-welcome{
+ font-size:clamp(26px,6vw,49px);line-height:1.25;
+ text-shadow:0 8px 38px rgba(0,0,0,.48);
+}
+.world-selection-screen .world-lead{
+ color:rgba(243,238,231,.77);max-width:680px;margin:.6rem auto 0;
+}
+.world-selection-screen .world-ask{margin-top:clamp(19px,4vw,39px)}
+.world-selection-screen .world-choices{margin-top:clamp(19px,4vw,34px)}
+.world-selection-screen .world-choice{
+ position:relative;flex:1 1 180px;max-width:220px;min-height:133px;
+ background:rgba(243,238,231,.07);border:1px solid rgba(243,238,231,.2);
+ backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.world-selection-screen .world-choice:hover,
+.world-selection-screen .world-choice:focus-visible{
+ background:rgba(243,238,231,.17);border-color:rgba(243,238,231,.61)
+}
+.world-choice-symbol{font-size:23px;color:var(--picker-three);line-height:1;margin-bottom:10px}
+.world-selection-footnote{
+ margin-top:clamp(19px,3.6vw,35px);
+ font-style:italic;font-size:16px;letter-spacing:.045em;color:rgba(243,238,231,.61)
+}
+@media(max-width:760px){
+ .nav-links .nav-change-world{display:none}
+}
+@media(max-width:520px){
+ .world-selection-screen{padding:33px 20px}
+ .world-selection-screen::after{inset:10px}
+ .world-selection-content{padding:5px 0}
+ .world-selection-mark{margin-bottom:18px}
+ .world-selection-screen .world-choices{gap:9px}
+ .world-selection-screen .world-choice{min-height:110px;max-width:100%;flex-basis:130px}
+ .world-choice-symbol{margin-bottom:5px;font-size:19px}
+ .world-selection-footnote{font-size:14px}
+}
+@media(prefers-reduced-motion:reduce){
+ .world-selection-screen::before{animation:none}
+ .world-selection-screen{transition:none}
+}
+
 </style>
 </head>
 <body>
@@ -570,8 +783,38 @@ footer::before{color:var(--rose)}
 <div class="grain"></div>
 <div class="vignette"></div>
 
+
+<!-- FIRST SCREEN — select a visual world BEFORE the password -->
+<div class="world-selection-screen" id="world-selection" data-preview="aurora" role="dialog" aria-modal="true" aria-labelledby="world-selection-title">
+  <div class="world-selection-stars" aria-hidden="true"></div>
+  <div class="world-selection-content">
+    <div class="world-selection-mark">ETERNORE <span aria-hidden="true">✦</span></div>
+    <h1 class="world-welcome" id="world-selection-title">Welcome my love, Aurora.</h1>
+    <p class="world-lead">I always try to keep improving this website for you.</p>
+    <p class="world-ask">Which world do you want to enter?</p>
+    <div class="world-choices">
+      <button type="button" class="world-choice" data-enter="aurora">
+        <span class="world-choice-symbol" aria-hidden="true">✧</span>
+        <span class="world-choice-name">Aurora light</span>
+        <span class="world-choice-desc">ribbons of light</span>
+      </button>
+      <button type="button" class="world-choice" data-enter="particles">
+        <span class="world-choice-symbol" aria-hidden="true">♡</span>
+        <span class="world-choice-name">Forming</span>
+        <span class="world-choice-desc">dust becomes your name</span>
+      </button>
+      <button type="button" class="world-choice" data-enter="starfield">
+        <span class="world-choice-symbol" aria-hidden="true">✦</span>
+        <span class="world-choice-name">Fly through</span>
+        <span class="world-choice-desc">through the stars</span>
+      </button>
+    </div>
+    <div class="world-selection-footnote">A different sky. The same letters.</div>
+  </div>
+</div>
+
 <!-- ══ GATE ══ -->
-<div id="gate">
+<div id="gate" aria-hidden="true">
   <div class="gate-box">
     <div class="gate-rose">&#127801;</div>
     <div class="gate-eyebrow">Eternore</div>
@@ -580,6 +823,7 @@ footer::before{color:var(--rose)}
     <input type="password" class="gate-input" id="gate-input" placeholder="whisper the password" autocomplete="off"/>
     <br>
     <button class="gate-btn" onclick="submitGate()">Enter &#10022;</button>
+    <button type="button" class="gate-change-world" onclick="changeWorld()">← Change Theme</button>
     <div class="gate-err" id="gate-err">That's not quite right, my love&#8230;</div>
   </div>
 </div>
@@ -594,6 +838,7 @@ footer::before{color:var(--rose)}
       <a href="#story" data-sec="story">Our Story</a>
       <a href="#photos" data-sec="photos">Photos</a>
       <a href="#film" data-sec="film">Film</a>
+      <button type="button" class="nav-change-world" onclick="changeWorld()">Change Theme</button>
     </div>
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Switch theme"><span class="tt-icon">&#9790;</span></button>
     <button class="nav-burger" id="nav-burger" onclick="openMenu()" aria-label="Open menu"><span></span><span></span><span></span></button>
@@ -608,6 +853,7 @@ footer::before{color:var(--rose)}
     <a href="#story" onclick="closeMenu()">Our Story</a>
     <a href="#photos" onclick="closeMenu()">Photos</a>
     <a href="#film" onclick="closeMenu()">Film</a>
+    <button type="button" class="mobile-world-change" onclick="changeWorld()">Change Theme</button>
   </nav>
   <button class="menu-theme" onclick="toggleTheme()"><span class="tt-icon2">&#9790;</span> <span class="tt-label">Dark mode</span></button>
 </div>
@@ -625,25 +871,8 @@ footer::before{color:var(--rose)}
   </div>
   <div class="world-hint" id="world-hint">move your cursor · tilt your phone</div>
   <button type="button" class="world-motionbtn" id="world-motionbtn">Enable motion</button>
-  <div class="world-switcher" role="group" aria-label="Choose a 3D world">
-    <button type="button" data-fx="aurora" class="active" aria-pressed="true">Aurora light</button>
-    <button type="button" data-fx="particles" aria-pressed="false">Forming</button>
-    <button type="button" data-fx="starfield" aria-pressed="false">Fly through</button>
-  </div>
   <a class="world-explore" href="#first-letter">Read the letter <span aria-hidden="true">↓</span></a>
-  <div class="world-intro" id="world-intro" aria-label="Welcome to Eternore">
-    <div class="world-intro-inner">
-      <div class="world-welcome">Welcome my love, Aurora.
-        <span class="world-lead">I always try to keep improving this website for you.</span>
-      </div>
-      <div class="world-ask">Which world do you want to enter?</div>
-      <div class="world-choices">
-        <button type="button" class="world-choice" data-enter="aurora"><span class="world-choice-name">Aurora light</span><span class="world-choice-desc">ribbons of light</span></button>
-        <button type="button" class="world-choice" data-enter="particles"><span class="world-choice-name">Forming</span><span class="world-choice-desc">dust becomes your name</span></button>
-        <button type="button" class="world-choice" data-enter="starfield"><span class="world-choice-name">Fly through</span><span class="world-choice-desc">through the stars</span></button>
-      </div>
-    </div>
-  </div>
+
 </header>
 <section class="hero-prologue" id="first-letter" aria-label="An opening letter to Aurora">
     <div class="hero-letter tilt">
@@ -1064,11 +1293,81 @@ async function fetchWeather(){
   }catch(e){}
 }
 
+
+// ══ VISITOR FLOW: select world → password → entire themed site ══
+let selectedWorld = null; // Deliberately never skips the first choice on a new visit.
+const WORLD_NAMES = new Set(['aurora','particles','starfield']);
+function selectWorld(name){
+  if(!WORLD_NAMES.has(name)) return;
+  selectedWorld=name;
+  document.documentElement.dataset.world=name;
+  const picker=document.getElementById('world-selection');
+  if(picker){
+    picker.classList.add('hide');
+    picker.setAttribute('aria-hidden','true');
+    picker.inert=true;
+  }
+  document.body.style.overflow='';
+  const hero=document.querySelector('.hero-worlds');
+  if(hero)hero.classList.add('world-entered');
+  const site=document.getElementById('site');
+  if(site&&site.classList.contains('show')){
+    if(typeof window.__eternoreWorld==='function')window.__eternoreWorld(name);
+    const button=document.querySelector('.nav-change-world');
+    if(button)button.focus({preventScroll:true});
+  }else{
+    const gate=document.getElementById('gate');
+    if(gate){
+      gate.classList.add('ready');
+      gate.setAttribute('aria-hidden','false');
+    }
+    window.setTimeout(function(){
+      const input=document.getElementById('gate-input');
+      if(input)input.focus({preventScroll:true});
+    },220);
+  }
+}
+function changeWorld(){
+  closeMenu();
+  const picker=document.getElementById('world-selection');
+  if(!picker)return;
+  picker.dataset.preview=selectedWorld||'aurora';
+  picker.classList.remove('hide');
+  picker.removeAttribute('aria-hidden');
+  picker.inert=false;
+  document.body.style.overflow='hidden';
+  window.setTimeout(function(){
+    const first=picker.querySelector('[data-enter="'+(selectedWorld||'aurora')+'"]');
+    if(first)first.focus({preventScroll:true});
+  },60);
+}
+const worldPicker=document.getElementById('world-selection');
+if(worldPicker){
+  worldPicker.querySelectorAll('.world-choice[data-enter]').forEach(function(button){
+    button.addEventListener('click',function(){selectWorld(button.dataset.enter);});
+    button.addEventListener('mouseenter',function(){worldPicker.dataset.preview=button.dataset.enter;});
+    button.addEventListener('focus',function(){worldPicker.dataset.preview=button.dataset.enter;});
+  });
+  document.addEventListener('keydown',function(event){
+    if(event.key==='Escape'&&!worldPicker.classList.contains('hide')){
+      const site=document.getElementById('site');
+      if(site&&site.classList.contains('show')){
+        worldPicker.classList.add('hide');
+        worldPicker.setAttribute('aria-hidden','true');
+        worldPicker.inert=true;
+        document.body.style.overflow='';
+      }
+    }
+  });
+}
+
 // ══ GATE ══
 function submitGate(){
+  if(!selectedWorld)return;
   const val=document.getElementById('gate-input').value.trim().replace(/\s/g,'');
   if(val==='1128'){
     document.getElementById('gate').classList.add('hide');
+    document.getElementById('gate').setAttribute('aria-hidden','true');
     document.getElementById('site').classList.add('show');
     fetchWeather();
     buildLetters();buildPhotos();
@@ -1217,7 +1516,6 @@ function initNavScroll(){
 function initHero3D(){
   const hero=document.querySelector('.hero-worlds');
   const canvas=document.getElementById('hero-canvas');
-  const intro=document.getElementById('world-intro');
   if(!hero||!canvas||hero.dataset.initialized)return;
   hero.dataset.initialized='true';
 
@@ -1474,31 +1772,12 @@ function initHero3D(){
       catch(error){console.warn('Eternore 3D world unavailable:',error);current=null;}
     }
     currentName=name;
-    document.querySelectorAll('.world-switcher button').forEach(function(button){
-      const active=button.dataset.fx===name;
-      button.classList.toggle('active',active);
-      button.setAttribute('aria-pressed',String(active));
-    });
     const overlay=document.querySelector('.world-overlay');
     if(overlay){
       overlay.style.transition='opacity .9s ease';
       overlay.style.opacity=name==='particles'?'0':'1';
     }
   }
-  document.querySelectorAll('.world-switcher button').forEach(function(button){
-    button.addEventListener('click',function(){mount(button.dataset.fx);});
-  });
-  if(intro){
-    intro.querySelectorAll('.world-choice').forEach(function(button){
-      button.addEventListener('click',function(){
-        mount(button.dataset.enter);
-        hero.classList.add('world-entered');
-        intro.classList.add('hide');
-        window.setTimeout(function(){intro.style.display='none';},1000);
-      });
-    });
-  }
-
   function resize(){
     const nextW=Math.max(1,hero.clientWidth),nextH=Math.max(1,hero.clientHeight);
     if(W===nextW&&H===nextH)return;
@@ -1525,7 +1804,7 @@ function initHero3D(){
     }
     requestAnimationFrame(loop);
   }
-  mount('aurora');
+  mount(selectedWorld||'aurora');
   if(renderer)requestAnimationFrame(loop);
   const hint=document.getElementById('world-hint');
   if(hint)window.setTimeout(function(){hint.style.opacity='0';},8000);
