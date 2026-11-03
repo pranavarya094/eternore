@@ -775,6 +775,178 @@ body{transition:background .8s ease,color .8s ease}
  .world-selection-screen{transition:none}
 }
 
+/* ═══ ETERNORE POLISH: consistent ambience, crafted chapters, tactile letters ═══ */
+.world-atmosphere{
+  position:fixed;inset:0;z-index:1;overflow:hidden;pointer-events:none;
+  opacity:.72;mix-blend-mode:screen;isolation:isolate;
+  transition:opacity .85s ease;
+}
+:root[data-theme="light"] .world-atmosphere{mix-blend-mode:multiply;opacity:.30}
+.ambient-flow{
+  position:absolute;inset:auto;top:-25%;height:150%;
+  width:min(33vw,440px);pointer-events:none;
+  opacity:0;filter:blur(62px);border-radius:50%;
+  transform:rotate(21deg);transform-origin:center;
+  animation:ambient-drift 20s ease-in-out infinite alternate;
+}
+.ambient-a{left:2%;animation-duration:22s}
+.ambient-b{left:38%;animation-duration:26s;animation-direction:alternate-reverse}
+.ambient-c{right:-4%;animation-duration:24s}
+:root[data-world="aurora"] .ambient-a{
+  background:linear-gradient(180deg,transparent 4%,rgba(134,102,249,.34) 36%,rgba(225,101,175,.24) 67%,transparent 94%);
+  opacity:.45;
+}
+:root[data-world="aurora"] .ambient-b{
+  background:linear-gradient(180deg,transparent 7%,rgba(106,169,245,.27) 37%,rgba(191,102,242,.27) 72%,transparent 96%);
+  opacity:.34;transform:rotate(-16deg);
+}
+:root[data-world="aurora"] .ambient-c{
+  background:linear-gradient(180deg,transparent 10%,rgba(245,148,192,.25) 47%,rgba(230,194,120,.18) 71%,transparent 95%);
+  opacity:.37;
+}
+:root[data-world="particles"] .ambient-a,
+:root[data-world="particles"] .ambient-b,
+:root[data-world="particles"] .ambient-c{opacity:.17;filter:blur(80px)}
+:root[data-world="particles"] .ambient-a{background:radial-gradient(ellipse,rgba(247,158,166,.58),transparent 70%)}
+:root[data-world="particles"] .ambient-b{background:radial-gradient(ellipse,rgba(249,184,117,.50),transparent 70%)}
+:root[data-world="particles"] .ambient-c{background:radial-gradient(ellipse,rgba(221,113,156,.45),transparent 70%)}
+:root[data-world="starfield"] .ambient-a,
+:root[data-world="starfield"] .ambient-b,
+:root[data-world="starfield"] .ambient-c{opacity:.19;filter:blur(100px)}
+:root[data-world="starfield"] .ambient-a{background:radial-gradient(ellipse,rgba(88,141,239,.56),transparent 74%)}
+:root[data-world="starfield"] .ambient-b{background:radial-gradient(ellipse,rgba(148,117,234,.42),transparent 72%)}
+:root[data-world="starfield"] .ambient-c{background:radial-gradient(ellipse,rgba(114,173,242,.42),transparent 74%)}
+.ambient-specks{
+  position:absolute;inset:0;opacity:0;pointer-events:none;
+  background-repeat:repeat;transition:opacity .8s ease;
+  background-image:
+    radial-gradient(circle,rgba(255,235,220,.72) .7px,transparent 1.5px),
+    radial-gradient(circle,rgba(223,186,224,.50) .9px,transparent 1.8px);
+  background-size:135px 161px,201px 223px;
+  background-position:17px 22px,72px 109px;
+  animation:ambient-speck-shift 35s linear infinite;
+}
+:root[data-world="particles"] .ambient-specks{opacity:.22}
+:root[data-world="starfield"] .ambient-specks{opacity:.48}
+:root[data-world="aurora"] .ambient-specks{opacity:.13}
+@keyframes ambient-drift{
+  from{translate:-3% -1%;scale:.96}
+  to{translate:5% 2%;scale:1.09}
+}
+@keyframes ambient-speck-shift{
+  from{background-position:17px 22px,72px 109px}
+  to{background-position:76px 140px,130px 232px}
+}
+/* A thread of light guides the eye from chapter to chapter. */
+section.block{isolation:isolate;scroll-margin-top:95px}
+section.block::before{
+  content:'';position:absolute;top:26px;left:50%;
+  width:min(70%,440px);height:1px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--gold),var(--ornament),var(--gold),transparent);
+  opacity:.15;transform:translateX(-50%) scaleX(.45);
+  transform-origin:center;transition:opacity 1.1s ease,transform 1.25s cubic-bezier(.18,.75,.2,1);
+}
+section.block::after{
+  content:'✧';position:absolute;top:13px;left:50%;transform:translateX(-50%) translateY(8px);
+  font-family:'Fraunces',serif;color:var(--gold);font-size:19px;line-height:1;
+  opacity:0;pointer-events:none;transition:opacity 1.1s ease,transform 1.1s ease;
+}
+section.block.chapter-visible::before{opacity:.7;transform:translateX(-50%) scaleX(1)}
+section.block.chapter-visible::after{opacity:.83;transform:translateX(-50%) translateY(0)}
+section.block .sec-title{transition:text-shadow .85s ease}
+section.block.chapter-visible .sec-title{text-shadow:0 0 36px var(--accent-soft)}
+#letters{scroll-margin-top:100px}
+#epilogue{padding-bottom:120px}
+
+/* Letter heads are real accessible buttons; paper gently unfolds below them. */
+.letter-head{
+  width:100%;border:0;border-radius:2px;background:transparent;
+  color:inherit;text-align:left;font:inherit;align-items:center;
+  min-height:66px;touch-action:manipulation;
+}
+.letter-head:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+.letter-item{position:relative}
+.letter-item.open{
+  overflow:visible;
+  box-shadow:0 23px 65px -39px rgba(0,0,0,.43),inset 0 1px 0 var(--ornament);
+}
+.letter-item.open::before{
+  content:'✦';position:absolute;right:16px;top:-12px;
+  font-size:12px;color:var(--gold);pointer-events:none;
+}
+.letter-body{perspective:1000px;transition:max-height .68s cubic-bezier(.2,.7,.2,1)}
+.letter-body-inner{
+  position:relative;opacity:0;
+  transform-origin:center top;transform:translateY(-12px) rotateX(-6deg);
+  transition:opacity .52s ease,transform .68s cubic-bezier(.18,.75,.2,1);
+  background:linear-gradient(180deg,var(--highlight),transparent 34%);
+  border-top:1px solid var(--ornament);
+  padding-top:23px;
+}
+.letter-item.open .letter-body-inner{
+  opacity:1;transform:translateY(0) rotateX(0);
+}
+.letter-body-inner::before{
+  content:'';position:absolute;top:8px;bottom:18px;left:-12px;width:1px;
+  background:linear-gradient(transparent,var(--ornament),transparent);
+}
+.letter-item.open .letter-title{color:var(--accent)}
+.letter-body-text{overflow-wrap:anywhere}
+.letter-body-text img{max-width:100%;height:auto}
+.letter-sig{transition:opacity .45s ease .16s,transform .45s ease .16s}
+.letter-item:not(.open) .letter-sig{opacity:0;transform:translateY(5px)}
+.letter-item.open .letter-sig{opacity:1;transform:none}
+.letter-chev{transition:transform .36s ease,color .36s}
+.letter-item.open .letter-chev{color:var(--gold)}
+/* Framing and subtle motion for meaningful images. */
+.photo-card{will-change:auto;backface-visibility:hidden}
+.photo-card img{transform:translateZ(0)}
+.photo-grid{perspective:1000px}
+.story-card,.hero-prologue .hero-letter{transition:box-shadow .5s ease,border-color .5s ease}
+.story-card:hover,.hero-prologue .hero-letter:hover{
+  box-shadow:0 34px 90px -45px rgba(0,0,0,.43);
+  border-color:var(--gold);
+}
+/* Soft, not jarring, transition from cinema into reading. */
+.hero-worlds::after{
+  height:min(52vh,465px);
+  background:linear-gradient(to bottom,transparent 0%,var(--bg) 98%);
+}
+.hero-prologue{
+  padding-top:clamp(64px,9vw,110px);
+  background:linear-gradient(to bottom,var(--world-haze1),transparent 66%);
+}
+.hero-worlds .world-explore{bottom:38px}
+@media(max-width:760px){
+  .world-atmosphere{opacity:.42}
+  :root[data-theme="light"] .world-atmosphere{opacity:.18}
+  .ambient-flow{animation:none;filter:blur(46px);width:54vw}
+  .ambient-specks{animation:none}
+  section.block::before{width:76%}
+  .letter-head{min-height:61px}
+  .letter-body-inner{transform:translateY(-8px) rotateX(-3deg)}
+  .letter-body-inner::before{display:none}
+  .photo-card:hover{transform:none}
+  .photo-card:hover img{transform:none}
+  .story-card:hover,.hero-prologue .hero-letter:hover{
+    box-shadow:var(--shadow);border-color:var(--ornament);
+  }
+}
+@media(max-width:440px){
+  .letter-head{gap:10px}
+  .letter-body{transition-duration:.5s}
+  .letter-body-inner{padding-top:18px}
+  .hero-prologue{padding-top:65px}
+}
+@media(prefers-reduced-motion:reduce){
+  .ambient-flow,.ambient-specks{animation:none!important}
+  section.block::before,section.block::after,
+  .letter-body,.letter-body-inner,.letter-sig{transition:none!important}
+  .letter-body-inner{transform:none;opacity:1}
+  section.block::before{transform:translateX(-50%) scaleX(1);opacity:.65}
+  section.block::after{transform:translateX(-50%);opacity:.78}
+}
+
 </style>
 </head>
 <body>
@@ -782,6 +954,12 @@ body{transition:background .8s ease,color .8s ease}
 <div class="bg"></div>
 <div class="grain"></div>
 <div class="vignette"></div>
+<div class="world-atmosphere" aria-hidden="true">
+  <span class="ambient-flow ambient-a"></span>
+  <span class="ambient-flow ambient-b"></span>
+  <span class="ambient-flow ambient-c"></span>
+  <span class="ambient-specks"></span>
+</div>
 
 
 <!-- FIRST SCREEN — select a visual world BEFORE the password -->
@@ -1386,29 +1564,55 @@ function buildLetters(){
   const dated=[],undated=[];
   PAGES.forEach(p=>{if(p.type!=='poem')return;if(p.date)dated.push(p);else undated.push(p);});
   dated.sort((a,b)=>{if(a.pin&&!b.pin)return -1;if(b.pin&&!a.pin)return 1;return new Date(b.date)-new Date(a.date);});
-  const row=p=>`
+  const row=(p,uid)=>`
     <div class="letter-item" data-search="${(p.title+' '+(p.date||'')).toLowerCase()}">
-      <div class="letter-head" onclick="toggleLetter(this)">
+      <button type="button" class="letter-head" aria-expanded="false" aria-controls="${uid}" onclick="toggleLetter(this)">
         <span class="letter-date">${p.date||''}</span>
         <span class="letter-title">${p.title}</span>
-        <span class="letter-chev">&#9662;</span>
-      </div>
-      <div class="letter-body">
+        <span class="letter-chev" aria-hidden="true">&#9662;</span>
+      </button>
+      <div class="letter-body" id="${uid}" role="region">
         <div class="letter-body-inner">
           <div class="letter-body-text">${p.body}</div>
           <div class="letter-sig">${p.sig?p.sig:'&#8212; Pranav Arya'}</div>
         </div>
       </div>
     </div>`;
-  let html='<div class="letters-group-label">Letters for Aurora</div>'+dated.map(row).join('');
-  if(undated.length)html+='<div class="letters-group-label">More Notes</div>'+undated.map(row).join('');
+  let html='<div class="letters-group-label">Letters for Aurora</div>'+dated.map((p,i)=>row(p,'letter-d-'+i)).join('');
+  if(undated.length)html+='<div class="letters-group-label">More Notes</div>'+undated.map((p,i)=>row(p,'letter-u-'+i)).join('');
   document.getElementById('letters-dated').innerHTML=html;
 }
+const letterResizeObserver=typeof ResizeObserver==='function'?new ResizeObserver(function(entries){
+  for(const entry of entries){
+    const item=entry.target.closest('.letter-item');
+    if(item&&item.classList.contains('open')){
+      const body=item.querySelector('.letter-body');
+      if(body)body.style.maxHeight=body.scrollHeight+'px';
+    }
+  }
+}):null;
 function toggleLetter(headEl){
-  const item=headEl.parentElement;
+  const item=headEl.closest('.letter-item');
+  if(!item)return;
   const body=item.querySelector('.letter-body');
-  if(item.classList.contains('open')){item.classList.remove('open');body.style.maxHeight=null;}
-  else{item.classList.add('open');body.style.maxHeight=body.scrollHeight+'px';}
+  const inner=body&&body.querySelector('.letter-body-inner');
+  if(!body)return;
+  const opening=!item.classList.contains('open');
+  if(opening){
+    item.classList.add('open');
+    headEl.setAttribute('aria-expanded','true');
+    body.style.maxHeight=body.scrollHeight+'px';
+    if(letterResizeObserver&&inner)letterResizeObserver.observe(inner);
+  }else{
+    if(letterResizeObserver&&inner)letterResizeObserver.unobserve(inner);
+    body.style.maxHeight=body.scrollHeight+'px';
+    void body.offsetHeight;
+    item.classList.remove('open');
+    headEl.setAttribute('aria-expanded','false');
+    requestAnimationFrame(function(){
+      if(!item.classList.contains('open'))body.style.maxHeight='0px';
+    });
+  }
 }
 function filterLetters(q){
   const term=q.trim().toLowerCase();let any=false;
@@ -1482,13 +1686,37 @@ document.addEventListener('keydown',e=>{
 
 // ══ SCROLL REVEAL ══
 function initReveal(){
-  document.querySelectorAll('section.block, .hero').forEach(sec=>{
-    Array.from(sec.querySelectorAll(':scope .reveal')).forEach((el,i)=>{el.style.transitionDelay=Math.min(i*70,350)+'ms';});
-  });
-  const io=new IntersectionObserver((entries)=>{
-    entries.forEach(ent=>{if(ent.isIntersecting){ent.target.classList.add('in');io.unobserve(ent.target);}});
-  },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
-  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+  const sections=[...document.querySelectorAll('section.block')];
+  const reveals=[...document.querySelectorAll('.reveal')];
+  for(const section of sections){
+    [...section.querySelectorAll('.reveal')].forEach((el,i)=>{
+      el.style.transitionDelay=Math.min(i*65,330)+'ms';
+    });
+  }
+  const reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(reduced||!('IntersectionObserver' in window)){
+    sections.forEach(el=>el.classList.add('chapter-visible'));
+    reveals.forEach(el=>el.classList.add('in'));
+    return;
+  }
+  const revealObserver=new IntersectionObserver(function(entries){
+    for(const entry of entries){
+      if(entry.isIntersecting){
+        entry.target.classList.add('in');
+        revealObserver.unobserve(entry.target);
+      }
+    }
+  },{threshold:.1,rootMargin:'0px 0px -28px 0px'});
+  reveals.forEach(el=>revealObserver.observe(el));
+  const chapterObserver=new IntersectionObserver(function(entries){
+    for(const entry of entries){
+      if(entry.isIntersecting){
+        entry.target.classList.add('chapter-visible');
+        chapterObserver.unobserve(entry.target);
+      }
+    }
+  },{threshold:0,rootMargin:'0px 0px -18% 0px'});
+  sections.forEach(el=>chapterObserver.observe(el));
 }
 
 // ══ NAV SCROLL + ACTIVE + PARALLAX ══
@@ -1521,12 +1749,15 @@ function initHero3D(){
 
   const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let W=Math.max(1,hero.clientWidth),H=Math.max(1,hero.clientHeight);
-  let isMobile=Math.min(W,H)<620;
+  const isMobile=Math.min(W,H)<620;
+  const lowMemory=Boolean(navigator.deviceMemory&&navigator.deviceMemory<=4);
+  const saveData=Boolean(navigator.connection&&navigator.connection.saveData);
+  const lowPower=isMobile||lowMemory||saveData||reduceMotion;
   let renderer=null;
   if(typeof THREE!=='undefined'){
     try{
-      renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:!isMobile,alpha:false,powerPreference:'high-performance'});
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,isMobile?1.5:2));
+      renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:!lowPower,alpha:false,powerPreference:lowPower?'low-power':'high-performance'});
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,lowPower?1.2:1.7));
       renderer.setSize(W,H,false);
     }catch(error){console.warn('Eternore: 3D fallback active',error);renderer=null;}
   }
@@ -1642,7 +1873,7 @@ function initHero3D(){
     const scene=new THREE.Scene();
     const cam=new THREE.PerspectiveCamera(55,W/H,.1,400);
     cam.position.z=isMobile?54:46;
-    const COUNT=isMobile?2900:6500;
+    const COUNT=isMobile?1500:(lowPower?3200:5500);
     const textPoints=sampleText('AURORA');
     const heart=heartPoints(COUNT,isMobile?7:11);
     const cloud=new Float32Array(COUNT*3),words=new Float32Array(COUNT*3),hearts=new Float32Array(COUNT*3);
@@ -1705,7 +1936,7 @@ function initHero3D(){
     const scene=new THREE.Scene();
     scene.fog=new THREE.FogExp2(0x05050a,.0016);
     const cam=new THREE.PerspectiveCamera(70,W/H,.1,600);
-    const COUNT=isMobile?2600:5800,DEPTH=520,SP=120;
+    const COUNT=isMobile?1650:(lowPower?3300:5200),DEPTH=520,SP=120;
     const pos=new Float32Array(COUNT*3),colors=new Float32Array(COUNT*3),sizes=new Float32Array(COUNT);
     const warm=new THREE.Color(0xffd9b0),rose=new THREE.Color(0xffb0c4),cool=new THREE.Color(0xbcd0ff);
     for(let i=0;i<COUNT;i++){
@@ -1793,10 +2024,12 @@ function initHero3D(){
     },{threshold:0});
     observer.observe(hero);
   }
-  let last=performance.now();
+  let last=performance.now(),lastDraw=0;
+  const minFrameInterval=reduceMotion?140:(lowPower?1000/30:1000/60);
   function loop(now){
     const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;
-    if(renderer&&current&&visible&&!document.hidden){
+    if(renderer&&current&&visible&&!document.hidden&&now-lastDraw>=minFrameInterval){
+      lastDraw=now;
       ptr.x+=(ptr.tx-ptr.x)*.06;
       ptr.y+=(ptr.ty-ptr.y)*.06;
       current.update(reduceMotion?0:dt);
