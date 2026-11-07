@@ -1564,7 +1564,7 @@ document.getElementById('gate-input').addEventListener('keydown',e=>{if(e.key===
 function buildLetters(){
   const dated=[],undated=[];
   PAGES.forEach(p=>{if(p.type!=='poem')return;if(p.date)dated.push(p);else undated.push(p);});
-  dated.sort((a,b)=>{if(a.pin&&!b.pin)return -1;if(b.pin&&!a.pin)return 1;return new Date(b.date)-new Date(a.date);});
+  dated.sort((a,b)=>new Date(b.date)-new Date(a.date));
   const row=(p,uid)=>`
     <div class="letter-item" data-search="${(p.title+' '+(p.date||'')).toLowerCase()}">
       <button type="button" class="letter-head" aria-expanded="false" aria-controls="${uid}" onclick="toggleLetter(this)">
