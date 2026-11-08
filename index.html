@@ -947,6 +947,54 @@ section.block.chapter-visible .sec-title{text-shadow:0 0 36px var(--accent-soft)
   section.block::after{transform:translateX(-50%);opacity:.78}
 }
 
+
+/* Eternore winter edition — one cinematic world, quieter navigation */
+:root[data-theme="dark"]{
+ --bg:#170711;--bg2:#411224;--card:#29111e;--ink:#fff0e5;--ink2:#e9cdd0;
+ --muted:#c49da9;--line:rgba(222,177,137,.25);--rose:#e8a4b5;--gold:#f2cb8d;
+ --accent:#e5b77e;--accent-soft:rgba(229,183,126,.13);
+ --nav-bg:rgba(28,7,19,.90);--vig:rgba(12,2,11,.70);
+ --shadow:0 28px 85px -28px rgba(0,0,0,.8);
+}
+:root[data-theme="light"]{
+ --bg:#32101f;--bg2:#55203a;--card:#fff0e8;--ink:#fff0e5;--ink2:#f0d5d8;
+ --muted:#dfb8bf;--line:rgba(229,186,147,.3);--rose:#f1b5c2;--gold:#f2cb8d;
+ --accent:#e5b77e;--nav-bg:rgba(37,9,23,.9);--vig:rgba(17,3,13,.55);
+}
+.bg{
+ background:
+ radial-gradient(circle at 78% 16%,rgba(255,230,179,.78) 0 2.1%,rgba(255,209,155,.19) 3.5%,transparent 12%),
+ radial-gradient(ellipse 45% 34% at 77% 20%,rgba(162,60,83,.32),transparent 75%),
+ radial-gradient(ellipse 85% 60% at 24% 0%,#6b2444 0%,transparent 70%),
+ linear-gradient(160deg,#4d1830 0%,#270d22 47%,#0d111c 100%)!important;
+}
+.bg::before{
+ content:"";position:absolute;inset:0;pointer-events:none;opacity:.7;
+ background-image:
+ radial-gradient(1.5px 1.5px at 12% 20%,#ffe4c7 95%,transparent),
+ radial-gradient(2px 2px at 71% 39%,#fff1de 95%,transparent),
+ radial-gradient(1px 1px at 37% 62%,#ffe2c8 95%,transparent),
+ radial-gradient(2px 2px at 87% 78%,#fff2e2 95%,transparent);
+ background-size:173px 211px,241px 263px,131px 179px,307px 337px;
+ animation:winterSnow 26s linear infinite;
+}
+.bg::after{
+ content:"";position:absolute;inset:auto 0 0;height:32vh;pointer-events:none;
+ background:
+ linear-gradient(0deg,rgba(7,12,19,.84),transparent),
+ repeating-linear-gradient(115deg,transparent 0 47px,rgba(9,22,22,.20) 48px 51px,transparent 52px 103px);
+ mask-image:linear-gradient(to top,black,transparent);
+}
+@keyframes winterSnow{to{background-position:30px 680px,-50px 900px,60px 560px,-80px 770px}}
+#gate{background:radial-gradient(ellipse at 50% 24%,rgba(112,39,67,.55),transparent 65%),linear-gradient(155deg,#461329,#160a18 70%)}
+#gate::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.65;background-image:radial-gradient(2px 2px at 22% 25%,#ffe9d8 90%,transparent),radial-gradient(1px 1px at 75% 60%,#fff 90%,transparent);background-size:170px 230px,110px 160px;animation:winterSnow 30s linear infinite}
+.gate-box{position:relative;z-index:1}
+.gate-title,.hero-title{ text-shadow:0 4px 36px rgba(234,158,143,.18)}
+.hero-letter,.letter-body-inner{box-shadow:0 22px 70px rgba(8,2,9,.24)}
+.nav-change-world,.menu-change-world,.gate-change-world,.theme-toggle,.menu-theme,.world-selection-screen{display:none!important}
+#mainnav{backdrop-filter:blur(18px)}
+@media(prefers-reduced-motion:reduce){.bg::before,#gate::before{animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -1539,6 +1587,9 @@ if(worldPicker){
     }
   });
 }
+
+// Enter the single winter world automatically; keep the existing password gate.
+selectWorld('aurora');
 
 // ══ GATE ══
 function submitGate(){
