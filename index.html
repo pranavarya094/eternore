@@ -2186,7 +2186,7 @@ updateThemeIcon();
     const event = {site_id:SITE_ID,type:type,elapsed_ms:Date.now()-start};
     if (details && typeof details === 'object') {
       for (const [key,value] of Object.entries(details)) {
-        if (['section','milestone','mode','media','result'].includes(key) && (typeof value === 'string' || typeof value === 'number')) {
+        if (['section','milestone','mode','media','result','letter_title','letter_date'].includes(key) && (typeof value === 'string' || typeof value === 'number')) {
           event[key] = String(value).slice(0,64);
         }
       }
@@ -2247,7 +2247,13 @@ updateThemeIcon();
     const anchor=target.closest('a[href^="#"]');
     if (anchor) record('navigation',{section:(anchor.getAttribute('href')||'').slice(1)});
     const letter=target.closest('.letter-head');
-    if (letter) record(letter.closest('.letter-item')?.classList.contains('open')?'letter_close':'letter_open');
+    if (letter) {
+      const item=letter.closest('.letter-item');
+      record(item?.classList.contains('open')?'letter_close':'letter_open',{
+        letter_title:letter.querySelector('.letter-title')?.textContent?.trim()||'Untitled',
+        letter_date:letter.querySelector('.letter-date')?.textContent?.trim()||'Undated'
+      });
+    }
     const photo=target.closest('.photo-card');
     if (photo) record('photo_open');
     if (target.closest('#lightbox-close')) record('photo_close');
