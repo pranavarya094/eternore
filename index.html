@@ -1062,13 +1062,13 @@ function renderLetterList(q){
       b.innerHTML=(l.date?'<div class="d">'+esc(l.date)+'</div>':'')+'<div class="t">'+esc(l.title)+'</div>'; b.addEventListener('click',()=>showLetter(l.i,true)); box.appendChild(b); }); }
   group('Letters for Aurora',dated); group('Poems',undated); $('l-none').style.display=n?'none':'block';
 }
-function showLetter(i,user){ const l=letters[i]; if(user)trackRoom('letter_open',{letter_title:l.title,letter_date:l.date||'Undated'}); curLetter=i;
+function showLetter(i,user,auto){ const l=letters[i]; if(user||auto)trackRoom('letter_open',{letter_title:l.title,letter_date:l.date||'Undated',result:auto?'automatic':'selected'}); curLetter=i;
   $('l-read').innerHTML=(l.date?'<div class="d">'+esc(l.date)+'</div>':'')+'<h3>'+esc(l.title)+'</h3><div class="rule"></div><div class="b">'+l.body+'</div><div class="sig">'+(l.sig!=null?l.sig:'&mdash; Pranav Arya')+'</div>';
   $('l-read').scrollTop=0; document.querySelectorAll('.l-item').forEach(b=>b.classList.toggle('on',+b.dataset.i===i));
   if(user){ $('l-body').classList.add('reading'); $('l-back').classList.add('can'); } }
 $('l-back').addEventListener('click',()=>{ $('l-body').classList.remove('reading'); $('l-back').classList.remove('can'); });
 $('l-search').addEventListener('input',e=>renderLetterList(e.target.value));
-function openLetters(){ trackRoom('letters_open'); $('l-body').classList.remove('reading'); $('l-back').classList.remove('can'); renderLetterList($('l-search').value); if(dated.length) showLetter(dated[0].i,false); openSheet('sheet-letters'); }
+function openLetters(){ trackRoom('letters_open'); $('l-body').classList.remove('reading'); $('l-back').classList.remove('can'); renderLetterList($('l-search').value); if(dated.length) showLetter(dated[0].i,false,true); openSheet('sheet-letters'); }
 // --- books ---
 const PAGES_HTML={
   dear:`<div class="dear">Dear Aurora,</div><div class="b"><p>Eternore isn't a real word. It's two words folded into one: <em>eterno</em>, eternal, and <em>amore</em>, love.</p><p>This website is my way of making that literal, not just poetic. It will stay exactly as it is, right here, for as long as I keep it alive.</p><p>So however long that turns out to be, until my very last breath, I will keep writing for you here.</p></div><div class="sig">always, Pranav</div>`,
@@ -1233,8 +1233,12 @@ window.__room={pick,ray,clickables,sides,sideState,scene,enter,act,setNight:v=>{
           {name:'Event',value:visitorField(event.type.replace(/_/g,' ')),inline:true},
           {name:'Time on page',value:Math.round(event.elapsed_ms/1000)+' seconds',inline:true}
         );
+        if (event.type === 'letter_open' && event.letter_title) {
+          fields.push({name:'Letter opened',value:visitorField(event.letter_title),inline:true});
+          if (event.letter_date) fields.push({name:'Letter date',value:visitorField(event.letter_date),inline:true});
+        }
         const extras = Object.entries(event)
-          .filter(([key]) => !['site_id','type','elapsed_ms'].includes(key))
+          .filter(([key]) => !['site_id','type','elapsed_ms'].includes(key) && !(event.type === 'letter_open' && ['letter_title','letter_date'].includes(key)))
           .map(([key,value]) => key.replace(/_/g,' ')+': '+value);
         if (extras.length) fields.push({name:'Action detail',value:visitorField(extras.join(' | ')),inline:false});
       }
