@@ -121,6 +121,12 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 /* letters */
 .l-list{flex:none;width:310px;border-right:1px solid var(--line);display:flex;flex-direction:column}
+/* Open Letters on its complete menu; show the reading pane only after choosing a letter. */
+.sheet-body.split:not(.reading) .l-list{width:100%;border-right:0}
+.sheet-body.split:not(.reading) .l-read{display:none}
+.sheet-body.split:not(.reading) .l-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:2px 12px;align-content:start}
+.sheet-body.split:not(.reading) .l-group{grid-column:1/-1}
+@media(max-width:520px){.sheet-body.split:not(.reading) .l-items{grid-template-columns:1fr}}
 .l-search{margin:14px 16px 8px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:16px;color:var(--ink);outline:none;
   -webkit-user-select:text;user-select:text}
 .l-search:focus{border-color:var(--rose)}
@@ -1085,7 +1091,7 @@ function showLetter(i,user,auto){ const l=letters[i]; if(user||auto)trackRoom('l
   if(user){ $('l-body').classList.add('reading'); $('l-back').classList.add('can'); } }
 $('l-back').addEventListener('click',()=>{ $('l-body').classList.remove('reading'); $('l-back').classList.remove('can'); });
 $('l-search').addEventListener('input',e=>renderLetterList(e.target.value));
-function openLetters(){ trackRoom('letters_open'); $('l-body').classList.remove('reading'); $('l-back').classList.remove('can'); renderLetterList($('l-search').value); if(dated.length) showLetter(dated[0].i,false,true); openSheet('sheet-letters'); }
+function openLetters(){ trackRoom('letters_open'); $('l-body').classList.remove('reading'); $('l-back').classList.remove('can'); $('l-search').value=''; curLetter=null; $('l-read').innerHTML=''; renderLetterList(''); openSheet('sheet-letters'); }
 // --- books ---
 const PAGES_HTML={
   dear:`<div class="dear">Dear Aurora,</div><div class="b"><p>Eternore isn't a real word. It's two words folded into one: <em>eterno</em>, eternal, and <em>amore</em>, love.</p><p>This website is my way of making that literal, not just poetic. It will stay exactly as it is, right here, for as long as I keep it alive.</p><p>So however long that turns out to be, until my very last breath, I will keep writing for you here.</p></div><div class="sig">always, Pranav</div>`,
