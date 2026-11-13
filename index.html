@@ -138,6 +138,12 @@ button{font:inherit;color:inherit;cursor:pointer}
 .l-read .b{font-size:clamp(18px,2.4vw,21px);line-height:1.75}
 .l-read .b img{max-width:100%}
 .l-read .sig{font-family:var(--script);font-size:24px;color:var(--rose);margin-top:26px;text-align:right}
+.letter-voice{display:none;margin:20px 0 24px;padding:17px 20px 19px;border:1px solid rgba(167,71,102,.23);border-radius:13px;background:linear-gradient(135deg,rgba(167,71,102,.07),rgba(200,154,91,.08))}
+.letter-voice.available{display:block}
+.letter-voice .voice-title{font-family:var(--serif);color:var(--rose);font-size:17px;letter-spacing:.01em}
+.letter-voice .voice-desc{font-style:italic;color:var(--ink2);font-size:16px;margin:3px 0 12px}
+.letter-voice audio{display:block;width:100%;height:42px;accent-color:var(--rose)}
+.letter-voice audio:focus-visible{outline:2px solid var(--rose);outline-offset:3px}
 .rule{width:54px;height:1px;background:var(--rose);margin:0 0 20px}
 
 /* books */
@@ -1064,8 +1070,17 @@ function renderLetterList(q){
       b.innerHTML=(l.date?'<div class="d">'+esc(l.date)+'</div>':'')+'<div class="t">'+esc(l.title)+'</div>'; b.addEventListener('click',()=>showLetter(l.i,true)); box.appendChild(b); }); }
   group('Letters for Aurora',dated); group('Poems',undated); $('l-none').style.display=n?'none':'block';
 }
+const LETTER_AUDIO={ 'Sometimes|12 Nov 2026':'audio/sometimes-2026-11-12.mp3' };
 function showLetter(i,user,auto){ const l=letters[i]; if(user||auto)trackRoom('letter_open',{letter_title:l.title,letter_date:l.date||'Undated',result:auto?'automatic':'selected'}); curLetter=i;
-  $('l-read').innerHTML=(l.date?'<div class="d">'+esc(l.date)+'</div>':'')+'<h3>'+esc(l.title)+'</h3><div class="rule"></div><div class="b">'+l.body+'</div><div class="sig">'+(l.sig!=null?l.sig:'&mdash; Pranav Arya')+'</div>';
+  const src=LETTER_AUDIO[l.title+'|'+l.date];
+  const audioBox=src?'<aside class="letter-voice" aria-label="Audio recording of this letter"><div class="voice-title">✦ Listen in Pranav\'s Voice</div><div class="voice-desc">A recording of this letter, just for you.</div><audio controls preload="none" playsinline data-letter-title="'+esc(l.title)+'" data-letter-date="'+esc(l.date||'')+'"><source src="'+src+'" type="audio/mpeg">Your browser does not support audio playback.</audio></aside>':'';
+  $('l-read').innerHTML=(l.date?'<div class="d">'+esc(l.date)+'</div>':'')+'<h3>'+esc(l.title)+'</h3><div class="rule"></div>'+audioBox+'<div class="b">'+l.body+'</div><div class="sig">'+(l.sig!=null?l.sig:'&mdash; Pranav Arya')+'</div>';
+  if(src){
+    const box=$('l-read').querySelector('.letter-voice');
+    const audio=box&&box.querySelector('audio');
+    // The control appears only after the matching recording exists on this site.
+    fetch(src,{method:'HEAD'}).then(r=>{if(r.ok&&audio&&audio.isConnected&&curLetter===i)box.classList.add('available');}).catch(()=>{});
+  }
   $('l-read').scrollTop=0; document.querySelectorAll('.l-item').forEach(b=>b.classList.toggle('on',+b.dataset.i===i));
   if(user){ $('l-body').classList.add('reading'); $('l-back').classList.add('can'); } }
 $('l-back').addEventListener('click',()=>{ $('l-body').classList.remove('reading'); $('l-back').classList.remove('can'); });
@@ -1202,7 +1217,7 @@ window.__room={pick,ray,clickables,sides,sideState,scene,enter,act,setNight:v=>{
   let lastScroll = 0;
   let lastSearch = 0;
   let lastError = 0;
-  const allowed = new Set(['page_open','gate_success','gate_failure','section_view','navigation','letters_open','letter_open','letter_close','books_open','book_open','talk_open','call_click','window_view','window_exit','sheet_close','photo_open','photo_close','photo_next','photo_previous','video_play','video_pause','video_ended','theme_change','search_used','scroll_milestone','page_hidden','script_error','media_error']);
+  const allowed = new Set(['page_open','gate_success','gate_failure','section_view','navigation','letters_open','letter_open','letter_close','books_open','book_open','talk_open','call_click','window_view','window_exit','sheet_close','photo_open','photo_close','photo_next','photo_previous','video_play','video_pause','video_ended','audio_play','audio_pause','audio_ended','theme_change','search_used','scroll_milestone','page_hidden','script_error','media_error']);
   // Visitor details are looked up once, as on pranavarya.com.
   // If the lookup is blocked or times out, alerts still send with Unknown fields.
   let visitorGeo = {};
@@ -1352,9 +1367,16 @@ window.__room={pick,ray,clickables,sides,sideState,scene,enter,act,setNight:v=>{
   if (search) search.addEventListener('input',function () {
     if (Date.now()-lastSearch>3000) {lastSearch=Date.now();record('search_used');}
   });
-  document.addEventListener('play',e=>{if(e.target instanceof HTMLMediaElement)record('video_play',{media:'local_video'});},true);
-  document.addEventListener('pause',e=>{if(e.target instanceof HTMLMediaElement)record('video_pause',{media:'local_video'});},true);
-  document.addEventListener('ended',e=>{if(e.target instanceof HTMLMediaElement)record('video_ended',{media:'local_video'});},true);
+  for (const [domEvent,verb] of [['play','play'],['pause','pause'],['ended','ended']]) {
+    document.addEventListener(domEvent,function(e){
+      const el=e.target;
+      if(el instanceof HTMLAudioElement){
+        record('audio_'+verb,{media:'letter_voice',letter_title:el.dataset.letterTitle||'Untitled',letter_date:el.dataset.letterDate||'Undated'});
+      } else if(el instanceof HTMLVideoElement){
+        record('video_'+verb,{media:'local_video'});
+      }
+    },true);
+  }
   document.addEventListener('error',e=>{if(e.target instanceof HTMLImageElement || e.target instanceof HTMLMediaElement)record('media_error');},true);
   window.addEventListener('error',function () {if(Date.now()-lastError>3000){lastError=Date.now();record('script_error');}});
   window.addEventListener('scroll',function () {
