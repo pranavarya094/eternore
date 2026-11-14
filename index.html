@@ -2038,60 +2038,90 @@ function updateForest(dt,t){
 let sleepState=null;
 function makeSleepingScene(){
   const group=new T.Group();scene.add(group);
-  const bedding=M(0xd0b4bd,{roughness:.97,map:texLinen,side:T.DoubleSide});
-  const satin=M(0xe8d6dc,{roughness:.91,map:texLinen,side:T.DoubleSide});
-  const skinMat=skin.clone(),skinMate=skin2.clone();
-  // Two sleeping heads reuse the original character models and their hair.
-  const hGirl=gParts.head.clone(true);
-  const hGuy=guyParts.head.clone(true);
-  group.add(hGirl,hGuy);
-  hGirl.position.set(BX-.43,1.025,4.13);
-  hGuy.position.set(BX+.43,1.025,4.13);
-  hGirl.rotation.set(-Math.PI/2,0,-.12);
-  hGuy.rotation.set(-Math.PI/2,0,.1);
-  // Replace the open eyes with delicate closed-eye strokes on the original faces.
-  for(const head of [hGirl,hGuy]){
+  const quiltMat=M(0xc8a8bb,{roughness:.99,map:texLinen,side:T.DoubleSide});
+  const foldMat=M(0xf1e0e5,{roughness:1,map:texLinen,side:T.DoubleSide});
+  const girlNightwear=M(0xf1dfdf,{roughness:.95,map:texLinen});
+  const boyNightwear=M(0x4c6078,{roughness:.95,map:texLinen});
+  const girlSkin=skin.clone(),boySkin=skin2.clone();
+  const headBases=[],breathing=[];
+  // Both faces are rotated upwards, with the tops of their heads facing the headboard.
+  // Rotating each HEAD HOLDER around Y avoids upside-down faces in the overhead view.
+  for(const [idx,x,headSource,cloth,skinMat] of [
+    [0,BX-.42,gParts.head,girlNightwear,girlSkin],
+    [1,BX+.42,guyParts.head,boyNightwear,boySkin]
+  ]){
+    const sleeper=new T.Group();sleeper.position.set(x,0,0);group.add(sleeper);
+    const shoulder=sph(.30,cloth,0,1.01,3.58,sleeper,1.04,.43,1.55);
+    shoulder.rotation.y=idx?-.12:.12;
+    const collar=sph(.105,skinMat,0,1.045,4.02,sleeper,.72,.56,.9);
+    const headHolder=new T.Group();headHolder.position.set(idx?.04:-.04,1.095,4.30);
+    headHolder.rotation.y=Math.PI; sleeper.add(headHolder);
+    const head=headSource.clone(true);head.position.set(0,0,0);head.rotation.x=-Math.PI/2;
+    headHolder.add(head);
+    // Open-eye meshes are tiny spheres at (+/- .068, .01, .172) in head coordinates.
     head.traverse(o=>{
-      if(o.isMesh&&o.geometry&&o.geometry.type==='SphereGeometry'&&o.material&&o.material.color){
-        const pos=o.position;
-        if(Math.abs(pos.x)>.045&&Math.abs(pos.x)<.10&&Math.abs(pos.z-.172)<.027&&Math.abs(pos.y-.01)<.035)o.visible=false;
+      if(o.isMesh&&o.geometry&&o.geometry.type==='SphereGeometry'){
+        const p=o.position;
+        if(Math.abs(Math.abs(p.x)-.068)<.012 && Math.abs(p.y-.01)<.025 && Math.abs(p.z-.172)<.018)o.visible=false;
       }
     });
-    const eyelids=new T.MeshBasicMaterial({color:0x49333b,side:T.DoubleSide});
+    const lash=M(0x49333b,{roughness:1,side:T.DoubleSide});
     for(const dx of [-.068,.068]){
-      const brow=new T.Mesh(new T.TorusGeometry(.025,.004,5,12,Math.PI),eyelids);
-      brow.position.set(dx,.008,.175);brow.rotation.z=Math.PI;head.add(brow);
+      const eye=new T.Mesh(new T.TorusGeometry(.026,.0035,5,14,Math.PI),lash);
+      eye.position.set(dx,.008,.176);eye.rotation.z=Math.PI;head.add(eye);
     }
+    headBases.push(headHolder);
+    breathing.push(shoulder);
   }
-  // Hand and arm shapes peek out near the top of the blanket.
-  const hands=[];
-  for(const [x,mat] of [[BX-.10,skinMat],[BX+.10,skinMate]]){
-    const arm=sph(.070,mat,x,.97,3.81,group,1.1,.45,1.65);arm.rotation.y=.2;
-    const hand=sph(.055,mat,x,.998,3.90,group,1.05,.58,1);hands.push(hand);
+  // Curved forearms visibly meet in the middle: a clear, gentle cuddle pose.
+  function armBetween(from,to,material,r=.058){
+    const a=new T.Vector3(...from),b=new T.Vector3(...to);
+    const mesh=new T.Mesh(new T.CylinderGeometry(r*.93,r,a.distanceTo(b),10),material);
+    mesh.position.copy(a).add(b).multiplyScalar(.5);
+    mesh.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),b.sub(a).normalize());
+    mesh.castShadow=true;group.add(mesh);return mesh;
   }
-  // Soft, gently sculpted quilt with a rounded ridge over each sleeper.
-  const quiltGeo=new T.PlaneGeometry(2.28,2.52,18,26);
-  quiltGeo.rotateX(-Math.PI/2);
-  const a=quiltGeo.attributes.position;
-  const original=a.array.slice();
-  for(let i=0;i<a.count;i++){
-    const x=a.getX(i),z=a.getZ(i);
-    const humps=Math.exp(-Math.pow((x+.44)/.50,2))*.12+Math.exp(-Math.pow((x-.44)/.50,2))*.12;
-    a.setY(i,.08+humps+Math.sin((z+1.2)*2.8)*.013);
+  const hugHands=[];
+  for(const [points,material] of [
+    [[[BX-.63,1.085,3.89],[BX-.23,1.14,3.60],[BX+.07,1.16,3.72]],girlSkin],
+    [[[BX+.62,1.09,3.87],[BX+.26,1.17,3.59],[BX-.035,1.18,3.79]],boySkin]
+  ]){
+    armBetween(points[0],points[1],material,.068);
+    armBetween(points[1],points[2],material,.057);
+    hugHands.push(sph(.060,material,points[2][0],points[2][1],points[2][2],group,1,.62,1.2));
   }
-  quiltGeo.computeVertexNormals();
-  const quilt=new T.Mesh(quiltGeo,bedding);
-  quilt.position.set(BX, .91,2.72);quilt.receiveShadow=true;quilt.castShadow=true;group.add(quilt);
-  // Folded coverlet gives the bedding a cozy edge.
-  const hem=new T.Mesh(new T.PlaneGeometry(2.28,.20,16,2),satin);
-  hem.rotation.x=-Math.PI/2;hem.position.set(BX,1.02,3.90);
-  group.add(hem);
-  // Small crescent, visible in the air only during the bedtime scene.
-  const moonlight=new T.PointLight(0x9eacff,.24,5,2);moonlight.position.set(BX,2.2,3.55);group.add(moonlight);
+  // Cover the lower bodies, but leave faces, shoulders and the embrace visible.
+  // The quilt is a sculpted cloth surface spanning the lower two-thirds of the bed.
+  const geom=new T.PlaneGeometry(2.43,2.00,24,24);
+  geom.rotateX(-Math.PI/2);
+  const positions=geom.attributes.position;
+  for(let i=0;i<positions.count;i++){
+    const x=positions.getX(i),z=positions.getZ(i);
+    const rise=.105*Math.exp(-Math.pow((x+.40)/.50,2))
+              +.105*Math.exp(-Math.pow((x-.40)/.50,2));
+    positions.setY(i,.024+rise+Math.sin((z+1)*3.1)*.013);
+  }
+  geom.computeVertexNormals();
+  const quilt=new T.Mesh(geom,quiltMat);
+  quilt.position.set(BX,1.045,2.35);
+  quilt.castShadow=true;quilt.receiveShadow=true;group.add(quilt);
+  const foldedEdge=new T.Mesh(new T.PlaneGeometry(2.43,.12),foldMat);
+  foldedEdge.rotation.x=-Math.PI/2;
+  foldedEdge.position.set(BX,1.087,3.36);
+  group.add(foldedEdge);
+  // Pillow highlights to frame both faces against the bedding.
+  const pillowMat=M(0xfff5ee,{roughness:1,map:texLinen});
+  for(const x of [BX-.42,BX+.42]){
+    const p=sph(.43,pillowMat,x,.865,4.28,group,.88,.17,1.15);
+    p.rotation.y=x<BX?-.13:.13;
+  }
+  const moonlight=new T.PointLight(0xc3bafa,.36,5,2);
+  moonlight.position.set(BX+.25,2.8,3.25);group.add(moonlight);
   group.visible=false;
-  return {group,hGirl,hGuy,quilt,quiltVertices:original,hands,prevNight:0,
-    savedCamPos:new T.Vector3(),savedCamLook:new T.Vector3(),savedGirlVisible:true,savedGuyVisible:true,
-    enterTime:0};
+  return {group,headBases,breathing,quilt,hugHands,
+    prevNight:0,prevFov:camera.fov,
+    savedCamPos:new T.Vector3(),savedCamLook:new T.Vector3(),
+    savedGirlVisible:true,savedGuyVisible:true,enterTime:0};
 }
 function startCuddleSleep(){
   if(mode==='forest')leaveForestWalk();
@@ -2099,8 +2129,9 @@ function startCuddleSleep(){
   closeSheet();
   if(!sleepState)sleepState=makeSleepingScene();
   const f=sleepState;
-  f.prevNight=nightTarget;
+  f.prevNight=nightTarget;f.prevFov=camera.fov;
   f.savedCamPos.copy(camPos);f.savedCamLook.copy(camLook);
+  camera.up.set(0,0,1);
   f.savedGirlVisible=girl.visible;f.savedGuyVisible=guy.visible;
   for(const k in keys)keys[k]=false;
   girl.visible=false;guy.visible=false;f.group.visible=true;f.enterTime=0;
@@ -2118,6 +2149,7 @@ function wakeFromCuddle(){
   girl.visible=sleepState.savedGirlVisible;guy.visible=sleepState.savedGuyVisible;
   nightTarget=sleepState.prevNight;setDnButton();
   camPos.copy(sleepState.savedCamPos);camLook.copy(sleepState.savedCamLook);
+  camera.up.set(0,1,0);camera.fov=sleepState.prevFov;camera.updateProjectionMatrix();
   camera.position.copy(camPos);camera.lookAt(camLook);
   document.body.classList.remove('in-sleep');
   $('sleep-hud').classList.remove('visible');$('sleep-hud').setAttribute('aria-hidden','true');
@@ -2129,20 +2161,30 @@ function updateCuddleSleep(dt,t){
   if(!sleepState)return;
   const f=sleepState;
   f.enterTime+=dt;
-  const smooth=1-Math.pow(.00005,dt);
-  // Fixed gentle bedside camera, aimed at the pillow and blanket.
-  const target=new T.Vector3(BX+2.95,3.45,1.28);
-  const aim=new T.Vector3(BX,.99,3.25);
+  // Straight-down camera, centered on the actual bed. Y is vertical in the
+  // room, so Z is used as camera-up to avoid a degenerate lookAt orientation.
+  const target=new T.Vector3(BX+.12,6.15,3.43);
+  const aim=new T.Vector3(BX,.87,3.43);
+  const smooth=1-Math.pow(.00004,dt);
   camPos.lerp(target,smooth);camLook.lerp(aim,smooth);
+  camera.up.set(0,0,1);
   camera.position.copy(camPos);camera.lookAt(camLook);
-  f.hGirl.rotation.z=-.12+Math.sin(t*.7)*.014;
-  f.hGuy.rotation.z=.10+Math.sin(t*.8+.8)*.013;
-  f.quilt.position.y=.91+Math.sin(t*1.2)*.009;
-  // Keep the Zzz animation anchored near the pillows.
-  const headPoint=new T.Vector3(BX+.28,1.48,4.08).project(camera);
+  const targetFov=aspect<1?65:52;
+  if(Math.abs(camera.fov-targetFov)>.01){
+    camera.fov=lerp(camera.fov,targetFov,1-Math.pow(.001,dt));
+    camera.updateProjectionMatrix();
+  }
+  // Quiet breathing and two heads leaning towards one another.
+  f.breathing.forEach((chest,i)=>{
+    chest.scale.y=.43*(1+Math.sin(t*1.12+i*.5)*.025);
+  });
+  f.headBases[0].rotation.y=Math.PI+Math.sin(t*.55)*.023;
+  f.headBases[1].rotation.y=Math.PI-Math.sin(t*.54+.7)*.024;
+  f.quilt.position.y=1.045+Math.sin(t*1.12)*.008;
+  const point=new T.Vector3(BX+.38,1.55,4.28).project(camera);
   const label=$('sleep-zz');
-  label.style.left=clamp((headPoint.x*.5+.5)*innerWidth,45,innerWidth-45)+'px';
-  label.style.top=clamp((-headPoint.y*.5+.5)*innerHeight-42,90,innerHeight-120)+'px';
+  label.style.left=clamp((point.x*.5+.5)*innerWidth,55,innerWidth-55)+'px';
+  label.style.top=clamp((-point.y*.5+.5)*innerHeight-50,90,innerHeight-120)+'px';
 }
 $('start-cuddle-sleep').addEventListener('click',startCuddleSleep);
 $('sleep-wake').addEventListener('click',wakeFromCuddle);
@@ -2190,6 +2232,8 @@ function update(dt,t){
   [flies,dust].forEach((s,k)=>{ if(s.material.opacity<.01) return; const p=s.geometry.attributes.position, b=s.userData.base, ph=s.userData.ph, a=k?.12:1.1;
     for(let i=0;i<p.count;i++){ p.setXYZ(i,b[i*3]+Math.sin(t*.4+ph[i])*a,b[i*3+1]+Math.sin(t*.63+ph[i]*2)*a*.5,b[i*3+2]+Math.cos(t*.35+ph[i]*1.3)*a); } p.needsUpdate=true; });
   if(!k0) stars.rotation.y=t*.004;
+  // Dedicated sleep camera takes over; keep lighting, but not room camera/walls.
+  if(mode==='sleep')return;
   // camera
   follow.lerp(vTmp.set(girl.position.x*.72,1.12,girl.position.z*.72),1-Math.pow(.002,dt));   // keep a little of the whole room in frame
   let wantFov=aspect<1?58:46;
