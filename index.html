@@ -2238,123 +2238,165 @@ $('sleep-wake').addEventListener('click',wakeFromCuddle);
 let sushiDinner=null;
 const SUSHI_DURATION=25;
 function makeSushiDinner(){
+  // Separate restaurant scene: face-to-face seating and a consistent camera.
   const dinnerScene=new T.Scene();
-  dinnerScene.background=new T.Color(0x292c37);
-  dinnerScene.fog=new T.Fog(0x292c37,12,34);
-  const dinnerCam=new T.PerspectiveCamera(48,innerWidth/innerHeight,.1,65);
-  dinnerCam.position.set(0,3.25,5.9);dinnerCam.lookAt(0,1.18,-.5);
-  const ambient=new T.HemisphereLight(0xffe4c2,0x443d4c,1.45);
-  dinnerScene.add(ambient);
-  const warm=new T.PointLight(0xffc28f,1.9,13,2);warm.position.set(-2,3.6,1.2);dinnerScene.add(warm);
-  const fillLight=new T.DirectionalLight(0xd3c8fa,.74);fillLight.position.set(4,5,1);dinnerScene.add(fillLight);
-  const wood=M(0x805844,{roughness:.78}),lightWood=M(0xc69b76,{roughness:.76});
-  const floorMat=M(0x554738,{roughness:.97}),wallMat=M(0x4a4549,{roughness:1});
-  const roseMat=M(0xa6696c,{roughness:1}),cream=M(0xf4e8d5,{roughness:1});
-  const shirtGirl=M(0xf0dadc,{roughness:.9}),shirtBoy=M(0x52647a,{roughness:.92});
-  const skinGirl=skin.clone(),skinBoy=skin2.clone();
-  // Restaurant-like nook: wood floor, softly lit wall, lantern and framed panel.
-  box(10,.12,10,floorMat,0,-.065,-.6,dinnerScene,{noCast:true});
-  box(10,5,.16,wallMat,0,2.4,-3.8,dinnerScene,{noCast:true});
-  box(7,.08,.14,lightWood,0,1.4,-3.69,dinnerScene,{noCast:true});
-  box(7,.07,.14,lightWood,0,2.45,-3.69,dinnerScene,{noCast:true});
-  const art=M(0x827778,{roughness:1});
-  box(2.0,1.27,.06,lightWood,0,2.65,-3.65,dinnerScene);
-  box(1.83,1.1,.07,art,0,2.65,-3.57,dinnerScene);
-  const lanternG=new T.Group();lanternG.position.set(-2.8,2.6,-3.32);dinnerScene.add(lanternG);
-  box(.30,.52,.27,wood,0,0,0,lanternG);
-  const lantern=sph(.12,new T.MeshBasicMaterial({color:0xffd09b}),0,0,.18,lanternG,1.2,1.5,.65);
-  lanternG.add(new T.PointLight(0xffb971,.7,5,2));
-  // Dining table large enough to show two plates and the sushi animation.
+  dinnerScene.background=new T.Color(0x373434);
+  dinnerScene.fog=new T.Fog(0x49413b,13,40);
+  const dinnerCam=new T.PerspectiveCamera(innerWidth<innerHeight?61:47,innerWidth/innerHeight,.1,65);
+  const cameraTo=new T.Vector3(innerWidth<innerHeight?5.2:4.55,3.00,1.25);
+  const look=new T.Vector3(0,1.13,0);
+  dinnerCam.position.copy(cameraTo);dinnerCam.lookAt(look);
+  dinnerScene.add(new T.HemisphereLight(0xffe5c4,0x35343a,1.12));
+  const warm=new T.PointLight(0xffc38e,1.65,13,2);warm.position.set(-1.75,3.55,.3);dinnerScene.add(warm);
+  const backFill=new T.DirectionalLight(0xd9d2e5,.72);backFill.position.set(3.1,4.2,-2.6);dinnerScene.add(backFill);
+  const tableFill=new T.PointLight(0xffe1bc,.35,5,2);tableFill.position.set(0,2.7,0);dinnerScene.add(tableFill);
+  const woodGrain=canvasTex(256,256,(ctx,w,h)=>{
+    ctx.fillStyle='#aa7860';ctx.fillRect(0,0,w,h);
+    for(let i=0;i<150;i++){const x=(i*61)%w;ctx.strokeStyle=i%4?'rgba(63,32,18,.085)':'rgba(241,197,157,.12)';
+      ctx.lineWidth=i%5?1:2;ctx.beginPath();ctx.moveTo(x,0);
+      ctx.bezierCurveTo(x+Math.sin(i)*7,h*.28,x-Math.cos(i)*6,h*.7,x+Math.sin(i*.6)*5,h);ctx.stroke();}
+  });
+  const wallTexture=canvasTex(128,128,(ctx,w,h)=>{
+    ctx.fillStyle='#a79a88';ctx.fillRect(0,0,w,h);
+    for(let i=0;i<560;i++){ctx.fillStyle=i%3?'rgba(255,246,229,.035)':'rgba(51,41,37,.028)';
+      ctx.fillRect((i*73)%w,(i*37)%h,2,2);}
+  });
+  const darkWood=M(0x583b2e,{roughness:.79,map:woodGrain});
+  const tableWood=M(0xb0846b,{roughness:.62,map:woodGrain});
+  const wallMat=M(0xb5a899,{roughness:1,map:wallTexture});
+  const floorMat=M(0x55453c,{roughness:.94,map:woodGrain});
+  const trim=M(0x47362f,{roughness:.84});
+  const darkStone=M(0x2e3232,{roughness:.55});
+  const linen=M(0xe7d9c4,{roughness:1,map:texLinen,side:T.DoubleSide});
+  box(11,.14,11,floorMat,0,-.07,0,dinnerScene,{noCast:true});
+  box(11,5.3,.14,wallMat,0,2.5,-4.35,dinnerScene,{noCast:true});
+  box(.14,5.3,11,wallMat,-5.1,2.5,0,dinnerScene,{noCast:true});
+  for(const y of [.18,1.28,2.50,4.7]){
+    box(10.8,.048,.075,trim,0,y,-4.22,dinnerScene,{noCast:true});
+    box(.07,.048,10.6,trim,-4.98,y,0,dinnerScene,{noCast:true});
+  }
+  // A softly illuminated shoji-inspired window and framed landscape.
+  const glass=M(0x617077,{roughness:.31,emissive:0x1c272b,emissiveIntensity:.22});
+  box(2.5,2.12,.09,darkWood,-2.25,2.49,-4.20,dinnerScene);
+  box(2.34,1.96,.10,glass,-2.25,2.49,-4.14,dinnerScene);
+  for(const xx of [-2.92,-2.25,-1.58])box(.037,1.98,.12,trim,xx,2.49,-4.07,dinnerScene);
+  for(const yy of [1.97,2.50,3.03])box(2.37,.035,.12,trim,-2.25,yy,-4.07,dinnerScene);
+  const artFrame=M(0x74533f,{roughness:.8});
+  box(1.72,1.38,.10,artFrame,1.65,2.58,-4.20,dinnerScene);
+  box(1.56,1.23,.11,M(0x4f6757,{roughness:1}),1.65,2.58,-4.13,dinnerScene);
+  box(1.03,.10,.12,M(0xd6b48f,{roughness:.9}),1.66,2.21,-4.05,dinnerScene);
+  // Japanese pendant lamps; the warm shade provides a clear dining focal point.
+  const shade=M(0xe7c8a7,{roughness:.92,transparent:true,opacity:.93});
+  const glowMat=new T.MeshBasicMaterial({color:0xffdfb1});
+  for(const x of [-1.04,1.04]){
+    cyl(.012,.012,.48,trim,x,4.04,-.18,dinnerScene,8);
+    const lamp=sph(.25,shade,x,3.70,-.18,dinnerScene,1.35,.67,1.0);
+    sph(.10,glowMat,x,3.58,-.18,dinnerScene,1,.5,1);
+    const light=new T.PointLight(0xffc490,.53,4.8,2);light.position.set(x,3.49,-.18);dinnerScene.add(light);
+  }
+  // Low greenery on the room's perimeter, without obscuring the dinner.
+  const leaf=M(0x557253,{roughness:1}),potMat=M(0x9b8069,{roughness:1});
+  for(const [x,z] of [[-3.38,-3.55],[3.15,-3.5]]){
+    cyl(.20,.15,.38,potMat,x,.19,z,dinnerScene,16);
+    for(let j=0;j<8;j++){
+      const a=j*Math.PI*.75;
+      const blade=sph(.10,leaf,x+Math.cos(a)*.13,.64+(.07*(j%3)),z+Math.sin(a)*.14,dinnerScene,.46,2.55,.7);
+      blade.rotation.z=Math.cos(a)*.35;blade.rotation.x=Math.sin(a)*.29;
+    }
+  }
+  // A real two-person rectangular table, rather than an oversized round pedestal.
   const table=new T.Group();dinnerScene.add(table);
-  const top=cyl(1.50,1.47,.12,wood,0,.83,.13,table,48);
-  top.receiveShadow=true;
-  cyl(.16,.23,.77,wood,0,.39,.13,table,18);
-  cyl(.56,.56,.07,lightWood,0,.045,.13,table,24);
-  const runner=M(0xb9a493,{roughness:1});
-  const runnerMesh=new T.Mesh(new T.PlaneGeometry(2.4,.66),runner);
-  runnerMesh.rotation.x=-Math.PI/2;runnerMesh.position.set(0,.899,.10);table.add(runnerMesh);
-  // Small saucers, soy sauce dishes, ginger, wasabi and a teapot.
-  const plateMat=M(0xf5ede0,{roughness:.34}),blackDish=M(0x343b41,{roughness:.37});
-  const rice=M(0xfff4e5,{roughness:1}),salmon=M(0xf38d68,{roughness:.78});
-  const seaweed=M(0x263e32,{roughness:1}),tuna=M(0xc55061,{roughness:.88});
-  const soy=M(0x392d26,{roughness:.25}),wasabi=M(0x77ad66,{roughness:1});
-  const ginger=M(0xefc0ab,{roughness:1});
-  const plates=[], rolls=[];
-  for(const [side,x] of [[-1,-.71],[1,.71]]){
-    cyl(.44,.44,.045,plateMat,x,.942,.22,table,36);
-    cyl(.28,.28,.018,blackDish,x,.982,.22,table,30);
-    const rollsForPerson=[];
+  const top=rbox(2.62,.105,1.64,.047,tableWood,0,.84,0,table);top.receiveShadow=true;
+  box(2.32,.19,.09,darkWood,0,.71,.64,table);
+  box(2.32,.19,.09,darkWood,0,.71,-.64,table);
+  box(.08,.19,1.34,darkWood,-1.20,.71,0,table);
+  box(.08,.19,1.34,darkWood,1.20,.71,0,table);
+  for(const xx of [-1.13,1.13])for(const zz of [-.61,.61]){
+    cyl(.06,.075,.72,darkWood,xx,.36,zz,table,10);
+  }
+  const runner=new T.Mesh(new T.PlaneGeometry(.54,1.43),linen);
+  runner.rotation.x=-Math.PI/2;runner.position.set(0,.898,0);table.add(runner);
+  // Individual place settings on the opposite sides of the table.
+  const ceramic=M(0xece5d9,{roughness:.35}),plateDark=M(0x31393a,{roughness:.42});
+  const soy=M(0x34291f,{roughness:.28}),rice=M(0xf4f0e3,{roughness:1});
+  const salmon=M(0xdb866a,{roughness:.81}),tuna=M(0xb54b5b,{roughness:.83});
+  const nori=M(0x304537,{roughness:.96}),avocado=M(0x9eb97d,{roughness:.96});
+  const ginger=M(0xe9bbaa,{roughness:.93}),wasabi=M(0x83ad69,{roughness:1});
+  const rolls=[];
+  for(let dinerIndex=0;dinerIndex<2;dinerIndex++){
+    const near=dinerIndex===0,zz=near?.42:-.42;
+    const plate=rbox(.80,.035,.48,.021,plateDark,0,.912,zz,table);
+    const personRolls=[];
     for(let j=0;j<4;j++){
-      const zz=j<2?.05:.38,xx=x+(j%2? .13:-.13);
-      const roll=new T.Group();
-      roll.position.set(xx,1.027,zz);table.add(roll);
-      const outside=cyl(.067,.067,.075,seaweed,0,.018,0,roll,12);
-      cyl(.051,.051,.08,rice,0,.020,0,roll,12);
-      cyl(.022,.022,.085,j%3?tuna:salmon,0,.025,0,roll,10);
-      rollsForPerson.push(roll);
+      const roll=new T.Group();roll.position.set(j%2? .14:-.14,.95,zz+(j<2?-.105:.105));table.add(roll);
+      // Individual cylindrical maki pieces with distinct rice, nori and filling.
+      cyl(.078,.078,.064,nori,0,.017,0,roll,16);
+      cyl(.060,.060,.070,rice,0,.021,0,roll,16);
+      cyl(.023,.023,.078,j%3?salmon:tuna,0,.025,0,roll,12);
+      sph(.012,avocado,.018,.061,.01,roll,1,.5,1);
+      personRolls.push(roll);
     }
-    rolls.push(rollsForPerson);
-    cyl(.12,.12,.035,plateMat,side*.34,.935,.68,table,24);
-    cyl(.085,.085,.011,soy,side*.34,.958,.68,table,24);
-    sph(.05,wasabi,side*.40,1,.51,table,1.2,.3,1);
-    sph(.06,ginger,side*.25,.993,.52,table,1.2,.29,1);
-    plates.push(x);
+    rolls.push(personRolls);
+    cyl(.13,.13,.029,ceramic,.74,.92,near?.63:-.63,table,24);
+    cyl(.10,.10,.009,soy,.74,.942,near?.63:-.63,table,24);
+    sph(.040,wasabi,-.40,.928,zz,table,1.1,.33,1.2);
+    sph(.047,ginger,-.54,.928,zz,table,1.1,.3,1);
+    // Two hand-crafted sake/tea cups.
+    const cupM=M(0xd4c1ac,{roughness:.72});
+    cyl(.081,.072,.14,cupM,-.91,.961,near?.55:-.55,table,20);
   }
-  const pot=M(0xe7c7aa,{roughness:.62});
-  const teapot=sph(.16,pot,0,1.07,-.35,table,1.18,1,1);
-  cyl(.07,.08,.07,pot,0,1.26,-.35,table,12);
-  cyl(.16,.16,.022,pot,0,1.31,-.35,table,18);
-  for(const x of [-1.14,1.14]){
-    const mug=cyl(.095,.082,.18,cream,x,1.01,.48,table,20);mug.receiveShadow=true;
-  }
+  const teapot=M(0xb6a99b,{roughness:.55});
+  sph(.16,teapot,0,1.02,0,table,1.1,.82,1);
+  cyl(.073,.073,.06,teapot,0,1.20,0,table,15);
+  const flowerStem=M(0x657953,{roughness:1}),flower=M(0xdfbdba,{roughness:1});
+  cyl(.042,.045,.13,ceramic,0,.96,-.02,table,12);
+  cyl(.007,.007,.24,flowerStem,0,1.14,-.02,table,7);
+  for(let j=0;j<5;j++)sph(.025,flower,Math.cos(j*1.256)*.035,1.28,Math.sin(j*1.256)*.035,table,1,.6,1);
   const diners=[];
-  function makeDiner(side,headSource,clothes,skinMat){
-    const root=new T.Group();root.position.set(side*1.03,0,-1.32);root.rotation.y=side===-1?-.18:.18;dinnerScene.add(root);
-    // Chair with backrest, stool, and visible seated legs.
-    const chairM=M(0x765341,{roughness:1});
-    box(.82,.13,.78,chairM,0,.62,-.12,root);
-    box(.85,.83,.12,chairM,0,1.07,-.48,root);
-    for(const xx of [-.29,.29])for(const zz of [-.34,.19])cyl(.042,.055,.59,chairM,xx,.30,zz,root,8);
+  function makeDiner(index,headSource,clothes,skinMat){
+    // Local +Z is forward for both; rotating the near chair by PI points it
+    // toward the far chair. Their gaze meets across the center of the table.
+    const near=index===0;
+    const root=new T.Group();root.position.set(near?-.10:.10,0,near?1.55:-1.55);
+    root.rotation.y=near?Math.PI:0;dinnerScene.add(root);
+    const chair=M(0x76513d,{roughness:.88,map:woodGrain}),seat=M(0x8c7569,{roughness:.95});
+    rbox(.79,.15,.74,.037,seat,0,.63,-.15,root);
+    rbox(.84,.74,.105,.037,chair,0,1.07,-.49,root);
+    for(const xx of [-.30,.30])for(const zz of [-.40,.19])cyl(.041,.048,.56,chair,xx,.29,zz,root,9);
     for(const xx of [-.16,.16]){
-      const thigh=cyl(.10,.09,.44,clothes,xx,.54,.23,root,12);thigh.rotation.x=Math.PI/2;
-      cyl(.085,.070,.50,clothes,xx,.28,.43,root,12);
+      const thigh=cyl(.093,.081,.38,clothes,xx,.56,.22,root,12);thigh.rotation.x=Math.PI/2;
+      cyl(.072,.064,.46,clothes,xx,.28,.42,root,11);
     }
-    const torso=new T.Group();torso.position.set(0,1.25,-.05);root.add(torso);
-    const body=sph(.25,clothes,0,0,0,torso,1.22,1.55,.87);
-    const neck=cyl(.065,.065,.12,skinMat,0,.39,0,torso,10);
-    const head=headSource.clone(true);
-    head.position.set(0,1.75,.02);root.add(head);
-    // Shoulders and flexible foreground chopstick-holding hand.
-    const idleArm= new T.Group();idleArm.position.set(-.27,1.55,.0);root.add(idleArm);
-    const sleeve=cyl(.067,.063,.35,clothes,0,-.16,.10,idleArm,10);sleeve.rotation.x=-.4;
-    const restingHand=sph(.055,skinMat,-.27,1.21,.23,root);
-    const armPivot=new T.Vector3(.27,1.53,.05);
-    const armMesh=new T.Mesh(new T.CylinderGeometry(.065,.056,1,10),clothes);
+    const torso=new T.Group();torso.position.set(0,1.22,-.06);root.add(torso);
+    const chest=sph(.24,clothes,0,0,0,torso,1.2,1.55,.88);
+    cyl(.055,.055,.14,skinMat,0,.37,0,torso,10);
+    const head=headSource.clone(true);head.position.set(0,1.70,.035);root.add(head);
+    const shoulder=[.25,1.45,.02];
+    const armMesh=new T.Mesh(new T.CylinderGeometry(.060,.050,1,10),clothes);
     armMesh.castShadow=true;root.add(armMesh);
-    const wrist=sph(.063,skinMat,.2,1.26,.25,root);
-    const chopMat=M(0xbaa078,{roughness:.75});
+    const leftArm=cyl(.055,.045,.35,clothes,-.26,1.31,.17,root,10);leftArm.rotation.x=-.65;
+    sph(.048,skinMat,-.26,1.17,.28,root);
+    const wrist=sph(.057,skinMat,.23,1.16,.30,root);
+    const chopMat=M(0xa98b60,{roughness:.78});
     const sticks=[];
-    for(const offset of [-.019,.019]){
-      const stick=cyl(.009,.006,.39,chopMat,0,0,0,root,7);sticks.push(stick);
-    }
-    const food=sph(.048,salmon,0,0,0,root,1.14,.55,.9);
-    const diner={root,head,torso,armPivot,armMesh,wrist,sticks,food,side};
-    diners.push(diner);
-    return diner;
+    for(let j=0;j<2;j++)sticks.push(cyl(.008,.005,.34,chopMat,0,0,0,root,8));
+    const food=sph(.047,salmon,0,0,0,root,1.1,.65,.9);
+    const person={root,head,torso,armMesh,shoulder,wrist,sticks,food,near,index};
+    diners.push(person);
+    return person;
   }
-  makeDiner(-1,gParts.head,shirtGirl,skinGirl);
-  makeDiner(1,guyParts.head,shirtBoy,skinBoy);
-  const tmpVec=new T.Vector3(),tmpDir=new T.Vector3(),up=new T.Vector3(0,1,0);
+  makeDiner(0,gParts.head,M(0xf2d9dd,{roughness:.91,map:texLinen}),skin.clone());
+  makeDiner(1,guyParts.head,M(0x556980,{roughness:.93,map:texLinen}),skin2.clone());
+  const up=new T.Vector3(0,1,0);
   function aimCylinder(mesh,a,b){
-    const start=new T.Vector3(...a),end=new T.Vector3(...b);
-    const delta=end.clone().sub(start),length=delta.length();
-    mesh.position.copy(start).add(end).multiplyScalar(.5);
-    mesh.scale.y=length;
-    mesh.quaternion.setFromUnitVectors(up,delta.normalize());
+    const va=new T.Vector3(...a),vb=new T.Vector3(...b);
+    const diff=vb.clone().sub(va),len=diff.length();
+    mesh.position.copy(va).add(vb).multiplyScalar(.5);
+    mesh.scale.y=len;
+    mesh.quaternion.setFromUnitVectors(up,diff.normalize());
   }
   return {scene:dinnerScene,camera:dinnerCam,diners,rolls,elapsed:0,lastSteps:[-1,-1],
-    cameraFrom:new T.Vector3(0,3.7,7),cameraTo:new T.Vector3(0,3.15,5.55),
-    look:new T.Vector3(0,1.23,-.40),aimCylinder};
+    cameraTo,look,aimCylinder};
 }
 function startSushiDinner(){
   if(mode==='forest')leaveForestWalk();
@@ -2364,6 +2406,8 @@ function startSushiDinner(){
   if(!sushiDinner)sushiDinner=makeSushiDinner();
   const d=sushiDinner;
   d.elapsed=0;d.lastSteps=[-1,-1];
+  d.camera.position.copy(d.cameraTo);
+  d.camera.fov=innerWidth<innerHeight?61:47;d.camera.updateProjectionMatrix();
   for(const personRolls of d.rolls)for(const roll of personRolls){roll.visible=true;roll.scale.set(1,1,1);}
   for(const k in keys)keys[k]=false;
   jv.x=jv.y=0;knob.style.transform='';
@@ -2387,49 +2431,48 @@ function updateSushiDinner(dt,t){
   if(!sushiDinner||mode!=='sushi')return;
   const d=sushiDinner;d.elapsed+=dt;
   const time=d.elapsed;
-  const duration=SUSHI_DURATION;
-  // Gentle camera settling on both seated characters and their dinner.
-  d.camera.position.lerp(d.cameraTo,1-Math.pow(.004,dt));
+  d.camera.position.lerp(d.cameraTo,1-Math.pow(.005,dt));
   d.camera.lookAt(d.look);
   for(let i=0;i<2;i++){
-    const person=d.diners[i],start=i*1.55;
-    const pace=Math.max(0,time-2-start);
+    const person=d.diners[i],pace=Math.max(0,time-2-i*1.65);
     const cycle=pace%4.8,step=Math.floor(pace/4.8);
     const active=pace>0&&step<4&&time<23;
-    // Reach for sushi -> lift to lips -> eat -> lower chopsticks.
-    let reach=0;
+    // Reach from the near or far edge toward the plate; lift sushi gently to
+    // the mouth; lower the chopsticks. Coordinates are local to each diner.
+    let lift=0;
     if(active){
-      if(cycle<1)reach=cycle;
-      else if(cycle<2.25)reach=1;
-      else if(cycle<3.25)reach=1-(cycle-2.25);
+      if(cycle<1.05)lift=cycle/1.05;
+      else if(cycle<2.15)lift=1;
+      else if(cycle<3.30)lift=1-(cycle-2.15)/1.15;
     }
-    const ease=reach*reach*(3-2*reach);
-    const localHand=[.24-ease*.055,1.12+ease*.49,.56-ease*.48];
-    const shoulder=[.27,1.51,.045];
-    person.armPivot.set(...shoulder);
+    const ease=lift*lift*(3-2*lift);
+    const shoulder=person.shoulder;
+    const handRest=[.23,1.09,.66];
+    const handMouth=[.13,1.59,.23];
+    const localHand=handRest.map((v,k)=>v+(handMouth[k]-v)*ease);
     d.aimCylinder(person.armMesh,shoulder,localHand);
     person.wrist.position.set(...localHand);
     person.sticks.forEach((stick,j)=>{
-      const tip=[localHand[0]+(j?-.024:.024),localHand[1]+.02,localHand[2]+.02];
-      const outer=[tip[0]+(j?-.016:.016),tip[1]-.33,tip[2]+.18];
-      d.aimCylinder(stick,tip,outer);
+      const grip=[localHand[0]+(j?-.018:.018),localHand[1]+.012,localHand[2]+.02];
+      const tip=[grip[0]+(j?-.018:.018),grip[1]-.24,grip[2]+.22];
+      d.aimCylinder(stick,grip,tip);
     });
-    person.food.position.set(localHand[0],localHand[1]-.18,localHand[2]+.12);
-    person.food.visible=active&&cycle<2.3;
-    if(active&&cycle>=2.3&&d.lastSteps[i]!==step){
+    person.food.position.set(localHand[0],localHand[1]-.10,localHand[2]+.16);
+    person.food.visible=active&&cycle<2.25;
+    if(active&&cycle>=2.25&&d.lastSteps[i]!==step){
       d.lastSteps[i]=step;
       if(d.rolls[i][step])d.rolls[i][step].visible=false;
     }
-    person.torso.rotation.z=Math.sin(t*.65+i)*.014;
-    person.head.rotation.y=Math.sin(t*.6+i*2)*.055+(active&&reach>.8?(i===0?-.075:.075):0);
-    person.head.rotation.x=-.06+Math.sin(t*.9+i)*.012;
+    person.torso.rotation.z=Math.sin(t*.68+i)*.012;
+    person.head.rotation.y=Math.sin(t*.5+i)*.045+(active&&ease>.8?(i===0?.06:-.06):0);
+    person.head.rotation.x=-.035+(active&&ease>.8?-.07:0);
   }
   const status=$('sushi-status');
   if(time<5)status.textContent='Sushi, just for us 🍣';
   else if(time<14)status.textContent='A little bite, and a little smile ♡';
   else if(time<22)status.textContent='Everything tastes better together';
   else status.textContent='That was lovely. Back to our room…';
-  if(d.elapsed>=duration)leaveSushiDinner(true);
+  if(time>=SUSHI_DURATION)leaveSushiDinner(true);
 }
 $('start-sushi-dinner').addEventListener('click',startSushiDinner);
 $('sushi-return').addEventListener('click',()=>leaveSushiDinner(false));
@@ -2492,7 +2535,7 @@ function update(dt,t){
 }
 const k0=reduced;
 function frame(){ const dt=Math.min(.05,clock.getDelta()); if(mode==='forest'){ updateForest(dt,clock.elapsedTime); renderer.render(forest.scene,forest.camera); }else if(mode==='sushi'){ updateSushiDinner(dt,clock.elapsedTime); renderer.render(sushiDinner.scene,sushiDinner.camera); }else{ update(dt,clock.elapsedTime); if(mode==='sleep')updateCuddleSleep(dt,clock.elapsedTime); renderer.render(scene,camera); } requestAnimationFrame(frame); }
-addEventListener('resize',()=>{ aspect=innerWidth/innerHeight; renderer.setSize(innerWidth,innerHeight,false); camera.aspect=aspect; camera.updateProjectionMatrix(); if(forest){forest.camera.aspect=aspect;forest.camera.updateProjectionMatrix();} if(sushiDinner){sushiDinner.camera.aspect=aspect;sushiDinner.camera.updateProjectionMatrix();} });
+addEventListener('resize',()=>{ aspect=innerWidth/innerHeight; renderer.setSize(innerWidth,innerHeight,false); camera.aspect=aspect; camera.updateProjectionMatrix(); if(forest){forest.camera.aspect=aspect;forest.camera.updateProjectionMatrix();} if(sushiDinner){sushiDinner.camera.aspect=aspect;sushiDinner.camera.fov=aspect<1?61:47;sushiDinner.camera.updateProjectionMatrix();sushiDinner.cameraTo.set(aspect<1?5.2:4.55,3.00,1.25);} });
 
 /* ---------------- gate ---------------- */
 function enter(){ entered=true; $('gate').classList.add('hide'); $('hud').classList.add('on'); canvas.focus();
