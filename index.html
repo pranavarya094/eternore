@@ -504,6 +504,21 @@ body.in-sushi #hud .hint,body.in-sushi #hud #joy,body.in-sushi #hud #viewbar{
       <button type="button" class="act-card" id="start-cuddle-sleep"><span class="act-ico">🌙</span><span class="act-tx"><b>Let's cuddle and sleep</b><i>Under the blanket, the room turns to night</i></span><span class="act-go">Enter &#9825;</span></button>
     </div>
   </section>
+  <!-- door / places still in progress -->
+  <section class="sheet acts" id="sheet-places" aria-label="Visit Other Places">
+    <button class="x" data-close aria-label="Close">&#10005;</button>
+    <div class="acts-head">
+      <div class="acts-eyebrow">Beyond our room</div>
+      <h2 class="acts-title">Visit Other Places</h2>
+      <p class="acts-note">Where shall we go next?</p>
+    </div>
+    <div class="acts-list">
+      <button type="button" class="act-card" data-place="Ground Floor"><span class="act-ico">🏠</span><span class="act-tx"><b>Ground Floor</b></span><span class="act-go">Explore &#10022;</span></button>
+      <button type="button" class="act-card" data-place="Take a flight to Berlin"><span class="act-ico">✈️</span><span class="act-tx"><b>Take a flight to Berlin</b></span><span class="act-go">Explore &#10022;</span></button>
+      <button type="button" class="act-card" data-place="Zoppola"><span class="act-ico">🌿</span><span class="act-tx"><b>Zoppola</b></span><span class="act-go">Explore &#10022;</span></button>
+    </div>
+    <p id="places-coming-soon" role="status" aria-live="polite" style="display:none;margin:22px 4px 0;text-align:center;font-family:var(--serif);font-size:19px;line-height:1.5;color:var(--rose)">Under construction. Check back in a while.</p>
+  </section>
   <!-- phone -->
   <section class="sheet phone-sheet" id="sheet-phone" aria-label="Phone">
     <div class="phone">
@@ -795,6 +810,8 @@ var curtains=[];
   sph(.045,mats.gold,-.42,1.05,.09,g); cyl(.06,.06,.012,mats.gold,-.42,1.05,.06,g,16).rotation.x=Math.PI/2;
   // doormat
   const mat=new T.Mesh(new T.PlaneGeometry(.95,.55),M(0x7a5a48,{roughness:1})); mat.rotation.x=-Math.PI/2; mat.position.set(0,.013,.48); mat.receiveShadow=true; g.add(mat);
+  // Door is now interactable, with a large invisible target for mouse and touch.
+  hit('places',1.06,2.1,.20,0,1.08,.11,g);
 })();
 
 /* ---- study desk + chair + books (north) ---- */
@@ -1328,6 +1345,7 @@ let hoverT=0; function hover(e){ const n=performance.now(); if(n-hoverT<60) retu
 
 /* ---------------- labels ---------------- */
 const labelDefs=[
+  {id:'places',text:'Visit Other Places',pos:new T.Vector3(-HX+.25,1.93,-3.25),action:'places',side:'W'},
   {id:'letters',text:'Read the letters',pos:new T.Vector3(-HX+.5,tableTop+.62,.7),action:'letters'},
   {id:'books',text:'Open the books',pos:new T.Vector3(-1.2,deskTop+.68,-HZ+.4),action:'books'},
   {id:'phone',text:'Use the phone',pos:new T.Vector3(.55,deskTop+.2,-4.78),action:'phone'},
@@ -1366,11 +1384,18 @@ function act(a){
   else if(a==='photos'){ openBooks('photos'); }
   else if(a==='talk'){ faceTo(guy.position.x,guy.position.z); trackRoom('talk_open'); openSheet('sheet-talk'); }
   else if(a==='activities'){ trackRoom('activities_open'); openSheet('sheet-activities'); }
+  else if(a==='places'){ trackRoom('places_open'); $('places-coming-soon').style.display='none'; openSheet('sheet-places'); }
   else if(a==='calendar'){ faceTo(2.95,4.85); openCalendar(); }
   else if(a==='phone'){ faceTo(.55,-4.78); openPhone(); }
   else if(a==='study'){ enterStudy(); }
   else if(a==='window'){ enterWindow(); }
 }
+// Door destinations are intentionally previews until their 3D worlds are built.
+document.querySelectorAll('#sheet-places [data-place]').forEach(b=>b.addEventListener('click',()=>{
+  const destination=b.dataset.place;
+  trackRoom('place_under_construction',{section:destination});
+  $('places-coming-soon').style.display='block';
+}));
 // --- letters ---
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const letters=CONTENT.letters.map((l,i)=>Object.assign({i,ts:l.date?Date.parse(l.date):NaN,text:(l.title+' '+l.date+' '+l.body.replace(/<[^>]+>/g,' ')).toLowerCase()},l));
@@ -2812,7 +2837,7 @@ window.__room={pick,ray,clickables,sides,sideState,scene,enter,act,setNight:v=>{
   let lastScroll = 0;
   let lastSearch = 0;
   let lastError = 0;
-  const allowed = new Set(['page_open','gate_success','gate_failure','section_view','navigation','letters_open','letter_open','letter_close','books_open','book_open','talk_open','call_click','window_view','window_exit','forest_walk_start','forest_walk_exit','activities_open','phone_open','phone_app_open','phone_home','music_library_open','music_track_select','calendar_open','study_start','study_exit','room_walk','cuddle_sleep_start','cuddle_sleep_wake','sushi_dinner_start','sushi_dinner_complete','sushi_dinner_exit','sheet_close','photo_open','photo_close','photo_next','photo_previous','video_play','video_pause','video_ended','audio_play','audio_pause','audio_ended','theme_change','search_used','scroll_milestone','page_hidden','script_error','media_error']);
+  const allowed = new Set(['page_open','gate_success','gate_failure','section_view','navigation','letters_open','letter_open','letter_close','books_open','book_open','talk_open','call_click','window_view','window_exit','forest_walk_start','forest_walk_exit','activities_open','places_open','place_under_construction','phone_open','phone_app_open','phone_home','music_library_open','music_track_select','calendar_open','study_start','study_exit','room_walk','cuddle_sleep_start','cuddle_sleep_wake','sushi_dinner_start','sushi_dinner_complete','sushi_dinner_exit','sheet_close','photo_open','photo_close','photo_next','photo_previous','video_play','video_pause','video_ended','audio_play','audio_pause','audio_ended','theme_change','search_used','scroll_milestone','page_hidden','script_error','media_error']);
   // Visitor details are looked up once, as on pranavarya.com.
   // If the lookup is blocked or times out, alerts still send with Unknown fields.
   let visitorGeo = {};
