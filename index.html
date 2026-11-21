@@ -1354,7 +1354,7 @@ function trackRoom(type,details){
 let sheetOpen=null, mode='walk', entered=false;
 const veil=$('veil');
 function openSheet(id){ document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('show')); $(id).classList.add('show'); veil.classList.add('show'); sheetOpen=id; for(const k in keys) keys[k]=false; }
-function closeSheet(){ if(sheetOpen)trackRoom('sheet_close',{section:sheetOpen.replace('sheet-','')}); veil.classList.remove('show'); document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('show')); sheetOpen=null;
+function closeSheet(){ if(sheetOpen==='sheet-letters'&&curLetter!=null){ const l=letters[curLetter];trackRoom('letter_close',{letter_title:l.title,letter_date:l.date||'Undated'}); } if(sheetOpen)trackRoom('sheet_close',{section:sheetOpen.replace('sheet-','')}); veil.classList.remove('show'); document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('show')); sheetOpen=null;
   const v=document.querySelector('#b-page video'); if(v) v.pause(); const f=document.querySelector('#b-page iframe'); if(f) f.src=f.src;
   document.querySelectorAll('#sheet-phone video, #sheet-phone audio').forEach(m=>{ try{ m.pause(); }catch(_){} }); canvas.focus(); }
 veil.addEventListener('pointerdown',e=>{ if(e.target===veil) closeSheet(); });
@@ -1397,7 +1397,7 @@ function showLetter(i,user,auto){ const l=letters[i]; if(user||auto)trackRoom('l
   }
   $('l-read').scrollTop=0; document.querySelectorAll('.l-item').forEach(b=>b.classList.toggle('on',+b.dataset.i===i));
   if(user){ $('l-body').classList.add('reading'); $('l-back').classList.add('can'); } }
-$('l-back').addEventListener('click',()=>{ $('l-body').classList.remove('reading'); $('l-back').classList.remove('can'); });
+$('l-back').addEventListener('click',()=>{ if(curLetter!=null){const l=letters[curLetter];trackRoom('letter_close',{letter_title:l.title,letter_date:l.date||'Undated'});curLetter=null;} $('l-body').classList.remove('reading'); $('l-back').classList.remove('can'); });
 $('l-search').addEventListener('input',e=>renderLetterList(e.target.value));
 function openLetters(){ trackRoom('letters_open'); $('l-body').classList.remove('reading'); $('l-back').classList.remove('can'); $('l-search').value=''; curLetter=null; $('l-read').innerHTML=''; renderLetterList(''); openSheet('sheet-letters'); }
 // --- books ---
@@ -1424,7 +1424,7 @@ function openBooks(id){
 }
 $('b-back').addEventListener('click',()=>openBooks());
 function lightbox(i){ const p=CONTENT.photos[i]; trackRoom('photo_open',{section:String(i+1)}); $('lb-img').src=p.src; $('lb-c').textContent=p.caption; $('lb').classList.add('show'); }
-$('lb').addEventListener('click',e=>{ if(e.target!==$('lb-img')) $('lb').classList.remove('show'); });
+$('lb').addEventListener('click',e=>{ if(e.target!==$('lb-img')&&$('lb').classList.contains('show')){trackRoom('photo_close');$('lb').classList.remove('show');} });
 // --- talk ---
 (function(){ const n=PHONE_NUMBER.trim(); $('talk-num').textContent=n||'your number goes here'; const a=$('talk-call');
   if(n) a.href='tel:'+n.replace(/[^+\d]/g,''); else a.addEventListener('click',e=>e.preventDefault()); a.addEventListener('click',()=>trackRoom('call_click')); })();
