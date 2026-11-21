@@ -1348,7 +1348,9 @@ function updateLabels(){
 }
 
 /* ---------------- actions + sheets ---------------- */
-function trackRoom(){}  /* analytics removed */
+function trackRoom(type,details){
+  if(typeof window.EternoreTrack==='function')window.EternoreTrack(type,details);
+}
 let sheetOpen=null, mode='walk', entered=false;
 const veil=$('veil');
 function openSheet(id){ document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('show')); $(id).classList.add('show'); veil.classList.add('show'); sheetOpen=id; for(const k in keys) keys[k]=false; }
@@ -1434,10 +1436,10 @@ $('view-back').addEventListener('click',leaveWindow);
 
 // --- study mode ---
 let studying=false;
-function enterStudy(){ studying=true; mode='study'; girl.position.set(-.5,0,-3.9); girlTargetRot=Math.PI; girl.rotation.y=Math.PI;
+function enterStudy(){ trackRoom('study_start'); studying=true; mode='study'; girl.position.set(-.5,0,-3.9); girlTargetRot=Math.PI; girl.rotation.y=Math.PI;
   gParts.legL.visible=false; gParts.legR.visible=false; gParts.studyLegs.visible=true;
   $('study-bar').classList.add('show'); $('hint').classList.add('off'); joy.style.visibility='hidden'; canvas.style.cursor='default'; for(const k in keys) keys[k]=false; }
-function standUp(){ studying=false; mode='walk'; gParts.legL.visible=true; gParts.legR.visible=true; gParts.studyLegs.visible=false;
+function standUp(){ trackRoom('study_exit'); studying=false; mode='walk'; gParts.legL.visible=true; gParts.legR.visible=true; gParts.studyLegs.visible=false;
   $('study-bar').classList.remove('show'); joy.style.visibility=''; }
 $('study-up').addEventListener('click',standUp);
 
@@ -1468,18 +1470,18 @@ async function fetchFolderMusic(){
 }
 async function buildMusic(){ const box=$('ph-musicbody'); box.innerHTML='<div class="ph-empty">loading your songs\u2026</div>';
   let list=await fetchFolderMusic(); if(!list||!list.length) list=(typeof MUSIC!=='undefined'?MUSIC:[]).slice();
-  curMusic=list; renderMusic(box,list); }
+  curMusic=list; trackRoom('music_library_open',{track_count:list.length}); renderMusic(box,list); }
 function renderMusic(box,list){
   if(!list.length){ box.innerHTML='<div class="ph-empty">No songs yet.<br><span>Drop audio files into the music folder in your repo and they will appear here.</span></div>'; return; }
   box.innerHTML='<div class="ph-art">\u266A</div><div class="ph-now"><div class="ph-t" id="ph-t"></div><div class="ph-a" id="ph-a"></div></div><audio id="ph-audio" controls></audio><div class="ph-list" id="ph-list"></div>';
   $('ph-list').innerHTML=list.map((m,i)=>'<button class="ph-trk" data-i="'+i+'"><span>'+esc(m.title)+'</span><i>'+esc(m.artist||'')+'</i></button>').join('');
   $('ph-list').querySelectorAll('.ph-trk').forEach(b=>b.addEventListener('click',()=>playTrack(+b.dataset.i,true)));
   playTrack(0,false); }
-function playTrack(i,autoplay){ const m=curMusic[i]; const a=document.getElementById('ph-audio'); if(!a||!m) return; a.src=m.src; $('ph-t').textContent=m.title; $('ph-a').textContent=m.artist||'';
+function playTrack(i,autoplay){ const m=curMusic[i]; const a=document.getElementById('ph-audio'); if(!a||!m) return; if(autoplay)trackRoom('music_track_select',{song_title:m.title,artist:m.artist||''}); a.src=m.src; $('ph-t').textContent=m.title; $('ph-a').textContent=m.artist||'';
   document.querySelectorAll('#ph-list .ph-trk').forEach((b,k)=>b.classList.toggle('on',k===i)); if(autoplay) a.play().catch(()=>{}); }
-function openPhone(){ openSheet('sheet-phone'); phClock(); phShow('home'); }
-document.querySelectorAll('#sheet-phone .ph-app').forEach(b=>b.addEventListener('click',()=>{ const app=b.dataset.app; if(app==='videos') buildVideos(); else buildMusic(); phShow(app); }));
-document.querySelectorAll('#sheet-phone [data-home]').forEach(b=>b.addEventListener('click',()=>phShow('home')));
+function openPhone(){ trackRoom('phone_open'); openSheet('sheet-phone'); phClock(); phShow('home'); }
+document.querySelectorAll('#sheet-phone .ph-app').forEach(b=>b.addEventListener('click',()=>{ const app=b.dataset.app; trackRoom('phone_app_open',{app}); if(app==='videos') buildVideos(); else buildMusic(); phShow(app); }));
+document.querySelectorAll('#sheet-phone [data-home]').forEach(b=>b.addEventListener('click',()=>{trackRoom('phone_home');phShow('home');}));
 
 // --- days-apart calendar (counts from 27 July, updates by itself each day) ---
 const APART_SINCE = new Date(2026,6,27);   // month 6 = July
@@ -1493,7 +1495,7 @@ function openCalendar(){ const now=new Date();
   const unit=(n,w)=>n+' <span class="u">'+w+(n===1?'':'s')+'</span>';
   $('cal-num').innerHTML = m>0 ? unit(m,'month')+' '+unit(d,'day') : unit(d,'day');
   $('cal-since').textContent='since 27 July '+APART_SINCE.getFullYear();
-  openSheet('sheet-calendar'); }
+  trackRoom('calendar_open',{months:m,days:d}); openSheet('sheet-calendar'); }
 
 
 /* ---------------- photo textures ---------------- */
@@ -2720,6 +2722,7 @@ function blocked(x,z){ if(x<-HX+R||x>HX-R||z<-HZ+R||z>HZ-R) return true; for(con
 function angLerp(a,b,t){ let d=((b-a+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI; return a+d*t; }
 const camPos=new T.Vector3(0,7,12), camLook=new T.Vector3(0,1,0), wantPos=new T.Vector3(), wantLook=new T.Vector3(), follow=new T.Vector3(-1.8,1.12,-2.2);
 const WIN_POS=new T.Vector3(HX-1.25,1.6,WZC), clock=new T.Clock();
+let lastRoomWalkEvent=0;
 let fov=aspect<1?58:46;
 function update(dt,t){
   // input
@@ -2727,7 +2730,7 @@ function update(dt,t){
   if(mode==='walk'&&!sheetOpen&&entered){
     ix=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+jv.x; iy=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0)+jv.y; }
   let mag=Math.hypot(ix,iy); if(mag>1){ ix/=mag; iy/=mag; mag=1; } if(mag<.12) mag=0;
-  if(mag){ if(!usedMove){ usedMove=true; setTimeout(()=>$('hint').classList.add('off'),1200); }
+  if(mag){ if(entered && Date.now()-lastRoomWalkEvent>20000){ lastRoomWalkEvent=Date.now();trackRoom('room_walk',{mode:'bedroom'}); } if(!usedMove){ usedMove=true; setTimeout(()=>$('hint').classList.add('off'),1200); }
     const fx=-Math.sin(yaw), fz=-Math.cos(yaw), rx=Math.cos(yaw), rz=-Math.sin(yaw);
     const mx=(rx*ix+fx*iy), mz=(rz*ix+fz*iy), sp=2.7*dt*(keys.ShiftLeft||keys.ShiftRight?1.5:1);
     const nx=girl.position.x+mx*sp, nz=girl.position.z+mz*sp;
@@ -2791,6 +2794,215 @@ camera.position.copy(camPos); update(.016,0); camPos.copy(wantPos); camLook.copy
 requestAnimationFrame(()=>{ $('gate-load').style.opacity=0; frame(); });
 window.__room={pick,ray,clickables,sides,sideState,scene,enter,act,setNight:v=>{nightTarget=v;setDnButton();},girl,get mode(){return mode;},setView:(y,p,d)=>{yaw=y;pitch=p;dist=d;intro=false;},home:()=>{dist=distHome();intro=false;},leaveWindow,closeSheet,keys,snap:()=>{ follow.set(girl.position.x*.72,1.12,girl.position.z*.72); update(.016,clock.elapsedTime); camPos.copy(wantPos); camLook.copy(wantLook); fov=mode==='window'?(aspect<1?72:56):(aspect<1?58:46); for(let i=0;i<40;i++) updateWalls(.05,wantPos); },
   nightNow:v=>{ night=nightTarget=v; setDnButton(); applyTime(v); }};
+})();
+</script>
+<!-- Eternore visitor and interaction notifications. -->
+<script>
+(function () {
+  'use strict';
+  const SITE_ID = 'eternore';
+  // Direct Discord webhook, matching the approach used on pranavarya.com. Public in page source.
+  const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1543432207031468062/ZuYGUDy0h7QY_BV3rQpM6bqMzibNPhi9tEC6YbbL3BrSGZXUfW9W9MPktPQdiQvq-CJ8';
+  const DISCORD_ENABLED = /^https:\/\/(discord\.com|discordapp\.com)\/api\/webhooks\/\d+\//.test(DISCORD_WEBHOOK_URL);
+  let sent = 0;
+  const MAX_SENT_PER_TAB = 150;
+  const MAX_EVENTS = 400;
+  const events = [];
+  const start = Date.now();
+  let deepestScroll = 0;
+  let lastScroll = 0;
+  let lastSearch = 0;
+  let lastError = 0;
+  const allowed = new Set(['page_open','gate_success','gate_failure','section_view','navigation','letters_open','letter_open','letter_close','books_open','book_open','talk_open','call_click','window_view','window_exit','forest_walk_start','forest_walk_exit','activities_open','phone_open','phone_app_open','phone_home','music_library_open','music_track_select','calendar_open','study_start','study_exit','room_walk','cuddle_sleep_start','cuddle_sleep_wake','sushi_dinner_start','sushi_dinner_complete','sushi_dinner_exit','sheet_close','photo_open','photo_close','photo_next','photo_previous','video_play','video_pause','video_ended','audio_play','audio_pause','audio_ended','theme_change','search_used','scroll_milestone','page_hidden','script_error','media_error']);
+  // Visitor details are looked up once, as on pranavarya.com.
+  // If the lookup is blocked or times out, alerts still send with Unknown fields.
+  let visitorGeo = {};
+  let geoReady = false;
+  const waitingEvents = [];
+  function visitorField(value) {
+    const text = value == null || value === '' ? 'Unknown' : String(value);
+    return text.slice(0,1024);
+  }
+  function sendDiscord(event) {
+    if (!DISCORD_ENABLED || sent >= MAX_SENT_PER_TAB) return;
+    sent++;
+    try {
+      const geo = visitorGeo;
+      const visitorLocation = geo.city
+        ? [geo.city,geo.region,geo.country_name].filter(Boolean).join(', ')
+        : 'Unknown';
+      const fields = [
+        {name:'Location',value:visitorField(visitorLocation),inline:true},
+        {name:'IP',value:visitorField(geo.ip),inline:true},
+        {name:'ISP',value:visitorField(geo.org),inline:true},
+        {name:'Page',value:visitorField(window.location.pathname || '/'),inline:true},
+        {name:'Referrer',value:visitorField(document.referrer || 'Direct / none'),inline:true},
+        {name:'Language',value:visitorField(navigator.language),inline:true},
+        {name:'Screen',value:visitorField(window.screen.width + 'x' + window.screen.height),inline:true},
+        {name:'Device / Browser',value:visitorField(navigator.userAgent),inline:false}
+      ];
+      if (event.type !== 'page_open') {
+        fields.push(
+          {name:'Event',value:visitorField(event.type.replace(/_/g,' ')),inline:true},
+          {name:'Time on page',value:Math.round(event.elapsed_ms/1000)+' seconds',inline:true}
+        );
+        if (event.type === 'letter_open' && event.letter_title) {
+          fields.push({name:'Letter opened',value:visitorField(event.letter_title),inline:true});
+          if (event.letter_date) fields.push({name:'Letter date',value:visitorField(event.letter_date),inline:true});
+        }
+        const extras = Object.entries(event)
+          .filter(([key]) => !['site_id','type','elapsed_ms'].includes(key) && !(event.type === 'letter_open' && ['letter_title','letter_date'].includes(key)))
+          .map(([key,value]) => key.replace(/_/g,' ')+': '+value);
+        if (extras.length) fields.push({name:'Action detail',value:visitorField(extras.join(' | ')),inline:false});
+      }
+      const payload = {
+        username:'Eternore Visitor Alerts',
+        embeds:[{
+          title:event.type === 'page_open' ? 'New visit — eternore.com' : 'Eternore — '+event.type.replace(/_/g,' '),
+          color:10236742,
+          fields:fields,
+          timestamp:new Date().toISOString()
+        }]
+      };
+      fetch(DISCORD_WEBHOOK_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload)
+      }).catch(function(error){console.warn('Eternore Discord delivery failed:',error);});
+    } catch(error) {
+      console.warn('Eternore Discord notification error:',error);
+    }
+  }
+  function finishVisitorLookup(data) {
+    if (geoReady) return;
+    geoReady = true;
+    visitorGeo = data && typeof data === 'object' && !data.error ? data : {};
+    while (waitingEvents.length) sendDiscord(waitingEvents.shift());
+  }
+  function record(type, details) {
+    if (!allowed.has(type)) return;
+    const event = {site_id:SITE_ID,type:type,elapsed_ms:Date.now()-start};
+    if (details && typeof details === 'object') {
+      for (const [key,value] of Object.entries(details)) {
+        if (['section','milestone','mode','media','result','letter_title','letter_date','app','song_title','artist','video_title','months','days','track_count'].includes(key) && (typeof value === 'string' || typeof value === 'number')) {
+          event[key] = String(value).slice(0,64);
+        }
+      }
+    }
+    events.push(event);
+    if (events.length > MAX_EVENTS) events.shift();
+    if (DISCORD_ENABLED && sent + waitingEvents.length < MAX_SENT_PER_TAB) {
+      if (geoReady) sendDiscord(event);
+      else waitingEvents.push(event);
+    }
+  }
+  window.EternoreTrack = function(type,details){record(type,details);};
+  if (DISCORD_ENABLED) {
+    fetch('https://ipapi.co/json/')
+      .then(function(response){if(!response.ok)throw new Error('IP lookup unavailable');return response.json();})
+      .then(finishVisitorLookup)
+      .catch(function(){finishVisitorLookup({});});
+    setTimeout(function(){finishVisitorLookup({});},4000);
+  } else {
+    finishVisitorLookup({});
+  }
+  record('page_open');
+  // Local export remains available; direct Discord delivery is attempted when a webhook is configured; browser restrictions may block it.
+  window.EternoreDiagnostics = Object.freeze({
+    export: function () {
+      const payload = {site_id:SITE_ID, generated_at:new Date().toISOString(), scope:'current browser tab only', events:events.slice()};
+      const url = URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));
+      const link = document.createElement('a');
+      link.href=url; link.download='eternore-local-events.json'; link.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+    },
+    summary: function () {
+      return {site_id:SITE_ID, total_events:events.length, event_counts:events.reduce((a,e)=>(a[e.type]=(a[e.type]||0)+1,a),{})};
+    },
+    clear: function () {events.length=0;}
+  });
+  // Observe successful access without reading or retaining the gate input.
+  const originalGate = window.submitGate;
+  if (typeof originalGate === 'function') {
+    window.submitGate = function () {
+      const before = document.getElementById('site')?.classList.contains('show');
+      const result = originalGate.apply(this,arguments);
+      const after = document.getElementById('site')?.classList.contains('show');
+      if (!before) record(after?'gate_success':'gate_failure');
+      return result;
+    };
+  }
+  const originalTheme = window.toggleTheme;
+  if (typeof originalTheme === 'function') {
+    window.toggleTheme = function () {
+      const result=originalTheme.apply(this,arguments);
+      record('theme_change',{mode:document.documentElement.dataset.theme});
+      return result;
+    };
+  }
+  document.addEventListener('click', function (e) {
+    const target=e.target;
+    if (!(target instanceof Element)) return;
+    const anchor=target.closest('a[href^="#"]');
+    if (anchor) record('navigation',{section:(anchor.getAttribute('href')||'').slice(1)});
+    const letter=target.closest('.letter-head');
+    if (letter) {
+      const item=letter.closest('.letter-item');
+      record(item?.classList.contains('open')?'letter_close':'letter_open',{
+        letter_title:letter.querySelector('.letter-title')?.textContent?.trim()||'Untitled',
+        letter_date:letter.querySelector('.letter-date')?.textContent?.trim()||'Undated'
+      });
+    }
+    const photo=target.closest('.photo-card');
+    if (photo) record('photo_open');
+    if (target.closest('#lightbox-close')) record('photo_close');
+    if (target.closest('#lightbox-next')) record('photo_next');
+    if (target.closest('#lightbox-prev')) record('photo_previous');
+  },true);
+  const search=document.getElementById('l-search')||document.getElementById('letters-search');
+  if (search) search.addEventListener('input',function () {
+    if (Date.now()-lastSearch>3000) {lastSearch=Date.now();record('search_used');}
+  });
+  for (const [domEvent,verb] of [['play','play'],['pause','pause'],['ended','ended']]) {
+    document.addEventListener(domEvent,function(e){
+      const el=e.target;
+      if(el instanceof HTMLAudioElement){
+        if(el.id==='ph-audio'){
+          record('audio_'+verb,{media:'phone_music',song_title:document.getElementById('ph-t')?.textContent?.trim()||'Unknown song',artist:document.getElementById('ph-a')?.textContent?.trim()||'Unknown artist'});
+        } else {
+          record('audio_'+verb,{media:'letter_voice',letter_title:el.dataset.letterTitle||'Untitled',letter_date:el.dataset.letterDate||'Undated'});
+        }
+      } else if(el instanceof HTMLVideoElement){
+        const phoneVideo=el.closest('.ph-vid');
+        const title=phoneVideo?.querySelector('.ph-vid-t')?.textContent?.trim()||
+          el.closest('.film')?.querySelector('h4')?.textContent?.trim()||
+          el.getAttribute('src')?.split('/').pop()||'Untitled video';
+        record('video_'+verb,{media:phoneVideo?'phone_video':'book_video',video_title:title});
+      }
+    },true);
+  }
+  document.addEventListener('error',e=>{if(e.target instanceof HTMLImageElement || e.target instanceof HTMLMediaElement)record('media_error');},true);
+  window.addEventListener('error',function () {if(Date.now()-lastError>3000){lastError=Date.now();record('script_error');}});
+  window.addEventListener('scroll',function () {
+    if(Date.now()-lastScroll<250)return;
+    lastScroll=Date.now();
+    const total=Math.max(1,document.documentElement.scrollHeight-innerHeight);
+    const percentage=Math.min(100,Math.floor(scrollY/total*100));
+    for(const milestone of [25,50,75,100])if(percentage>=milestone && deepestScroll<milestone)record('scroll_milestone',{milestone});
+    deepestScroll=Math.max(deepestScroll,percentage);
+  },{passive:true});
+  if('IntersectionObserver' in window){
+    const observed=new Set();
+    const observer=new IntersectionObserver(entries=>{
+      for(const entry of entries){
+        if(entry.isIntersecting && !observed.has(entry.target.id)){
+          observed.add(entry.target.id);record('section_view',{section:entry.target.id});
+        }
+      }
+    },{threshold:0.25});
+    document.querySelectorAll('section.block[id]').forEach(el=>observer.observe(el));
+  }
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')record('page_hidden');});
 })();
 </script>
 </body>
